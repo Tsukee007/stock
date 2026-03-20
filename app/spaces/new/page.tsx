@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import AddressSearch from '@/components/ui/AddressSearch'
 
 export default function NewSpacePage() {
   const router = useRouter()
@@ -14,8 +15,9 @@ export default function NewSpacePage() {
     description: '',
     address: '',
     city: '',
-    lat: '',
-    lng: '',
+    postal_code: '',
+    lat: 0,
+    lng: 0,
     surface_m2: '',
     type: 'garage',
     price_month: '',
@@ -28,7 +30,21 @@ export default function NewSpacePage() {
     setForm(prev => ({ ...prev, [name]: value }))
   }
 
+  const handleAddressSelect = (data: {
+    address: string
+    city: string
+    postal_code: string
+    lat: number
+    lng: number
+  }) => {
+    setForm(prev => ({ ...prev, ...data }))
+  }
+
   const handleSubmit = async () => {
+    if (!form.lat || !form.lng) {
+      setError('Veuillez sélectionner une adresse dans la liste')
+      return
+    }
     setLoading(true)
     setError('')
 
@@ -39,12 +55,19 @@ export default function NewSpacePage() {
     }
 
     const { error } = await supabase.from('spaces').insert({
-      ...form,
-      owner_id: user.id,
-      lat: parseFloat(form.lat),
-      lng: parseFloat(form.lng),
+      title: form.title,
+      description: form.description,
+      address: form.address,
+      city: form.city,
+      postal_code: form.postal_code,
+      lat: form.lat,
+      lng: form.lng,
       surface_m2: parseFloat(form.surface_m2),
+      type: form.type,
       price_month: parseFloat(form.price_month),
+      available_from: form.available_from || null,
+      access_24h: form.access_24h,
+      owner_id: user.id,
     })
 
     if (error) {
@@ -65,7 +88,7 @@ export default function NewSpacePage() {
       <div className="max-w-2xl mx-auto p-6">
         <div className="bg-white rounded-xl shadow-sm p-6 space-y-4">
 
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+          {error && <p className="text-red-500 text-sm bg-red-50 p-3 rounded-lg">{error}</p>}
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Titre de l'annonce</label>
@@ -108,34 +131,28 @@ export default function NewSpacePage() {
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Adresse</label>
-            <input name="address" value={form.address} onChange={handleChange}
-              placeholder="12 rue de la Paix"
-              className="w-full border rounded-lg p-3" />
-          </div>
+          {/* Recherche adresse avec autocomplétion */}
+          <AddressSearch onSelect={handleAddressSelect} />
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Ville</label>
-            <input name="city" value={form.city} onChange={handleChange}
-              placeholder="Paris"
-              className="w-full border rounded-lg p-3" />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Latitude</label>
-              <input name="lat" value={form.lat} onChange={handleChange}
-                type="number" placeholder="48.8566"
-                className="w-full border rounded-lg p-3" />
+          {/* Champs remplis automatiquement */}
+          {form.address && (
+            <div className="bg-blue-50 rounded-lg p-4 space-y-2 text-sm">
+              <p className="font-medium text-blue-700">✅ Adresse sélectionnée</p>
+              <p className="text-gray-600">📍 {form.address}</p>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Ville</label>
+                  <input name="city" value={form.city} onChange={handleChange}
+                    className="w-full border rounded-lg p-2 text-sm bg-white" />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Code postal</label>
+                  <input name="postal_code" value={form.postal_code} onChange={handleChange}
+                    className="w-full border rounded-lg p-2 text-sm bg-white" />
+                </div>
+              </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Longitude</label>
-              <input name="lng" value={form.lng} onChange={handleChange}
-                type="number" placeholder="2.3522"
-                className="w-full border rounded-lg p-3" />
-            </div>
-          </div>
+          )}
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Disponible à partir du</label>
@@ -144,8 +161,16 @@ export default function NewSpacePage() {
               className="w-full border rounded-lg p-3" />
           </div>
 
+          <div className="flex items-center gap-3">
+            <input type="checkbox" id="access_24h"
+              checked={form.access_24h}
+              onChange={e => setForm(prev => ({ ...prev, access_24h: e.target.checked }))}
+              className="w-4 h-4" />
+            <label htmlFor="access_24h" className="text-sm text-gray-700">Accès 24h/24</label>
+          </div>
+
           <button onClick={handleSubmit} disabled={loading}
-            className="w-full bg-blue-600 text-white rounded-lg p-3 font-semibold hover:bg-blue-700">
+            className="w-full bg-blue-600 text-white rounded-lg p-3 font-semibold hover:bg-blue-700 disabled:opacity-50">
             {loading ? 'Publication...' : '🚀 Publier mon annonce'}
           </button>
 
