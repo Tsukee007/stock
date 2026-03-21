@@ -87,9 +87,9 @@ export default async function SpacePage({ params }: { params: Promise<{ id: stri
         </div>
 
         {/* Bouton contact */}
-        <button className="w-full bg-blue-600 text-white rounded-xl p-4 font-bold text-lg hover:bg-blue-700">
-          📩 Contacter le propriétaire
-        </button>
+        <a href={`/api/contact/${space.id}`} className="block w-full bg-blue-600 text-white rounded-xl p-4 font-bold text-lg hover:bg-blue-700 text-center">
+  📩 Contacter le propriétaire
+</a>
 
       </div>
     </div>
