@@ -22,7 +22,6 @@ export default function ChatWindow({ bookingId, currentUserId }: Props) {
   const [loading, setLoading] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
 
-  // Charger les messages
   useEffect(() => {
     const loadMessages = async () => {
       const { data } = await supabase
@@ -34,7 +33,6 @@ export default function ChatWindow({ bookingId, currentUserId }: Props) {
     }
     loadMessages()
 
-    // Écoute temps réel
     const channel = supabase
       .channel(`messages:${bookingId}`)
       .on('postgres_changes', {
@@ -50,7 +48,6 @@ export default function ChatWindow({ bookingId, currentUserId }: Props) {
     return () => { supabase.removeChannel(channel) }
   }, [bookingId])
 
-  // Scroll automatique
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
@@ -58,18 +55,35 @@ export default function ChatWindow({ bookingId, currentUserId }: Props) {
   const sendMessage = async () => {
     if (!newMessage.trim()) return
     setLoading(true)
-    await supabase.from('messages').insert({
-      booking_id: bookingId,
-      sender_id: currentUserId,
-      content: newMessage.trim()
-    })
+
+    const { data: msg } = await supabase
+      .from('messages')
+      .insert({
+        booking_id: bookingId,
+        sender_id: currentUserId,
+        content: newMessage.trim()
+      })
+      .select()
+      .single()
+
+    if (msg) {
+      await fetch('/api/messages/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bookingId,
+          content: newMessage.trim(),
+          senderId: currentUserId
+        })
+      })
+    }
+
     setNewMessage('')
     setLoading(false)
   }
 
   return (
     <div className="flex flex-col h-full">
-      {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {messages.map(msg => (
           <div key={msg.id}
@@ -83,7 +97,10 @@ export default function ChatWindow({ bookingId, currentUserId }: Props) {
               <p className={`text-xs mt-1 ${
                 msg.sender_id === currentUserId ? 'text-blue-200' : 'text-gray-400'
               }`}>
-                {new Date(msg.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                {new Date(msg.created_at).toLocaleTimeString('fr-FR', {
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
               </p>
             </div>
           </div>
@@ -91,7 +108,6 @@ export default function ChatWindow({ bookingId, currentUserId }: Props) {
         <div ref={bottomRef} />
       </div>
 
-      {/* Input */}
       <div className="border-t p-3 flex gap-2">
         <input
           value={newMessage}
