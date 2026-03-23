@@ -90,6 +90,66 @@ export default async function DashboardPage() {
           </div>
         )}
 
+        {/* Réservations à gérer */}
+{(() => {
+  const manageable = spaces?.flatMap(space =>
+    ((space.bookings as any[]) ?? [])
+      .filter(b => b.status === 'confirmed' || b.status === 'active')
+      .map(b => ({ ...b, spaceTitle: space.title }))
+  ) ?? []
+
+  if (manageable.length === 0) return null
+
+  return (
+    <div>
+      <h2 className="text-lg font-bold text-gray-700 mb-4">
+        🔑 Locations en cours
+      </h2>
+      <div className="space-y-3">
+        {manageable.map(booking => (
+          <div key={booking.id} className="bg-white rounded-xl shadow-sm p-4 border-l-4 border-blue-400">
+            <div className="flex items-start justify-between">
+              <div>
+                <h3 className="font-semibold">{booking.spaceTitle}</h3>
+                <span className={`text-xs px-2 py-0.5 rounded-full ${
+                  booking.status === 'active'
+                    ? 'bg-green-100 text-green-600'
+                    : 'bg-blue-100 text-blue-600'
+                }`}>
+                  {booking.status === 'active' ? '🟢 Active' : '🔵 Confirmée'}
+                </span>
+              </div>
+              <div className="flex gap-2">
+                {booking.status === 'confirmed' && (
+                  <BookingAction
+                    bookingId={booking.id}
+                    status="active"
+                    label="🟢 Marquer actif"
+                    color="blue"
+                  />
+                )}
+                {booking.status === 'active' && (
+                  <BookingAction
+                    bookingId={booking.id}
+                    status="ended"
+                    label="👋 Terminer"
+                    color="gray"
+                  />
+                )}
+              </div>
+            </div>
+            <a href={`/messages?booking_id=${booking.id}`}
+              className="text-xs text-blue-600 hover:underline mt-2 inline-block">
+              💬 Voir la conversation
+            </a>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+})()}
+
+
         {/* Mes annonces */}
         <div>
           <div className="flex items-center justify-between mb-4">
