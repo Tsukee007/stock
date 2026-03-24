@@ -2,24 +2,31 @@ import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
 export async function POST(req: Request) {
-  const { bookingId, targetId, spaceId, rating, comment, type } = await req.json()
+  console.log('Reviews route appelée')
+  
+  const body = await req.json()
+  console.log('Body:', body)
+  
+  const { bookingId, targetId, spaceId, rating, comment, type } = body
   const supabase = await createClient()
 
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  console.log('User:', user?.id, 'AuthError:', authError)
+  
   if (!user) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 
-  // Vérifier que la réservation est bien terminée
-  const { data: booking } = await supabase
+  const { data: booking, error: bookingError } = await supabase
     .from('bookings')
     .select('status')
     .eq('id', bookingId)
     .single()
 
+  console.log('Booking:', booking, 'BookingError:', bookingError)
+
   if (booking?.status !== 'ended') {
     return NextResponse.json({ error: 'Location non terminée' }, { status: 400 })
   }
 
-  // Créer l'avis
   const { error } = await supabase.from('reviews').insert({
     booking_id: bookingId,
     author_id: user.id,
@@ -30,9 +37,10 @@ export async function POST(req: Request) {
     type
   })
 
+  console.log('Insert error:', error)
+
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  // Mettre à jour la note moyenne du profil cible
   const { data: reviews } = await supabase
     .from('reviews')
     .select('rating')

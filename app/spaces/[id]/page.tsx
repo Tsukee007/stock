@@ -5,11 +5,17 @@ export default async function SpacePage({ params }: { params: Promise<{ id: stri
   const { id } = await params
   const supabase = await createClient()
 
-  const { data: space } = await supabase
-    .from('spaces')
-    .select('*, profiles(full_name, avatar_url, rating_avg)')
-    .eq('id', id)
-    .single()
+const { data: space } = await supabase
+  .from('spaces')
+  .select('*, profiles(full_name, avatar_url, rating_avg)')
+  .eq('id', id)
+  .single()
+
+const { data: reviews } = await supabase
+  .from('reviews')
+  .select('*, profiles!reviews_author_id_fkey(full_name, avatar_url)')
+  .eq('space_id', id)
+  .order('created_at', { ascending: false })
 
   if (!space) notFound()
 
@@ -85,7 +91,44 @@ export default async function SpacePage({ params }: { params: Promise<{ id: stri
             </div>
           </div>
         </div>
-
+{/* Avis */}
+{reviews && reviews.length > 0 && (
+  <div className="bg-white rounded-xl shadow-sm p-6">
+    <h3 className="font-bold text-lg mb-4">
+      ⭐ Avis ({reviews.length})
+    </h3>
+    <div className="space-y-4">
+      {reviews.map(review => {
+        const author = review.profiles as any
+        return (
+          <div key={review.id} className="border-b pb-4 last:border-0">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-sm">
+                {author?.full_name?.[0] ?? '?'}
+              </div>
+              <div>
+                <p className="font-medium text-sm">{author?.full_name ?? 'Anonyme'}</p>
+                <div className="flex gap-0.5">
+                  {[1,2,3,4,5].map(star => (
+                    <span key={star} className="text-sm">
+                      {star <= review.rating ? '⭐' : '☆'}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <p className="text-gray-400 text-xs ml-auto">
+                {new Date(review.created_at).toLocaleDateString('fr-FR')}
+              </p>
+            </div>
+            {review.comment && (
+              <p className="text-gray-600 text-sm pl-11">{review.comment}</p>
+            )}
+          </div>
+        )
+      })}
+    </div>
+  </div>
+)}
         {/* Bouton contact */}
         <a href={`/api/contact/${space.id}`} className="block w-full bg-blue-600 text-white rounded-xl p-4 font-bold text-lg hover:bg-blue-700 text-center">
   📩 Contacter le propriétaire
