@@ -2,6 +2,9 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import BookingAction from '@/components/ui/BookingAction'
 import ReviewForm from '@/components/ui/ReviewForm'
+import PayButton from '@/components/ui/PayButton'
+import { statusLabels, statusColors } from '@/lib/utils'
+
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -223,14 +226,13 @@ export default async function DashboardPage() {
                     </div>
                     <div className="flex flex-col items-end gap-2">
                       <span className={`text-xs px-2 py-0.5 rounded-full ${
-                        booking.status === 'active' ? 'bg-green-100 text-green-600' :
-                        booking.status === 'pending' ? 'bg-yellow-100 text-yellow-600' :
-                        booking.status === 'confirmed' ? 'bg-blue-100 text-blue-600' :
-                        booking.status === 'ended' ? 'bg-gray-100 text-gray-500' :
-                        'bg-red-100 text-red-500'
+                        statusColors[booking.status] ?? 'bg-gray-100 text-gray-500'
                       }`}>
-                        {booking.status}
+                        {statusLabels[booking.status] ?? booking.status}
                       </span>
+                      {booking.status === 'confirmed' && (
+                        <PayButton bookingId={booking.id} />
+                      )}
                       <a href={`/messages?booking_id=${booking.id}`}
                         className="text-xs text-blue-600 hover:underline">
                         Messages

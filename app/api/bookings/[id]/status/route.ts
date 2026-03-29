@@ -30,7 +30,23 @@ export async function POST(
     return NextResponse.json({ error: 'Non autorisé' }, { status: 403 })
   }
 
-  await supabase.from('bookings').update({ status }).eq('id', id)
+ await supabase.from('bookings').update({ status }).eq('id', id)
+
+// Message automatique selon le statut
+const autoMessages: Record<string, string> = {
+  confirmed: 'Votre demande a été acceptée ! Vous pouvez maintenant convenir des modalités.',
+  cancelled: 'Votre demande a été refusée.',
+  active: 'La location est maintenant active. Bon stockage !',
+  ended: 'La location est terminée. Merci et à bientôt !'
+}
+
+if (autoMessages[status]) {
+  await supabase.from('messages').insert({
+    booking_id: id,
+    sender_id: user.id,
+    content: autoMessages[status]
+  })
+}
 
   const adminClient = createAdminClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

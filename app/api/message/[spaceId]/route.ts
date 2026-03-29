@@ -13,12 +13,12 @@ export async function GET(
     return NextResponse.redirect(new URL('/login', process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'))
   }
 
+  // Chercher une conversation existante sans créer de réservation
   const { data: existing } = await supabase
     .from('bookings')
     .select('id')
     .eq('space_id', spaceId)
     .eq('renter_id', user.id)
-    .neq('status', 'message_only')
     .single()
 
   if (existing) {
@@ -27,9 +27,10 @@ export async function GET(
     )
   }
 
+  // Créer une réservation "message only" avec statut pending
   const { data: space } = await supabase
     .from('spaces')
-    .select('price_month, title, owner_id')
+    .select('price_month')
     .eq('id', spaceId)
     .single()
 
@@ -40,19 +41,10 @@ export async function GET(
       renter_id: user.id,
       start_date: new Date().toISOString().split('T')[0],
       price_month: space?.price_month ?? 0,
-      status: 'pending'
+      status: 'message_only'
     })
     .select('id')
     .single()
-
-  // Message automatique dans le fil
-  if (booking) {
-    await supabase.from('messages').insert({
-      booking_id: booking.id,
-      sender_id: user.id,
-      content: `Bonjour, je suis intéressé par votre annonce "${space?.title}". Pouvez-vous confirmer la disponibilité ?`
-    })
-  }
 
   return NextResponse.redirect(
     new URL(`/messages?booking_id=${booking?.id}`, process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000')

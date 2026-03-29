@@ -69,7 +69,7 @@ export default function SpacesMap({ spaces, selectedId, onSelect }: Props) {
                 : 'bg-white text-blue-600 border border-blue-200 hover:bg-blue-50'
               }
             `}>
-              {space.price_month}€
+              {Math.round(space.price_month * 1.10)}€
             </div>
           </Marker>
         )
@@ -92,7 +92,7 @@ export default function SpacesMap({ spaces, selectedId, onSelect }: Props) {
               {space.surface_m2 && (
                 <p className="text-gray-500 text-xs">📐 {space.surface_m2} m²</p>
               )}
-              <p className="text-blue-600 font-bold text-sm mt-1">{space.price_month}€/mois</p>
+              <p className="text-blue-600 font-bold text-sm mt-1">{Math.round(space.price_month * 1.10)}€/mois</p>
               <a
                 href={`/spaces/${space.id}`}
                 className="text-xs text-blue-500 underline block mt-1"

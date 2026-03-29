@@ -25,21 +25,25 @@ export default async function SpacePage({ params }: { params: Promise<{ id: stri
       <div className="max-w-2xl mx-auto p-6 space-y-6">
 
         {/* Titre et type */}
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <div className="flex items-start justify-between">
-            <div>
-              <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full font-medium capitalize">
-                {space.type}
-              </span>
-              <h2 className="text-2xl font-bold mt-2">{space.title}</h2>
-              <p className="text-gray-500 mt-1">📍 {space.address}, {space.city}</p>
-            </div>
-            <div className="text-right">
-              <p className="text-3xl font-bold text-blue-600">{space.price_month}€</p>
-              <p className="text-gray-400 text-sm">/mois</p>
-            </div>
-          </div>
-        </div>
+        <div className="bg-white rounded-xl shadow-sm p-6 space-y-3">
+  <h3 className="font-bold text-lg">Intéressé par cet espace ?</h3>
+  <div className="bg-gray-50 rounded-lg p-3 text-sm text-gray-600 space-y-1">
+    <p>✅ Envoyez une demande au propriétaire</p>
+    <p>✅ Discutez des modalités par messagerie</p>
+    <p>✅ Payez en ligne en toute sécurité</p>
+  </div>
+  <a href={`/api/contact/${space.id}`}
+    className="block w-full bg-blue-600 text-white rounded-xl p-4 font-bold text-lg hover:bg-blue-700 text-center">
+    📦 Demander à réserver
+  </a>
+  <a href={`/api/message/${space.id}`}
+    className="block w-full border border-blue-600 text-blue-600 rounded-xl p-3 font-medium text-center hover:bg-blue-50">
+    💬 Contacter le propriétaire
+  </a>
+  <p className="text-center text-xs text-gray-400">
+    Gratuit et sans engagement
+  </p>
+</div>
 
         {/* Détails */}
         <div className="bg-white rounded-xl shadow-sm p-6">
