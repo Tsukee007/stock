@@ -8,6 +8,9 @@ type Message = {
   content: string
   sender_id: string
   created_at: string
+  profiles?: {
+    full_name: string | null
+  }
 }
 
 type Props = {
@@ -26,7 +29,7 @@ export default function ChatWindow({ bookingId, currentUserId }: Props) {
     const loadMessages = async () => {
       const { data } = await supabase
         .from('messages')
-        .select('*')
+        .select('*, profiles(full_name)')
         .eq('booking_id', bookingId)
         .order('created_at', { ascending: true })
       setMessages(data ?? [])
@@ -40,8 +43,13 @@ export default function ChatWindow({ bookingId, currentUserId }: Props) {
         schema: 'public',
         table: 'messages',
         filter: `booking_id=eq.${bookingId}`
-      }, payload => {
-        setMessages(prev => [...prev, payload.new as Message])
+      }, async payload => {
+        const { data } = await supabase
+          .from('messages')
+          .select('*, profiles(full_name)')
+          .eq('id', payload.new.id)
+          .single()
+        if (data) setMessages(prev => [...prev, data])
       })
       .subscribe()
 
@@ -82,29 +90,52 @@ export default function ChatWindow({ bookingId, currentUserId }: Props) {
     setLoading(false)
   }
 
+  // Grouper les messages par expéditeur consécutif
+  const groupedMessages = messages.reduce((groups: Message[][], msg, i) => {
+    if (i === 0 || messages[i-1].sender_id !== msg.sender_id) {
+      groups.push([msg])
+    } else {
+      groups[groups.length - 1].push(msg)
+    }
+    return groups
+  }, [])
+
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
-        {messages.map(msg => (
-          <div key={msg.id}
-            className={`flex ${msg.sender_id === currentUserId ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-xs px-4 py-2 rounded-2xl text-sm ${
-              msg.sender_id === currentUserId
-                ? 'bg-blue-600 text-white rounded-br-none'
-                : 'bg-gray-100 text-gray-800 rounded-bl-none'
-            }`}>
-              {msg.content}
-              <p className={`text-xs mt-1 ${
-                msg.sender_id === currentUserId ? 'text-blue-200' : 'text-gray-400'
-              }`}>
-                {new Date(msg.created_at).toLocaleTimeString('fr-FR', {
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {groupedMessages.map((group, gi) => {
+          const isMe = group[0].sender_id === currentUserId
+          const name = (group[0].profiles as any)?.full_name ?? 'Utilisateur'
+
+          return (
+            <div key={gi} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+              {/* Nom de l'expéditeur */}
+              <p className="text-xs text-gray-400 mb-1 px-2">
+                {isMe ? 'Vous' : name}
+              </p>
+              {/* Bulles de messages */}
+              <div className={`space-y-1 max-w-xs ${isMe ? 'items-end' : 'items-start'} flex flex-col`}>
+                {group.map(msg => (
+                  <div key={msg.id}
+                    className={`px-4 py-2 rounded-2xl text-sm ${
+                      isMe
+                        ? 'bg-blue-600 text-white rounded-br-none'
+                        : 'bg-gray-100 text-gray-800 rounded-bl-none'
+                    }`}>
+                    {msg.content}
+                  </div>
+                ))}
+              </div>
+              {/* Heure du dernier message du groupe */}
+              <p className="text-xs text-gray-300 mt-1 px-2">
+                {new Date(group[group.length-1].created_at).toLocaleTimeString('fr-FR', {
                   hour: '2-digit',
                   minute: '2-digit'
                 })}
               </p>
             </div>
-          </div>
-        ))}
+          )
+        })}
         <div ref={bottomRef} />
       </div>
 
