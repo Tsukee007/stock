@@ -38,7 +38,7 @@ export default function Navbar({ user }: Props) {
             <>
               <span className="hidden md:block text-sm text-gray-500">👤 {user.email}</span>
               <a href="/api/logout"
-                className="text-sm text-gray-400 hover:text-red-500">
+                className="text-sm text-gray-600 hover:text-red-500">
                 Déconnexion
               </a>
             </>
@@ -62,7 +62,7 @@ export default function Navbar({ user }: Props) {
               className={`flex flex-col items-center text-xs gap-1 px-3 py-1 rounded-lg transition ${
                 pathname === link.href
                   ? 'text-blue-600'
-                  : 'text-gray-400 hover:text-blue-600'
+                  : 'text-gray-600 hover:text-blue-600'
               }`}>
               <span className="text-xl">{link.label}</span>
               <span>{link.title}</span>

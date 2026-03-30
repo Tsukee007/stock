@@ -38,7 +38,7 @@ export default function MapWithList({ spaces }: { spaces: Space[] }) {
 
         <div className="flex-1 overflow-y-auto">
           {spaces.length === 0 && (
-            <div className="p-8 text-center text-gray-400">
+            <div className="p-8 text-center text-gray-600">
               <p className="text-3xl mb-2">🔍</p>
               <p className="text-sm">Aucun résultat</p>
               <p className="text-xs mt-1">Essayez d'élargir votre recherche</p>
@@ -66,18 +66,18 @@ export default function MapWithList({ spaces }: { spaces: Space[] }) {
                   <h3 className="font-semibold text-sm text-gray-800 leading-tight">
                     {space.title}
                   </h3>
-                  <p className="text-gray-400 text-xs mt-0.5">
+                  <p className="text-gray-600 text-xs mt-0.5">
                     📍 {space.city}
                   </p>
                   {space.surface_m2 && (
-                    <p className="text-gray-400 text-xs">
+                    <p className="text-gray-600 text-xs">
                       📐 {space.surface_m2} m²
                     </p>
                   )}
                 </div>
                 <div className="text-right ml-2">
 <p className="font-bold text-blue-600">{Math.round(space.price_month * 1.10)}€</p>
-<p className="text-gray-400 text-xs">/mois TTC</p>
+<p className="text-gray-600 text-xs">/mois TTC</p>
                 </div>
               </div>
 

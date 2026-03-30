@@ -36,7 +36,7 @@ export default function ReviewCard({ review }: Props) {
         </div>
         <div className="flex-1 min-w-0">
           <p className="font-medium text-sm truncate">{author?.full_name ?? 'Anonyme'}</p>
-          <p className="text-gray-400 text-xs">
+          <p className="text-gray-600 text-xs">
             {new Date(review.created_at).toLocaleDateString('fr-FR', {
               day: 'numeric', month: 'long', year: 'numeric'
             })}

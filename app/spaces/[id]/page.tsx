@@ -40,7 +40,7 @@ export default async function SpacePage({ params }: { params: Promise<{ id: stri
     className="block w-full border border-blue-600 text-blue-600 rounded-xl p-3 font-medium text-center hover:bg-blue-50">
     💬 Contacter le propriétaire
   </a>
-  <p className="text-center text-xs text-gray-400">
+  <p className="text-center text-xs text-gray-600">
     Gratuit et sans engagement
   </p>
 </div>
@@ -102,7 +102,7 @@ export default async function SpacePage({ params }: { params: Promise<{ id: stri
                   {(spaceReviews.reduce((sum, r) => sum + r.rating, 0) / spaceReviews.length).toFixed(1)}
                 </span>
                 <span className="text-yellow-500">⭐</span>
-                <span className="text-gray-400 text-sm">({spaceReviews.length} avis)</span>
+                <span className="text-gray-600 text-sm">({spaceReviews.length} avis)</span>
               </div>
             </div>
             <div className="space-y-3">

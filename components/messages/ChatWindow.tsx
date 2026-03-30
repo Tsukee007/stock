@@ -110,24 +110,24 @@ export default function ChatWindow({ bookingId, currentUserId }: Props) {
           return (
             <div key={gi} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
               {/* Nom de l'expéditeur */}
-              <p className="text-xs text-gray-400 mb-1 px-2">
+              <p className="text-xs text-gray-600 mb-1 px-2">
                 {isMe ? 'Vous' : name}
               </p>
               {/* Bulles de messages */}
               <div className={`space-y-1 max-w-xs ${isMe ? 'items-end' : 'items-start'} flex flex-col`}>
                 {group.map(msg => (
                   <div key={msg.id}
-                    className={`px-4 py-2 rounded-2xl text-sm ${
-                      isMe
-                        ? 'bg-blue-600 text-white rounded-br-none'
-                        : 'bg-gray-100 text-gray-800 rounded-bl-none'
-                    }`}>
+className={`px-4 py-2 rounded-2xl text-sm ${
+  isMe
+    ? 'bg-blue-600 text-white rounded-br-none'
+    : 'bg-gray-200 text-gray-900 rounded-bl-none'
+}`}>
                     {msg.content}
                   </div>
                 ))}
               </div>
               {/* Heure du dernier message du groupe */}
-              <p className="text-xs text-gray-300 mt-1 px-2">
+              <p className="text-xs text-gray-600 mt-1 px-2">
                 {new Date(group[group.length-1].created_at).toLocaleTimeString('fr-FR', {
                   hour: '2-digit',
                   minute: '2-digit'

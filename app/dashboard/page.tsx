@@ -79,7 +79,7 @@ export default async function DashboardPage() {
                   <div className="flex items-start justify-between">
                     <div>
                       <h3 className="font-semibold">{booking.spaceTitle}</h3>
-                      <p className="text-gray-400 text-xs mt-1">
+                      <p className="text-gray-600 text-xs mt-1">
                         Demande recue le {new Date(booking.created_at).toLocaleDateString('fr-FR')}
                       </p>
                     </div>
@@ -144,7 +144,7 @@ export default async function DashboardPage() {
           </div>
 
           {spaces?.length === 0 && (
-            <div className="bg-white rounded-xl p-8 text-center text-gray-400">
+            <div className="bg-white rounded-xl p-8 text-center text-gray-600">
               <p className="text-4xl mb-3">🗄️</p>
               <p>Aucune annonce pour le moment</p>
               <a href="/spaces/new" className="text-blue-600 text-sm mt-2 inline-block">
@@ -163,7 +163,7 @@ export default async function DashboardPage() {
                   <div className="flex items-start justify-between">
                     <div>
                       <h3 className="font-semibold">{space.title}</h3>
-                      <p className="text-gray-400 text-sm">
+                      <p className="text-gray-600 text-sm">
                         {space.city} · {space.surface_m2}m2 · {space.price_month}€/mois
                       </p>
                       <div className="flex gap-2 mt-2">
@@ -198,7 +198,7 @@ export default async function DashboardPage() {
           <h2 className="text-lg font-bold text-gray-700 mb-4">Mes locations</h2>
 
           {bookings?.length === 0 && (
-            <div className="bg-white rounded-xl p-8 text-center text-gray-400">
+            <div className="bg-white rounded-xl p-8 text-center text-gray-600">
               <p className="text-4xl mb-3">🔑</p>
               <p>Aucune location en cours</p>
               <a href="/" className="text-blue-600 text-sm mt-2 inline-block">
@@ -217,10 +217,10 @@ export default async function DashboardPage() {
                   <div className="flex items-start justify-between">
                     <div>
                       <h3 className="font-semibold">{space?.title}</h3>
-                      <p className="text-gray-400 text-sm">
+                      <p className="text-gray-600 text-sm">
                         {space?.city} · {space?.price_month}€/mois
                       </p>
-                      <p className="text-gray-400 text-xs mt-1">
+                      <p className="text-gray-600 text-xs mt-1">
                         Depuis le {new Date(booking.start_date).toLocaleDateString('fr-FR')}
                       </p>
                     </div>

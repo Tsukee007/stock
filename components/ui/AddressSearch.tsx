@@ -96,7 +96,7 @@ export default function AddressSearch({ onSelect }: Props) {
               onClick={() => handleSelect(result)}
               className="w-full text-left px-4 py-3 hover:bg-blue-50 border-b last:border-0 text-sm"
             >
-              <span className="text-gray-400 mr-2">📍</span>
+              <span className="text-gray-600 mr-2">📍</span>
               {result.place_name}
             </button>
           ))}
