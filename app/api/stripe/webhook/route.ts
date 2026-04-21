@@ -10,27 +10,29 @@ export async function POST(req: Request) {
 
   let event: Stripe.Event
   try {
-    event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET!)
+    event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET ?? '')
   } catch {
     return NextResponse.json({ error: 'Webhook invalide' }, { status: 400 })
   }
 
   if (event.type === 'checkout.session.completed') {
-    const session = event.data.object as Stripe.CheckoutSession
-    const { bookingId } = session.metadata!
+    const session = event.data.object
+    const bookingId = session.metadata?.bookingId
 
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    )
+    if (bookingId) {
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+      )
 
-    await supabase
-      .from('bookings')
-      .update({
-        status: 'confirmed',
-        stripe_payment_intent_id: session.payment_intent as string
-      })
-      .eq('id', bookingId)
+      await supabase
+        .from('bookings')
+        .update({
+          status: 'confirmed',
+          stripe_payment_intent_id: session.payment_intent as string
+        })
+        .eq('id', bookingId)
+    }
   }
 
   return NextResponse.json({ received: true })
