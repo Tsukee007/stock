@@ -66,7 +66,7 @@ export default function AddressSearch({ onSelect }: Props) {
   }
 
   useEffect(() => {
-    return () => clearTimeout(timeoutRef.current)
+    return () => { if (timeoutRef.current) clearTimeout(timeoutRef.current) }
   }, [])
 
   return (
