@@ -12,54 +12,50 @@ type Props = {
 export default function PhotoUpload({ spaceId, existingPhotos, onUpdate }: Props) {
   const [photos, setPhotos] = useState<string[]>(existingPhotos)
   const [uploading, setUploading] = useState(false)
+  const [error, setError] = useState('')
   const supabase = createClient()
-
-  const compressImage = (file: File): Promise<Blob> => {
-    return new Promise((resolve) => {
-      const canvas = document.createElement('canvas')
-      const ctx = canvas.getContext('2d')!
-      const img = new Image()
-      img.onload = () => {
-        const maxSize = 800
-        let { width, height } = img
-        if (width > height && width > maxSize) {
-          height = (height * maxSize) / width
-          width = maxSize
-        } else if (height > maxSize) {
-          width = (width * maxSize) / height
-          height = maxSize
-        }
-        canvas.width = width
-        canvas.height = height
-        ctx.drawImage(img, 0, 0, width, height)
-        canvas.toBlob(blob => resolve(blob!), 'image/jpeg', 0.75)
-      }
-      img.src = URL.createObjectURL(file)
-    })
-  }
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? [])
+    if (!files.length) return
+
     if (photos.length + files.length > 3) {
-      alert('Maximum 3 photos par annonce')
+      setError('Maximum 3 photos par annonce')
       return
     }
 
     setUploading(true)
+    setError('')
     const newUrls: string[] = []
 
     for (const file of files) {
-      const compressed = await compressImage(file)
-      const filename = `${spaceId}/${Date.now()}-${file.name}`
-      const { error } = await supabase.storage
-        .from('space-photos')
-        .upload(filename, compressed, { contentType: 'image/jpeg' })
+      // Limite à 2MB
+      if (file.size > 2 * 1024 * 1024) {
+        setError(`${file.name} dépasse 2MB`)
+        continue
+      }
 
-      if (!error) {
-        const { data } = supabase.storage
+      const ext = file.name.split('.').pop()
+      const filename = `${spaceId}/${Date.now()}.${ext}`
+
+      const { data, error: uploadError } = await supabase.storage
+        .from('space-photos')
+        .upload(filename, file, {
+          cacheControl: '3600',
+          upsert: false
+        })
+
+      if (uploadError) {
+        console.error('Upload error:', uploadError)
+        setError(`Erreur: ${uploadError.message}`)
+        continue
+      }
+
+      if (data) {
+        const { data: urlData } = supabase.storage
           .from('space-photos')
           .getPublicUrl(filename)
-        newUrls.push(data.publicUrl)
+        newUrls.push(urlData.publicUrl)
       }
     }
 
@@ -83,12 +79,15 @@ export default function PhotoUpload({ spaceId, existingPhotos, onUpdate }: Props
         Photos ({photos.length}/3)
       </label>
 
+      {error && <p className="text-red-500 text-xs mb-2">{error}</p>}
+
       <div className="flex gap-3 flex-wrap mb-3">
         {photos.map((url, i) => (
           <div key={i} className="relative w-24 h-24">
-            <img src={url} alt={`Photo ${i+1}`}
+            <img src={url} alt={`Photo ${i + 1}`}
               className="w-24 h-24 object-cover rounded-lg border" />
             <button
+              type="button"
               onClick={() => handleDelete(url)}
               className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center hover:bg-red-600"
             >
@@ -99,11 +98,17 @@ export default function PhotoUpload({ spaceId, existingPhotos, onUpdate }: Props
 
         {photos.length < 3 && (
           <label className="w-24 h-24 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-blue-400 transition">
-            <span className="text-2xl text-gray-400">+</span>
-            <span className="text-xs text-gray-400">Photo</span>
+            {uploading ? (
+              <span className="text-xs text-blue-600">Upload...</span>
+            ) : (
+              <>
+                <span className="text-2xl text-gray-400">+</span>
+                <span className="text-xs text-gray-400">Photo</span>
+              </>
+            )}
             <input
               type="file"
-              accept="image/*"
+              accept="image/jpeg,image/png,image/webp"
               multiple
               onChange={handleUpload}
               className="hidden"
@@ -112,10 +117,7 @@ export default function PhotoUpload({ spaceId, existingPhotos, onUpdate }: Props
           </label>
         )}
       </div>
-
-      {uploading && (
-        <p className="text-sm text-blue-600">Upload en cours...</p>
-      )}
+      <p className="text-xs text-gray-400">Formats acceptés : JPG, PNG, WebP • Max 2MB par photo</p>
     </div>
   )
 }

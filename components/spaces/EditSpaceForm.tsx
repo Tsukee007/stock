@@ -174,5 +174,4 @@ export default function EditSpaceForm({ space }: { space: any }) {
         {loading ? 'Mise à jour...' : '✅ Enregistrer les modifications'}
       </button>
     </div>
-  )
-}
+  
