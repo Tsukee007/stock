@@ -9,12 +9,17 @@ type Props = {
 export default function Navbar({ user }: Props) {
   const pathname = usePathname()
 
-  const links = [
-    { href: '/', label: '🗺️', title: 'Carte' },
-    { href: '/messages', label: '💬', title: 'Messages' },
-    { href: '/dashboard', label: '📋', title: 'Mes annonces' },
-    { href: '/spaces/new', label: '➕', title: 'Déposer' },
-  ]
+const links = [
+  { href: '/', label: '🗺️', title: 'Carte' },
+  { href: '/messages', label: '💬', title: 'Messages' },
+  { href: '/dashboard', label: '📋', title: 'Dashboard' },
+  { href: '/spaces/new', label: '➕', title: 'Déposer' },
+]
+
+const publicLinks = [
+  { href: '/about', title: 'À propos' },
+  { href: '/contact', title: 'Contact' },
+]
 
   return (
     <>
@@ -22,7 +27,7 @@ export default function Navbar({ user }: Props) {
       <header className="bg-white shadow-sm p-4 flex items-center justify-between">
         <a href="/" className="text-xl font-bold text-blue-600">🗄️ Nestock</a>
         <nav className="hidden md:flex items-center gap-6">
-          {links.map(link => (
+  {[...links, ...publicLinks].map(link => (
             <a key={link.href} href={link.href}
               className={`text-sm font-medium transition ${
                 pathname === link.href
