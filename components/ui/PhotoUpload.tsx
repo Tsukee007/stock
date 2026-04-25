@@ -35,8 +35,9 @@ export default function PhotoUpload({ spaceId, existingPhotos, onUpdate }: Props
         continue
       }
 
-      const ext = file.name.split('.').pop()
-      const filename = `${spaceId}/${Date.now()}.${ext}`
+const ext = file.name.split('.').pop()
+const safeName = `${Date.now()}.${ext}`
+const filename = `${spaceId}/${safeName}`
 
       const { data, error: uploadError } = await supabase.storage
         .from('space-photos')

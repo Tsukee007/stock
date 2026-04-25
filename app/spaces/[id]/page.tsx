@@ -6,11 +6,11 @@ export default async function SpacePage({ params }: { params: Promise<{ id: stri
   const { id } = await params
   const supabase = await createClient()
 
-  const { data: space } = await supabase
-    .from('spaces')
-    .select('*, profiles(full_name, avatar_url, rating_avg)')
-    .eq('id', id)
-    .single()
+const { data: space } = await supabase
+  .from('spaces')
+  .select('*, profiles(full_name, avatar_url, rating_avg), space_photos(url, position)')
+  .eq('id', id)
+  .single()
 
   if (!space) notFound()
 
@@ -23,7 +23,17 @@ export default async function SpacePage({ params }: { params: Promise<{ id: stri
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-2xl mx-auto p-6 space-y-6">
-
+{/* Photos */}
+{spaceReviews && (space.space_photos as any[])?.length > 0 && (
+  <div className="bg-white rounded-xl shadow-sm p-4">
+    <div className="flex gap-3 overflow-x-auto">
+      {(space.space_photos as any[]).map((photo: any, i: number) => (
+        <img key={i} src={photo.url} alt={`Photo ${i + 1}`}
+          className="w-48 h-36 object-cover rounded-lg flex-shrink-0" />
+      ))}
+    </div>
+  </div>
+)}
         {/* Titre et type */}
         <div className="bg-white rounded-xl shadow-sm p-6 space-y-3">
   <h3 className="font-bold text-lg">Intéressé par cet espace ?</h3>
