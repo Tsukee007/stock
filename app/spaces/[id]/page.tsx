@@ -6,11 +6,11 @@ export default async function SpacePage({ params }: { params: Promise<{ id: stri
   const { id } = await params
   const supabase = await createClient()
 
-const { data: space } = await supabase
-  .from('spaces')
-  .select('*, profiles(full_name, avatar_url, rating_avg), space_photos(url, position)')
-  .eq('id', id)
-  .single()
+  const { data: space } = await supabase
+    .from('spaces')
+    .select('*, profiles(full_name, avatar_url, rating_avg), space_photos(url, position)')
+    .eq('id', id)
+    .single()
 
   if (!space) notFound()
 
@@ -20,40 +20,42 @@ const { data: space } = await supabase
     .eq('space_id', id)
     .order('created_at', { ascending: false })
 
+  const photos = (space.space_photos as any[]) ?? []
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-2xl mx-auto p-6 space-y-6">
-{/* Photos */}
-{spaceReviews && (space.space_photos as any[])?.length > 0 && (
-  <div className="bg-white rounded-xl shadow-sm p-4">
-    <div className="flex gap-3 overflow-x-auto">
-      {(space.space_photos as any[]).map((photo: any, i: number) => (
-        <img key={i} src={photo.url} alt={`Photo ${i + 1}`}
-          className="w-48 h-36 object-cover rounded-lg flex-shrink-0" />
-      ))}
-    </div>
-  </div>
-)}
+
+        {/* Photos */}
+        {photos.length > 0 && (
+          <div className="bg-white rounded-xl shadow-sm p-4">
+            <div className="flex gap-3 overflow-x-auto">
+              {photos
+                .sort((a: any, b: any) => a.position - b.position)
+                .map((photo: any, i: number) => (
+                  <img key={i} src={photo.url} alt={`Photo ${i + 1}`}
+                    className="w-48 h-36 object-cover rounded-lg flex-shrink-0" />
+                ))}
+            </div>
+          </div>
+        )}
+
         {/* Titre et type */}
-        <div className="bg-white rounded-xl shadow-sm p-6 space-y-3">
-  <h3 className="font-bold text-lg">Intéressé par cet espace ?</h3>
-  <div className="bg-gray-50 rounded-lg p-3 text-sm text-gray-600 space-y-1">
-    <p>✅ Envoyez une demande au propriétaire</p>
-    <p>✅ Discutez des modalités par messagerie</p>
-    <p>✅ Payez en ligne en toute sécurité</p>
-  </div>
-  <a href={`/api/contact/${space.id}`}
-    className="block w-full bg-blue-600 text-white rounded-xl p-4 font-bold text-lg hover:bg-blue-700 text-center">
-    📦 Demander à réserver
-  </a>
-  <a href={`/api/message/${space.id}`}
-    className="block w-full border border-blue-600 text-blue-600 rounded-xl p-3 font-medium text-center hover:bg-blue-50">
-    💬 Contacter le propriétaire
-  </a>
-  <p className="text-center text-xs text-gray-600">
-    Gratuit et sans engagement
-  </p>
-</div>
+        <div className="bg-white rounded-xl shadow-sm p-6">
+          <div className="flex items-start justify-between">
+            <div>
+              <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full font-medium capitalize">
+                {space.type}
+              </span>
+              <h2 className="text-2xl font-bold mt-2">{space.title}</h2>
+              <p className="text-gray-500 mt-1">📍 {space.address}, {space.city}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-3xl font-bold text-blue-600">{Math.round(space.price_month * 1.10)}€</p>
+              <p className="text-gray-400 text-sm">/mois TTC</p>
+            </div>
+          </div>
+        </div>
 
         {/* Détails */}
         <div className="bg-white rounded-xl shadow-sm p-6">
@@ -112,7 +114,7 @@ const { data: space } = await supabase
                   {(spaceReviews.reduce((sum, r) => sum + r.rating, 0) / spaceReviews.length).toFixed(1)}
                 </span>
                 <span className="text-yellow-500">⭐</span>
-                <span className="text-gray-600 text-sm">({spaceReviews.length} avis)</span>
+                <span className="text-gray-400 text-sm">({spaceReviews.length} avis)</span>
               </div>
             </div>
             <div className="space-y-3">
@@ -123,11 +125,24 @@ const { data: space } = await supabase
           </div>
         )}
 
-        {/* Bouton contact */}
-        <a href={`/api/contact/${space.id}`}
-          className="block w-full bg-blue-600 text-white rounded-xl p-4 font-bold text-lg hover:bg-blue-700 text-center">
-          Contacter le propriétaire
-        </a>
+        {/* Boutons */}
+        <div className="bg-white rounded-xl shadow-sm p-6 space-y-3">
+          <h3 className="font-bold text-lg">Intéressé par cet espace ?</h3>
+          <div className="bg-gray-50 rounded-lg p-3 text-sm text-gray-600 space-y-1">
+            <p>✅ Envoyez une demande au propriétaire</p>
+            <p>✅ Discutez des modalités par messagerie</p>
+            <p>✅ Payez en ligne en toute sécurité</p>
+          </div>
+          <a href={`/api/contact/${space.id}`}
+            className="block w-full bg-blue-600 text-white rounded-xl p-4 font-bold text-lg hover:bg-blue-700 text-center">
+            📦 Demander à réserver
+          </a>
+          <a href={`/api/message/${space.id}`}
+            className="block w-full border border-blue-600 text-blue-600 rounded-xl p-3 font-medium text-center hover:bg-blue-50">
+            💬 Contacter le propriétaire
+          </a>
+          <p className="text-center text-xs text-gray-400">Gratuit et sans engagement</p>
+        </div>
 
       </div>
     </div>
