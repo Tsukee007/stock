@@ -13,7 +13,7 @@ export default function ContactPage() {
 
   const handleSubmit = async () => {
     setLoading(true)
-    await fetch('/api/contact', {
+    await fetch('/api/contact-form', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(form)
@@ -84,13 +84,7 @@ export default function ContactPage() {
           </button>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <h2 className="font-bold mb-3">Autres moyens de nous contacter</h2>
-          <div className="space-y-2 text-sm text-gray-600">
-            <p>📧 Email : <a href="mailto:contact@nestock.tsukee.fr" className="text-blue-600">contact@nestock.tsukee.fr</a></p>
-            <p>⏰ Réponse sous 24-48h ouvrées</p>
-          </div>
-        </div>
+
 
       </div>
     </div>

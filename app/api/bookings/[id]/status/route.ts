@@ -1,9 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
-import { Resend } from 'resend'
+import { sendEmail } from '@/lib/mailer'
 import { NextResponse } from 'next/server'
-
-const resend = new Resend(process.env.RESEND_API_KEY)
 
 export async function POST(
   req: Request,
@@ -30,23 +28,22 @@ export async function POST(
     return NextResponse.json({ error: 'Non autorisé' }, { status: 403 })
   }
 
- await supabase.from('bookings').update({ status }).eq('id', id)
+  await supabase.from('bookings').update({ status }).eq('id', id)
 
-// Message automatique selon le statut
-const autoMessages: Record<string, string> = {
-  confirmed: 'Votre demande a été acceptée ! Vous pouvez maintenant convenir des modalités.',
-  cancelled: 'Votre demande a été refusée.',
-  active: 'La location est maintenant active. Bon stockage !',
-  ended: 'La location est terminée. Merci et à bientôt !'
-}
+  const autoMessages: Record<string, string> = {
+    confirmed: 'Votre demande a été acceptée ! Vous pouvez maintenant convenir des modalités.',
+    cancelled: 'Votre demande a été refusée.',
+    active: 'La location est maintenant active. Bon stockage !',
+    ended: 'La location est terminée. Merci et à bientôt !'
+  }
 
-if (autoMessages[status]) {
-  await supabase.from('messages').insert({
-    booking_id: id,
-    sender_id: user.id,
-    content: autoMessages[status]
-  })
-}
+  if (autoMessages[status]) {
+    await supabase.from('messages').insert({
+      booking_id: id,
+      sender_id: user.id,
+      content: autoMessages[status]
+    })
+  }
 
   const adminClient = createAdminClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -67,12 +64,11 @@ if (autoMessages[status]) {
     confirmed: 'Le propriétaire a accepté votre demande.',
     active: 'La location est officiellement démarrée. Bon stockage !',
     ended: 'La location est terminée. Laissez un avis !',
-    cancelled: 'Le propriétaire n\'a pas pu donner suite à votre demande.'
+    cancelled: "Le propriétaire n'a pas pu donner suite à votre demande."
   }
 
   if (renterEmail && statusLabels[status]) {
-    await resend.emails.send({
-      from: 'Nestock <onboarding@resend.dev>',
+    await sendEmail({
       to: renterEmail,
       subject: `${statusLabels[status]} — ${spaceData.title}`,
       html: `
