@@ -39,7 +39,13 @@ export default function EditSpaceForm({ space }: { space: any }) {
     setForm(prev => ({ ...prev, ...data }))
   }
 
+  const handlePhotosUpdate = (urls: string[]) => {
+    console.log('Photos updated:', urls)
+    setPhotos(urls)
+  }
+
   const handleSubmit = async () => {
+    console.log('Submit - photos:', photos)
     setLoading(true)
     setError('')
 
@@ -69,14 +75,17 @@ export default function EditSpaceForm({ space }: { space: any }) {
     }
 
     // Mettre à jour les photos
+    console.log('Saving photos to DB:', photos)
     await supabase.from('space_photos').delete().eq('space_id', space.id)
+    
     if (photos.length > 0) {
-      await supabase.from('space_photos').insert(
+      const { error: photoError } = await supabase.from('space_photos').insert(
         photos.map((url, i) => ({ space_id: space.id, url, position: i }))
       )
+      console.log('Photo insert error:', photoError)
     }
 
-    router.push('/dashboard')
+    router.push(`/spaces/${space.id}`)
     setLoading(false)
   }
 
@@ -87,7 +96,7 @@ export default function EditSpaceForm({ space }: { space: any }) {
       <PhotoUpload
         spaceId={space.id}
         existingPhotos={photos}
-        onUpdate={setPhotos}
+        onUpdate={handlePhotosUpdate}
       />
 
       <div>
@@ -174,4 +183,5 @@ export default function EditSpaceForm({ space }: { space: any }) {
         {loading ? 'Mise à jour...' : '✅ Enregistrer les modifications'}
       </button>
     </div>
-  
+  )
+}
