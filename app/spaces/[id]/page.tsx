@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import ReviewCard from '@/components/ui/ReviewCard'
+import PhotoLightbox from '@/components/ui/PhotoLightbox'
 
 export default async function SpacePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -27,18 +28,11 @@ export default async function SpacePage({ params }: { params: Promise<{ id: stri
       <div className="max-w-2xl mx-auto p-6 space-y-6">
 
         {/* Photos */}
-        {photos.length > 0 && (
-          <div className="bg-white rounded-xl shadow-sm p-4">
-            <div className="flex gap-3 overflow-x-auto">
-              {photos
-                .sort((a: any, b: any) => a.position - b.position)
-                .map((photo: any, i: number) => (
-                  <img key={i} src={photo.url} alt={`Photo ${i + 1}`}
-                    className="w-48 h-36 object-cover rounded-lg flex-shrink-0" />
-                ))}
-            </div>
-          </div>
-        )}
+{photos.length > 0 && (
+  <div className="bg-white rounded-xl shadow-sm p-4">
+    <PhotoLightbox photos={photos} />
+  </div>
+)}
 
         {/* Titre et type */}
         <div className="bg-white rounded-xl shadow-sm p-6">
