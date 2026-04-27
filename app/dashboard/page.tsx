@@ -46,8 +46,16 @@ export default async function DashboardPage() {
       <div className="max-w-4xl mx-auto p-6 space-y-8">
 
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Tableau de bord</h1>
-          <p className="text-gray-500 text-sm mt-1">{user.email}</p>
+<div className="flex items-center justify-between">
+  <div>
+    <h1 className="text-2xl font-bold text-gray-800">Tableau de bord</h1>
+    <p className="text-gray-500 text-sm mt-1">{user.email}</p>
+  </div>
+  <a href="/dashboard/stats"
+    className="text-sm bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">
+    📊 Mes stats
+  </a>
+</div>
         </div>
 
         <div className="grid grid-cols-3 gap-4">
