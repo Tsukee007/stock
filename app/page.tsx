@@ -1,6 +1,6 @@
-import MapWithList from '@/components/map/MapWithList'
-import SearchFilters from '@/components/map/SearchFilters'
 import { createClient } from '@/lib/supabase/server'
+import SearchFilters from '@/components/map/SearchFilters'
+import MapWithList from '@/components/map/MapWithList'
 
 type SearchParams = {
   city?: string
@@ -56,7 +56,7 @@ export default async function Home({
   return (
     <main className="relative flex flex-col" style={{ height: 'calc(100vh - 64px)' }}>
       <SearchFilters initialFilters={filters} />
-      <div className="flex-1 pt-16">
+      <div className="flex-1 pt-16 md:pt-16">
         <MapWithList spaces={spaces ?? []} />
       </div>
     </main>
