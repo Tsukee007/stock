@@ -80,7 +80,16 @@ const filename = `${spaceId}/${safeName}`
         Photos ({photos.length}/3)
       </label>
 
-      {error && <p className="text-red-500 text-xs mb-2">{error}</p>}
+      {error && (
+  <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-2 flex items-start gap-2">
+    <span className="text-red-500 text-lg">⚠️</span>
+    <div>
+      <p className="text-red-600 font-medium text-sm">Erreur d'upload</p>
+      <p className="text-red-500 text-xs">{error}</p>
+    </div>
+    <button onClick={() => setError('')} className="ml-auto text-red-400 hover:text-red-600">×</button>
+  </div>
+)}
 
       <div className="flex gap-3 flex-wrap mb-3">
         {photos.map((url, i) => (
