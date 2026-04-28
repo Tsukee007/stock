@@ -23,7 +23,7 @@ export default async function MessagesPage({
 
   const { data: bookings } = await supabase
     .from('bookings')
-    .select(`id, status, created_at, renter_id, spaces(id, title, city, owner_id), profiles!bookings_renter_id_fkey(full_name)`)
+    .select('id, status, created_at, renter_id, spaces(id, title, city, owner_id), profiles!bookings_renter_id_fkey(full_name)')
     .order('created_at', { ascending: false })
 
   const filteredBookings = bookings?.filter(b => {
@@ -32,15 +32,12 @@ export default async function MessagesPage({
   }) ?? []
 
   const activeBookingId = booking_id ?? filteredBookings?.[0]?.id
-
-  // Si on a un booking_id, on affiche le chat directement sur mobile
   const showChat = !!booking_id
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto flex h-[calc(100vh-120px)] md:h-[calc(100vh-80px)]">
 
-        {/* Liste conversations - cachée sur mobile si chat ouvert */}
         <div className={`
           ${showChat ? 'hidden md:flex' : 'flex'}
           w-full md:w-72 bg-white shadow-sm flex-col overflow-hidden
@@ -78,7 +75,6 @@ export default async function MessagesPage({
           })}
         </div>
 
-        {/* Chat - plein écran sur mobile si booking_id */}
         <div className={`
           ${showChat ? 'flex' : 'hidden md:flex'}
           flex-1 bg-white flex-col overflow-hidden
@@ -94,7 +90,7 @@ export default async function MessagesPage({
             <div className="flex items-center justify-center h-full text-gray-400">
               <div className="text-center">
                 <p className="text-4xl mb-3">💬</p>
-                <p>Sélectionne une conversation</p>
+                <p>Selectionnez une conversation</p>
               </div>
             </div>
           )}

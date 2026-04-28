@@ -30,7 +30,6 @@ export default function MapWithList({ spaces }: { spaces: Space[] }) {
   return (
     <div className="flex flex-col h-full md:flex-row">
 
-      {/* Toggle mobile */}
       <div className="md:hidden flex border-b bg-white">
         <button
           onClick={() => setView('list')}
@@ -38,7 +37,7 @@ export default function MapWithList({ spaces }: { spaces: Space[] }) {
             view === 'list' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'
           }`}
         >
-          📋 Liste ({spaces.length})
+          Liste ({spaces.length})
         </button>
         <button
           onClick={() => setView('map')}
@@ -46,18 +45,17 @@ export default function MapWithList({ spaces }: { spaces: Space[] }) {
             view === 'map' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'
           }`}
         >
-          🗺️ Carte
+          Carte
         </button>
       </div>
 
-      {/* Liste */}
       <div className={`
         ${view === 'map' ? 'hidden' : 'flex'} md:flex
         w-full md:w-80 bg-white shadow-lg flex-col overflow-hidden
       `}>
         <div className="p-4 border-b bg-gray-50 hidden md:block">
           <p className="font-semibold text-gray-700">
-            {spaces.length} espace{spaces.length > 1 ? 's' : ''} trouvé{spaces.length > 1 ? 's' : ''}
+            {spaces.length} espace{spaces.length > 1 ? 's' : ''} trouve{spaces.length > 1 ? 's' : ''}
           </p>
         </div>
 
@@ -65,8 +63,7 @@ export default function MapWithList({ spaces }: { spaces: Space[] }) {
           {spaces.length === 0 && (
             <div className="p-8 text-center text-gray-400">
               <p className="text-3xl mb-2">🔍</p>
-              <p className="text-sm">Aucun résultat</p>
-              <p className="text-xs mt-1">Essayez d'élargir votre recherche</p>
+              <p className="text-sm">Aucun resultat</p>
             </div>
           )}
 
@@ -111,7 +108,7 @@ export default function MapWithList({ spaces }: { spaces: Space[] }) {
                   onClick={e => e.stopPropagation()}
                   className="mt-2 inline-block text-xs bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700"
                 >
-                  Voir l'annonce →
+                  Voir l'annonce
                 </a>
               )}
             </button>
@@ -119,7 +116,6 @@ export default function MapWithList({ spaces }: { spaces: Space[] }) {
         </div>
       </div>
 
-      {/* Carte */}
       <div className={`
         ${view === 'list' ? 'hidden' : 'flex'} md:flex
         flex-1
