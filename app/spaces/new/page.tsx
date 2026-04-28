@@ -4,12 +4,22 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import AddressSearch from '@/components/ui/AddressSearch'
+import PhotoUpload from '@/components/ui/PhotoUpload'
+
+function generateUUID() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = Math.random() * 16 | 0
+    return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16)
+  })
+}
 
 export default function NewSpacePage() {
   const router = useRouter()
   const supabase = createClient()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [spaceId] = useState(generateUUID())
+  const [photos, setPhotos] = useState<string[]>([])
   const [form, setForm] = useState({
     title: '',
     description: '',
@@ -30,13 +40,7 @@ export default function NewSpacePage() {
     setForm(prev => ({ ...prev, [name]: value }))
   }
 
-  const handleAddressSelect = (data: {
-    address: string
-    city: string
-    postal_code: string
-    lat: number
-    lng: number
-  }) => {
+  const handleAddressSelect = (data: any) => {
     setForm(prev => ({ ...prev, ...data }))
   }
 
@@ -54,7 +58,8 @@ export default function NewSpacePage() {
       return
     }
 
-    const { error } = await supabase.from('spaces').insert({
+    const { error: insertError } = await supabase.from('spaces').insert({
+      id: spaceId,
       title: form.title,
       description: form.description,
       address: form.address,
@@ -70,25 +75,35 @@ export default function NewSpacePage() {
       owner_id: user.id,
     })
 
-    if (error) {
-      setError(error.message)
-    } else {
-      router.push('/')
+    if (insertError) {
+      setError(insertError.message)
+      setLoading(false)
+      return
     }
+
+    // Sauvegarder les photos
+    if (photos.length > 0) {
+      await supabase.from('space_photos').insert(
+        photos.map((url, i) => ({ space_id: spaceId, url, position: i }))
+      )
+    }
+
+    router.push('/')
     setLoading(false)
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm p-4 flex items-center gap-3">
-        <a href="/" className="text-gray-500 hover:text-blue-600">← Retour</a>
-        <h1 className="text-xl font-bold text-blue-600">🗄️ Déposer une annonce</h1>
-      </header>
-
-      <div className="max-w-2xl mx-auto p-6">
+    <div className="min-h-screen bg-gray-50 pb-20 md:pb-0">
+      <div className="max-w-2xl mx-auto p-4 md:p-6">
         <div className="bg-white rounded-xl shadow-sm p-6 space-y-4">
 
           {error && <p className="text-red-500 text-sm bg-red-50 p-3 rounded-lg">{error}</p>}
+
+          <PhotoUpload
+            spaceId={spaceId}
+            existingPhotos={photos}
+            onUpdate={setPhotos}
+          />
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Titre de l'annonce</label>
@@ -119,22 +134,18 @@ export default function NewSpacePage() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Surface (m²)</label>
-              <input name="surface_m2" value={form.surface_m2} onChange={handleChange}
-                type="number" placeholder="20"
-                className="w-full border rounded-lg p-3" />
+              <input name="surface_m2" type="number" value={form.surface_m2} onChange={handleChange}
+                placeholder="20" className="w-full border rounded-lg p-3" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Prix/mois (€)</label>
-              <input name="price_month" value={form.price_month} onChange={handleChange}
-                type="number" placeholder="80"
-                className="w-full border rounded-lg p-3" />
+              <input name="price_month" type="number" value={form.price_month} onChange={handleChange}
+                placeholder="80" className="w-full border rounded-lg p-3" />
             </div>
           </div>
 
-          {/* Recherche adresse avec autocomplétion */}
           <AddressSearch onSelect={handleAddressSelect} />
 
-          {/* Champs remplis automatiquement */}
           {form.address && (
             <div className="bg-blue-50 rounded-lg p-4 space-y-2 text-sm">
               <p className="font-medium text-blue-700">✅ Adresse sélectionnée</p>
@@ -156,8 +167,7 @@ export default function NewSpacePage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Disponible à partir du</label>
-            <input name="available_from" value={form.available_from} onChange={handleChange}
-              type="date"
+            <input name="available_from" type="date" value={form.available_from} onChange={handleChange}
               className="w-full border rounded-lg p-3" />
           </div>
 

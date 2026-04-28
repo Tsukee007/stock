@@ -33,28 +33,38 @@ export default async function MessagesPage({
 
   const activeBookingId = booking_id ?? filteredBookings?.[0]?.id
 
+  // Si on a un booking_id, on affiche le chat directement sur mobile
+  const showChat = !!booking_id
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto p-4 flex gap-4" style={{ height: 'calc(100vh - 80px)' }}>
-        <div className="w-72 bg-white rounded-xl shadow-sm overflow-y-auto">
+      <div className="max-w-4xl mx-auto flex h-[calc(100vh-120px)] md:h-[calc(100vh-80px)]">
+
+        {/* Liste conversations - cachée sur mobile si chat ouvert */}
+        <div className={`
+          ${showChat ? 'hidden md:flex' : 'flex'}
+          w-full md:w-72 bg-white shadow-sm flex-col overflow-hidden
+        `}>
           <div className="p-4 border-b">
             <h2 className="font-bold text-black">Conversations</h2>
           </div>
           {filteredBookings.length === 0 && (
-            <p className="text-gray-600 text-sm p-4">Aucune conversation</p>
+            <p className="text-gray-400 text-sm p-4">Aucune conversation</p>
           )}
           {filteredBookings.map(booking => {
             const space = booking.spaces as any
             const renter = booking.profiles as any
             return (
-              <a
+              
                 key={booking.id}
                 href={`/messages?booking_id=${booking.id}`}
-               className={`block p-4 border-b hover:bg-blue-50 transition ${activeBookingId === booking.id ? 'bg-blue-50 border-l-4 border-l-blue-600' : 'bg-white'}`}
-               >
-<p className="font-bold text-sm truncate text-black">{space?.title ?? 'Espace'}</p>
-<p className="text-gray-700 text-xs font-medium">{space?.city}</p>
-<p className="text-gray-700 text-xs font-medium">{renter?.full_name ?? 'Locataire'}</p>
+                className={`block p-4 border-b hover:bg-blue-50 transition ${
+                  activeBookingId === booking.id ? 'bg-blue-50 border-l-4 border-l-blue-600' : 'bg-white'
+                }`}
+              >
+                <p className="font-bold text-sm truncate text-black">{space?.title ?? 'Espace'}</p>
+                <p className="text-gray-700 text-xs">{space?.city}</p>
+                <p className="text-gray-700 text-xs">{renter?.full_name ?? 'Locataire'}</p>
                 <span className={`text-xs px-2 py-0.5 rounded-full mt-1 inline-block ${
                   booking.status === 'active' ? 'bg-green-100 text-green-600' :
                   booking.status === 'pending' ? 'bg-yellow-100 text-yellow-600' :
@@ -68,11 +78,20 @@ export default async function MessagesPage({
           })}
         </div>
 
-        <div className="flex-1 bg-white rounded-xl shadow-sm overflow-hidden">
+        {/* Chat - plein écran sur mobile si booking_id */}
+        <div className={`
+          ${showChat ? 'flex' : 'hidden md:flex'}
+          flex-1 bg-white flex-col overflow-hidden
+        `}>
+          {showChat && (
+            <div className="md:hidden p-3 border-b flex items-center gap-2">
+              <a href="/messages" className="text-gray-500 text-sm">← Retour</a>
+            </div>
+          )}
           {activeBookingId ? (
             <ChatWindow bookingId={activeBookingId} currentUserId={user.id} />
           ) : (
-            <div className="flex items-center justify-center h-full text-gray-600">
+            <div className="flex items-center justify-center h-full text-gray-400">
               <div className="text-center">
                 <p className="text-4xl mb-3">💬</p>
                 <p>Sélectionne une conversation</p>
@@ -80,6 +99,7 @@ export default async function MessagesPage({
             </div>
           )}
         </div>
+
       </div>
     </div>
   )
