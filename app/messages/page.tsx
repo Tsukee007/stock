@@ -35,7 +35,7 @@ export default async function MessagesPage({
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto flex h-[calc(100vh-120px)] md:h-[calc(100vh-80px)]">
-        <div className={`${showChat ? 'hidden md:flex' : 'flex'} w-full md:w-72 bg-white shadow-sm flex-col overflow-hidden`}>
+        <div className={showChat ? 'hidden md:flex w-full md:w-72 bg-white shadow-sm flex-col overflow-hidden' : 'flex w-full md:w-72 bg-white shadow-sm flex-col overflow-hidden'}>
           <div className="p-4 border-b">
             <h2 className="font-bold text-black">Conversations</h2>
           </div>
@@ -57,34 +57,4 @@ export default async function MessagesPage({
                 <span className={'text-xs px-2 py-0.5 rounded-full mt-1 inline-block ' + (
                   booking.status === 'active' ? 'bg-green-100 text-green-600' :
                   booking.status === 'pending' ? 'bg-yellow-100 text-yellow-600' :
-                  booking.status === 'confirmed' ? 'bg-blue-100 text-blue-600' :
-                  'bg-gray-100 text-gray-500'
-                )}>
-                  {statusLabels[booking.status] ?? booking.status}
-                </span>
-              </a>
-            )
-          })}
-        </div>
-
-        <div className={`${showChat ? 'flex' : 'hidden md:flex'} flex-1 bg-white flex-col overflow-hidden`}>
-          {showChat && (
-            <div className="md:hidden p-3 border-b">
-              <a href="/messages" className="text-gray-500 text-sm">← Retour</a>
-            </div>
-          )}
-          {activeBookingId ? (
-            <ChatWindow bookingId={activeBookingId} currentUserId={user.id} />
-          ) : (
-            <div className="flex items-center justify-center h-full text-gray-400">
-              <div className="text-center">
-                <p className="text-4xl mb-3">💬</p>
-                <p>Selectionnez une conversation</p>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  )
-}
+                  booking.status === 'confirmed' ? 'bg-blue-100 text-blue-

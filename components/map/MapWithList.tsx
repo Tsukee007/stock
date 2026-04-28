@@ -33,26 +33,19 @@ export default function MapWithList({ spaces }: { spaces: Space[] }) {
       <div className="md:hidden flex border-b bg-white">
         <button
           onClick={() => setView('list')}
-          className={`flex-1 py-3 text-sm font-medium ${
-            view === 'list' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'
-          }`}
+          className={view === 'list' ? 'flex-1 py-3 text-sm font-medium text-blue-600 border-b-2 border-blue-600' : 'flex-1 py-3 text-sm font-medium text-gray-500'}
         >
           Liste ({spaces.length})
         </button>
         <button
           onClick={() => setView('map')}
-          className={`flex-1 py-3 text-sm font-medium ${
-            view === 'map' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'
-          }`}
+          className={view === 'map' ? 'flex-1 py-3 text-sm font-medium text-blue-600 border-b-2 border-blue-600' : 'flex-1 py-3 text-sm font-medium text-gray-500'}
         >
           Carte
         </button>
       </div>
 
-      <div className={`
-        ${view === 'map' ? 'hidden' : 'flex'} md:flex
-        w-full md:w-80 bg-white shadow-lg flex-col overflow-hidden
-      `}>
+      <div className={view === 'map' ? 'hidden md:flex w-full md:w-80 bg-white shadow-lg flex-col overflow-hidden' : 'flex w-full md:w-80 bg-white shadow-lg flex-col overflow-hidden'}>
         <div className="p-4 border-b bg-gray-50 hidden md:block">
           <p className="font-semibold text-gray-700">
             {spaces.length} espace{spaces.length > 1 ? 's' : ''} trouve{spaces.length > 1 ? 's' : ''}
@@ -74,11 +67,7 @@ export default function MapWithList({ spaces }: { spaces: Space[] }) {
                 setSelectedId(space.id === selectedId ? null : space.id)
                 setView('map')
               }}
-              className={`w-full text-left p-4 border-b hover:bg-blue-50 transition ${
-                selectedId === space.id
-                  ? 'bg-blue-50 border-l-4 border-l-blue-600'
-                  : 'border-l-4 border-l-transparent'
-              }`}
+              className={selectedId === space.id ? 'w-full text-left p-4 border-b hover:bg-blue-50 bg-blue-50 border-l-4 border-l-blue-600' : 'w-full text-left p-4 border-b hover:bg-blue-50 border-l-4 border-l-transparent'}
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
@@ -104,7 +93,7 @@ export default function MapWithList({ spaces }: { spaces: Space[] }) {
 
               {selectedId === space.id && (
                 
-                  href={`/spaces/${space.id}`}
+                  href={'/spaces/' + space.id}
                   onClick={e => e.stopPropagation()}
                   className="mt-2 inline-block text-xs bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700"
                 >
@@ -116,10 +105,7 @@ export default function MapWithList({ spaces }: { spaces: Space[] }) {
         </div>
       </div>
 
-      <div className={`
-        ${view === 'list' ? 'hidden' : 'flex'} md:flex
-        flex-1
-      `}>
+      <div className={view === 'list' ? 'hidden md:flex flex-1' : 'flex flex-1'}>
         <SpacesMap
           spaces={spaces}
           selectedId={selectedId}
