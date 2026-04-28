@@ -25,35 +25,40 @@ const typeEmoji: Record<string, string> = {
 
 export default function MapWithList({ spaces }: { spaces: Space[] }) {
   const [selectedId, setSelectedId] = useState<string | null>(null)
-  const [showList, setShowList] = useState(false)
+  const [view, setView] = useState<'list' | 'map'>('list')
 
   return (
-    <div className="flex h-full relative">
+    <div className="flex flex-col h-full md:flex-row">
 
-      {/* Bouton toggle liste/carte sur mobile */}
-      <button
-        onClick={() => setShowList(!showList)}
-        className="md:hidden absolute bottom-20 left-1/2 -translate-x-1/2 z-20 bg-blue-600 text-white px-4 py-2 rounded-full shadow-lg text-sm font-medium"
-      >
-        {showList ? '🗺️ Voir la carte' : `📋 Liste (${spaces.length})`}
-      </button>
+      {/* Toggle mobile */}
+      <div className="md:hidden flex border-b bg-white">
+        <button
+          onClick={() => setView('list')}
+          className={`flex-1 py-3 text-sm font-medium ${
+            view === 'list' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'
+          }`}
+        >
+          📋 Liste ({spaces.length})
+        </button>
+        <button
+          onClick={() => setView('map')}
+          className={`flex-1 py-3 text-sm font-medium ${
+            view === 'map' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'
+          }`}
+        >
+          🗺️ Carte
+        </button>
+      </div>
 
-      {/* Liste à gauche — cachée sur mobile sauf si showList */}
+      {/* Liste */}
       <div className={`
-        ${showList ? 'flex' : 'hidden'} md:flex
-        absolute md:relative inset-0 md:inset-auto
-        w-full md:w-80 bg-white shadow-lg z-10 flex-col overflow-hidden
+        ${view === 'map' ? 'hidden' : 'flex'} md:flex
+        w-full md:w-80 bg-white shadow-lg flex-col overflow-hidden
       `}>
-        <div className="p-4 border-b bg-gray-50 flex items-center justify-between">
+        <div className="p-4 border-b bg-gray-50 hidden md:block">
           <p className="font-semibold text-gray-700">
             {spaces.length} espace{spaces.length > 1 ? 's' : ''} trouvé{spaces.length > 1 ? 's' : ''}
           </p>
-          <button
-            onClick={() => setShowList(false)}
-            className="md:hidden text-gray-400 hover:text-gray-600"
-          >
-            ✕
-          </button>
         </div>
 
         <div className="flex-1 overflow-y-auto">
@@ -70,7 +75,7 @@ export default function MapWithList({ spaces }: { spaces: Space[] }) {
               key={space.id}
               onClick={() => {
                 setSelectedId(space.id === selectedId ? null : space.id)
-                setShowList(false)
+                setView('map')
               }}
               className={`w-full text-left p-4 border-b hover:bg-blue-50 transition ${
                 selectedId === space.id
@@ -115,16 +120,17 @@ export default function MapWithList({ spaces }: { spaces: Space[] }) {
       </div>
 
       {/* Carte */}
-      <div className="flex-1">
+      <div className={`
+        ${view === 'list' ? 'hidden' : 'flex'} md:flex
+        flex-1
+      `}>
         <SpacesMap
           spaces={spaces}
           selectedId={selectedId}
-          onSelect={(id) => {
-            setSelectedId(id)
-            setShowList(false)
-          }}
+          onSelect={(id) => setSelectedId(id)}
         />
       </div>
+
     </div>
   )
 }
