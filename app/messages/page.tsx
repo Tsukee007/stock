@@ -52,7 +52,7 @@ export default async function MessagesPage({
             const bid = booking['id']
             const isActive = activeBookingId === bid
             return (
-              
+              <a
                 key={bid}
                 href={'/messages?booking_id=' + bid}
                 className={'block p-4 border-b hover:bg-blue-50 transition ' + (isActive ? 'bg-blue-50 border-l-4 border-l-blue-600' : 'bg-white')}
