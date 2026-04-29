@@ -47,8 +47,8 @@ export default async function MessagesPage({
             const renter = booking.profiles as any
             return (
               
-                key={booking.id}
-                href={'/messages?booking_id=' + booking.id}
+key={booking['id']}
+  href={'/messages?booking_id=' + booking['id']}
                 className={'block p-4 border-b hover:bg-blue-50 transition ' + (activeBookingId === booking.id ? 'bg-blue-50 border-l-4 border-l-blue-600' : 'bg-white')}
               >
                 <p className="font-bold text-sm truncate text-black">{space?.title ?? 'Espace'}</p>

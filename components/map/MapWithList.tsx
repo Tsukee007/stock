@@ -91,9 +91,9 @@ export default function MapWithList({ spaces }: { spaces: Space[] }) {
                 </div>
               </div>
 
-              {selectedId === space.id && (
-                
-                  href={'/spaces/' + space.id}
+{selectedId === space.id && (
+  
+    href={'/spaces/' + space['id']}
                   onClick={e => e.stopPropagation()}
                   className="mt-2 inline-block text-xs bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700"
                 >
