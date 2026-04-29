@@ -49,7 +49,7 @@ export default async function MessagesPage({
           {filteredBookings.map(booking => {
             const space = booking.spaces as any
             const renter = booking.profiles as any
-            const bid = booking.id
+            const bid = booking['id']
             const isActive = activeBookingId === bid
             return (
               
@@ -60,8 +60,8 @@ export default async function MessagesPage({
                 <p className="font-bold text-sm truncate text-black">{space?.title ?? 'Espace'}</p>
                 <p className="text-gray-700 text-xs">{space?.city}</p>
                 <p className="text-gray-700 text-xs">{renter?.full_name ?? 'Locataire'}</p>
-                <span className={'text-xs px-2 py-0.5 rounded-full mt-1 inline-block ' + getStatusColor(booking.status)}>
-                  {statusLabels[booking.status] ?? booking.status}
+                <span className={'text-xs px-2 py-0.5 rounded-full mt-1 inline-block ' + getStatusColor(booking['status'])}>
+                  {statusLabels[booking['status']] ?? booking['status']}
                 </span>
               </a>
             )
