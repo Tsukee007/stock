@@ -10,13 +10,10 @@ export default async function MessagesPage({
 }) {
   const { booking_id } = await searchParams
   const supabase = await createClient()
-
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: ownedSpaces } = await supabase
-    .from('spaces').select('id').eq('owner_id', user.id)
-
+  const { data: ownedSpaces } = await supabase.from('spaces').select('id').eq('owner_id', user.id)
   const ownedSpaceIds = ownedSpaces?.map(s => s.id) ?? []
 
   const { data: bookings } = await supabase
@@ -32,6 +29,13 @@ export default async function MessagesPage({
   const activeBookingId = booking_id ?? filteredBookings?.[0]?.id
   const showChat = !!booking_id
 
+  const getStatusColor = (status: string) => {
+    if (status === 'active') return 'bg-green-100 text-green-600'
+    if (status === 'pending') return 'bg-yellow-100 text-yellow-600'
+    if (status === 'confirmed') return 'bg-blue-100 text-blue-600'
+    return 'bg-gray-100 text-gray-500'
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto flex h-[calc(100vh-120px)] md:h-[calc(100vh-80px)]">
@@ -45,16 +49,42 @@ export default async function MessagesPage({
           {filteredBookings.map(booking => {
             const space = booking.spaces as any
             const renter = booking.profiles as any
+            const bid = booking.id
+            const isActive = activeBookingId === bid
             return (
-              <a
-                key={booking['id']}
-                href={'/messages?booking_id=' + booking['id']}
-                className={'block p-4 border-b hover:bg-blue-50 transition ' + (activeBookingId === booking.id ? 'bg-blue-50 border-l-4 border-l-blue-600' : 'bg-white')}
+              
+                key={bid}
+                href={'/messages?booking_id=' + bid}
+                className={'block p-4 border-b hover:bg-blue-50 transition ' + (isActive ? 'bg-blue-50 border-l-4 border-l-blue-600' : 'bg-white')}
               >
                 <p className="font-bold text-sm truncate text-black">{space?.title ?? 'Espace'}</p>
                 <p className="text-gray-700 text-xs">{space?.city}</p>
                 <p className="text-gray-700 text-xs">{renter?.full_name ?? 'Locataire'}</p>
-                <span className={'text-xs px-2 py-0.5 rounded-full mt-1 inline-block ' + (
-                  booking.status === 'active' ? 'bg-green-100 text-green-600' :
-                  booking.status === 'pending' ? 'bg-yellow-100 text-yellow-600' :
-                  booking.status === 'confirmed' ? 'bg-blue-100 text-blue-
+                <span className={'text-xs px-2 py-0.5 rounded-full mt-1 inline-block ' + getStatusColor(booking.status)}>
+                  {statusLabels[booking.status] ?? booking.status}
+                </span>
+              </a>
+            )
+          })}
+        </div>
+        <div className={showChat ? 'flex flex-1 bg-white flex-col overflow-hidden' : 'hidden md:flex flex-1 bg-white flex-col overflow-hidden'}>
+          {showChat && (
+            <div className="md:hidden p-3 border-b">
+              <a href="/messages" className="text-gray-500 text-sm">Retour</a>
+            </div>
+          )}
+          {activeBookingId ? (
+            <ChatWindow bookingId={activeBookingId} currentUserId={user.id} />
+          ) : (
+            <div className="flex items-center justify-center h-full text-gray-400">
+              <div className="text-center">
+                <p className="text-4xl mb-3">💬</p>
+                <p>Selectionnez une conversation</p>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
