@@ -4,6 +4,7 @@ import BookingAction from '@/components/ui/BookingAction'
 import ReviewForm from '@/components/ui/ReviewForm'
 import PayButton from '@/components/ui/PayButton'
 import { statusLabels, statusColors } from '@/lib/utils'
+import DeleteSpaceButton from '@/components/ui/DeleteSpaceButton'
 
 
 export default async function DashboardPage() {
