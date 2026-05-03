@@ -24,14 +24,12 @@ export default async function ContractPage({
   const space = booking.spaces as any
   const renter = booking.profiles as any
 
-  // Récupérer le profil du propriétaire
   const { data: ownerProfile } = await supabase
     .from('profiles')
     .select('full_name')
     .eq('id', space.owner_id)
     .single()
 
-  // Récupérer ou créer le contrat
   let { data: contract } = await supabase
     .from('contracts')
     .select('*')
@@ -82,52 +80,57 @@ export default async function ContractPage({
         <div className="bg-white rounded-xl shadow-sm p-6 space-y-4 text-sm">
           <h2 className="text-xl font-bold text-center text-blue-600">CONTRAT DE LOCATION D'ESPACE DE STOCKAGE</h2>
           <p className="text-center text-gray-500">Via la plateforme Nestock — nestock.tsukee.fr</p>
+          <hr />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-gray-50 rounded-lg p-4 space-y-1">
+              <p className="font-bold text-blue-700">LE PROPRIÉTAIRE</p>
+              <p><span className="text-gray-500">Nom :</span> {ownerProfile?.full_name ?? '—'}</p>
+              {contract?.owner_birth_date && <p><span className="text-gray-500">Naissance :</span> {new Date(contract.owner_birth_date).toLocaleDateString('fr-FR')}</p>}
+              {contract?.owner_phone && <p><span className="text-gray-500">Tél :</span> {contract.owner_phone}</p>}
+              {contract?.owner_email && <p><span className="text-gray-500">Email :</span> {contract.owner_email}</p>}
+            </div>
+            <div className="bg-gray-50 rounded-lg p-4 space-y-1">
+              <p className="font-bold text-blue-700">LE LOCATAIRE</p>
+              <p><span className="text-gray-500">Nom :</span> {renter?.full_name ?? '—'}</p>
+              {contract?.renter_birth_date && <p><span className="text-gray-500">Naissance :</span> {new Date(contract.renter_birth_date).toLocaleDateString('fr-FR')}</p>}
+              {contract?.renter_phone && <p><span className="text-gray-500">Tél :</span> {contract.renter_phone}</p>}
+              {contract?.renter_email && <p><span className="text-gray-500">Email :</span> {contract.renter_email}</p>}
+            </div>
+          </div>
 
           <hr />
 
-          <div className="space-y-2">
-            <p className="font-bold">ENTRE LES SOUSSIGNES :</p>
-            <p><span className="font-semibold">Le Propriétaire :</span> {ownerProfile?.full_name ?? 'Non renseigné'}</p>
-            <p><span className="font-semibold">Le Locataire :</span> {renter?.full_name ?? 'Non renseigné'}</p>
-          </div>
-
-          <hr />
-
-          <div className="space-y-2">
-            <p className="font-bold">ARTICLE 1 — OBJET</p>
-            <p>Location d'un espace de stockage de type <strong>{space.type}</strong> situé au <strong>{space.address}, {space.city}</strong>, d'une surface approximative de <strong>{space.surface_m2} m²</strong>.</p>
-          </div>
-
-          <div className="space-y-2">
-            <p className="font-bold">ARTICLE 2 — DURÉE</p>
-            <p>Le contrat prend effet le <strong>{new Date(booking.start_date).toLocaleDateString('fr-FR')}</strong> et se reconduit tacitement chaque mois jusqu'à résiliation par l'une des parties avec un préavis de <strong>30 jours</strong>.</p>
-          </div>
-
-          <div className="space-y-2">
-            <p className="font-bold">ARTICLE 3 — LOYER</p>
-            <p>Loyer mensuel : <strong>{space.price_month}€ HT</strong></p>
-            <p>Total facturé au locataire (frais de service inclus) : <strong>{Math.round(space.price_month * 1.10)}€ TTC</strong></p>
-            <p>Paiement mensuel automatique par prélèvement via Stripe.</p>
-          </div>
-
-          <div className="space-y-2">
-            <p className="font-bold">ARTICLE 4 — OBLIGATIONS</p>
-            <p>Le Propriétaire garantit l'accès libre à l'espace et son bon état. Le Locataire s'engage à n'y stocker que des biens licites et non dangereux, et à restituer l'espace en bon état.</p>
-          </div>
-
-          <div className="space-y-2">
-            <p className="font-bold">ARTICLE 5 — RESPONSABILITÉ</p>
-            <p>Le Locataire est seul responsable de l'assurance de ses biens. Nestock intervient uniquement comme intermédiaire et ne peut être tenu responsable des litiges entre les parties.</p>
-          </div>
-
-          <div className="space-y-2">
-            <p className="font-bold">ARTICLE 6 — RÉSILIATION</p>
-            <p>Chaque partie peut résilier le contrat avec un préavis de 30 jours via la messagerie Nestock. En cas de manquement grave, résiliation immédiate possible après mise en demeure de 72h.</p>
-          </div>
-
-          <div className="space-y-2">
-            <p className="font-bold">ARTICLE 7 — DROIT APPLICABLE</p>
-            <p>Contrat soumis au droit français. Tout litige sera porté devant les tribunaux compétents après tentative de médiation amiable.</p>
+          <div className="space-y-3">
+            <div>
+              <p className="font-bold">ARTICLE 1 — OBJET</p>
+              <p>Location d'un espace de type <strong>{space.type}</strong> situé au <strong>{space.address}, {space.city}</strong>, surface approximative <strong>{space.surface_m2} m²</strong>.</p>
+            </div>
+            <div>
+              <p className="font-bold">ARTICLE 2 — DURÉE</p>
+              <p>Prise d'effet le <strong>{new Date(booking.start_date).toLocaleDateString('fr-FR')}</strong>. Reconduction tacite mensuelle avec préavis de <strong>30 jours</strong>.</p>
+            </div>
+            <div>
+              <p className="font-bold">ARTICLE 3 — LOYER</p>
+              <p>Loyer : <strong>{space.price_month}€ HT</strong> — Total TTC (frais inclus) : <strong>{Math.round(space.price_month * 1.10)}€</strong>/mois</p>
+              <p>Paiement mensuel automatique par prélèvement via Stripe.</p>
+            </div>
+            <div>
+              <p className="font-bold">ARTICLE 4 — OBLIGATIONS</p>
+              <p>Le Propriétaire garantit l'accès libre et le bon état de l'espace. Le Locataire s'engage à n'y stocker que des biens licites et non dangereux.</p>
+            </div>
+            <div>
+              <p className="font-bold">ARTICLE 5 — RESPONSABILITÉ</p>
+              <p>Le Locataire est seul responsable de l'assurance de ses biens. Nestock intervient uniquement comme intermédiaire.</p>
+            </div>
+            <div>
+              <p className="font-bold">ARTICLE 6 — RÉSILIATION</p>
+              <p>Préavis de 30 jours via la messagerie Nestock. Résiliation immédiate possible en cas de manquement grave après mise en demeure de 72h.</p>
+            </div>
+            <div>
+              <p className="font-bold">ARTICLE 7 — DROIT APPLICABLE</p>
+              <p>Contrat soumis au droit français. Tout litige porté devant les tribunaux compétents après tentative de médiation.</p>
+            </div>
           </div>
         </div>
 
@@ -138,6 +141,7 @@ export default async function ContractPage({
             isOwner={isOwner}
             isRenter={isRenter}
             bookingId={bookingId}
+            spacePrice={Math.round(space.price_month * 1.10)}
           />
         )}
 
