@@ -99,10 +99,16 @@ export default async function DashboardPage() {
                       <BookingAction bookingId={booking.id} status="cancelled" label="Refuser" color="red" />
                     </div>
                   </div>
-                  <a href={`/messages?booking_id=${booking.id}`}
-                    className="text-xs text-blue-600 hover:underline mt-2 inline-block">
-                    Voir la conversation
-                  </a>
+<div className="flex gap-3 mt-2">
+                    <a href={'/messages?booking_id=' + booking['id']}
+                      className="text-xs text-blue-600 hover:underline">
+                      Voir la conversation
+                    </a>
+                    <a href={'/contracts/' + booking['id']}
+                      className="text-xs text-purple-600 hover:underline">
+                      📄 Voir le contrat
+                    </a>
+                  </div>
                 </div>
               ))}
             </div>
