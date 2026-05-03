@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { usePathname } from 'next/navigation'
+import NotificationBell from '@/components/ui/NotificationBell'
 
 type Props = {
   user: { email: string; id: string } | null
@@ -55,10 +56,11 @@ export default function Navbar({ user }: Props) {
           <div className="hidden md:flex items-center gap-3">
             {user ? (
               <>
-                <span className="text-sm text-gray-500 truncate max-w-40">👤 {user.email}</span>
-                <a href="/api/logout" className="text-sm text-gray-400 hover:text-red-500">
-                  Déconnexion
-                </a>
+<NotificationBell userId={user.id} />
+<span className="text-sm text-gray-500 truncate max-w-40">👤 {user.email}</span>
+<a href="/api/logout" className="text-sm text-gray-400 hover:text-red-500">
+  Déconnexion
+</a>
               </>
             ) : (
               <>
