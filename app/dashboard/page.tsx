@@ -19,6 +19,13 @@ export default async function DashboardPage() {
     .eq('owner_id', user.id)
     .order('created_at', { ascending: false })
 
+  const spacesWithStatus = spaces?.map(space => ({
+    ...space,
+    hasActiveBooking: (space.bookings as any[])?.some(b => 
+      ['pending', 'awaiting_signature', 'confirmed', 'active'].includes(b.status)
+    ) ?? false
+  })) ?? []
+
   const { data: bookings } = await supabase
     .from('bookings')
     .select('*, spaces(id, title, city, price_month, owner_id), reviews(id, author_id)')
@@ -161,7 +168,7 @@ export default async function DashboardPage() {
             </a>
           </div>
 
-          {spaces?.length === 0 && (
+          {spacesWithStatus.length === 0 && (
             <div className="bg-white rounded-xl p-8 text-center text-gray-600">
               <p className="text-4xl mb-3">🗄️</p>
               <p>Aucune annonce pour le moment</p>
@@ -172,7 +179,7 @@ export default async function DashboardPage() {
           )}
 
           <div className="space-y-3">
-            {spaces?.map(space => {
+            {spacesWithStatus.map(space => {
               const activeCount = (space.bookings as any[])?.filter(b => b.status === 'active').length ?? 0
               const pendingCount = (space.bookings as any[])?.filter(b => b.status === 'pending').length ?? 0
 
