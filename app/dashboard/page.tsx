@@ -201,14 +201,17 @@ export default async function DashboardPage() {
                         </span>
                       </div>
                     </div>
-       <div className="flex gap-2">
-  <a href={`/spaces/${space.id}`} className="text-sm text-blue-600 hover:underline">
-    Voir
-  </a>
-  <a href={`/spaces/${space.id}/edit`} className="text-sm text-orange-500 hover:underline">
-    Modifier
-  </a>
-</div>
+<div className="flex gap-2 items-center flex-wrap">
+                      <a href={'/spaces/' + space['id']} className="text-sm text-blue-600 hover:underline">
+                        Voir
+                      </a>
+                      <a href={'/spaces/' + space['id'] + '/edit'} className="text-sm text-orange-500 hover:underline">
+                        Modifier
+                      </a>
+                      {!space.hasActiveBooking && (
+                        <DeleteSpaceButton spaceId={space['id']} />
+                      )}
+                    </div>
                   </div>
                 </div>
               )
