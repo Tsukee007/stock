@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import AddressSearch from '@/components/ui/AddressSearch'
@@ -17,9 +17,8 @@ function generateUUID() {
 export default function NewSpacePage() {
   const router = useRouter()
   const supabase = createClient()
+  const [step, setStep] = useState<'info' | 'stripe'>('info')
   const [loading, setLoading] = useState(false)
-  const [checking, setChecking] = useState(true)
-  const [stripeReady, setStripeReady] = useState(false)
   const [error, setError] = useState('')
   const [spaceId] = useState(generateUUID())
   const [photos, setPhotos] = useState<string[]>([])
@@ -38,17 +37,6 @@ export default function NewSpacePage() {
     access_24h: false,
   })
 
-  useEffect(() => {
-    checkStripeConnect()
-  }, [])
-
-  const checkStripeConnect = async () => {
-    const res = await fetch('/api/stripe/connect')
-    const data = await res.json()
-    setStripeReady(data.connected)
-    setChecking(false)
-  }
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
     setForm(prev => ({ ...prev, [name]: value }))
@@ -58,11 +46,16 @@ export default function NewSpacePage() {
     setForm(prev => ({ ...prev, ...data }))
   }
 
+  const handleNext = () => {
+    if (!form.title.trim()) { setError('Veuillez entrer un titre'); return }
+    if (!form.price_month) { setError('Veuillez entrer un prix'); return }
+    if (!form.surface_m2) { setError('Veuillez entrer une surface'); return }
+    if (!form.lat || !form.lng) { setError('Veuillez sélectionner une adresse'); return }
+    setError('')
+    setStep('stripe')
+  }
+
   const handleSubmit = async () => {
-    if (!form.lat || !form.lng) {
-      setError('Veuillez sélectionner une adresse dans la liste')
-      return
-    }
     setLoading(true)
     setError('')
 
@@ -104,41 +97,97 @@ export default function NewSpacePage() {
       )
     }
 
+    const res = await fetch('/api/stripe/connect')
+    const stripeData = await res.json()
+
+    if (!stripeData.connected) {
+      const connectRes = await fetch('/api/stripe/connect', { method: 'POST' })
+      const connectData = await connectRes.json()
+      if (connectData.url) {
+        window.location.href = connectData.url
+        return
+      }
+    }
+
     router.push('/')
     setLoading(false)
   }
 
-  if (checking) return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <p className="text-gray-500">Vérification de votre compte...</p>
-    </div>
-  )
-
-  if (!stripeReady) return (
+  if (step === 'stripe') return (
     <div className="min-h-screen bg-gray-50 pb-20">
       <div className="max-w-lg mx-auto p-4 md:p-6 space-y-6">
         <div className="flex items-center gap-3">
-          <a href="/" className="text-gray-500 hover:text-blue-600">← Retour</a>
-          <h1 className="text-xl font-bold">Déposer une annonce</h1>
+          <button onClick={() => setStep('info')} className="text-gray-500 hover:text-blue-600">← Retour</button>
+          <h1 className="text-xl font-bold">💳 Connexion Stripe</h1>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm p-6 space-y-4 text-center">
-          <p className="text-5xl">💳</p>
-          <h2 className="text-xl font-bold">Connectez votre compte Stripe</h2>
-          <p className="text-gray-600 text-sm">
-            Avant de déposer une annonce, vous devez connecter votre compte Stripe 
-            pour recevoir vos paiements automatiquement.
+        <div className="bg-white rounded-xl shadow-sm p-6 space-y-4">
+          <h2 className="text-lg font-bold text-center">Dernière étape !</h2>
+          <p className="text-gray-600 text-sm text-center">
+            Pour recevoir vos paiements automatiquement, connectez votre compte Stripe.
           </p>
-          <div className="bg-blue-50 rounded-lg p-4 text-sm text-blue-700 text-left space-y-1">
-            <p>✅ Recevez vos loyers automatiquement</p>
-            <p>✅ Virements directs sur votre IBAN</p>
-            <p>✅ Tableau de bord Stripe dédié</p>
-            <p>✅ Sécurisé et certifié PCI-DSS</p>
+
+          <div className="bg-blue-50 rounded-lg p-4 space-y-2 text-sm text-blue-700">
+            <p className="font-semibold">💡 Transparence totale sur les frais</p>
+            <div className="space-y-1 text-gray-700">
+              <div className="flex justify-between">
+                <span>Prix que vous fixez</span>
+                <span className="font-semibold">{parseFloat(form.price_month).toFixed(2)}€</span>
+              </div>
+              <div className="flex justify-between text-orange-600">
+                <span>Commission Nestock (10%)</span>
+                <span>+ {(parseFloat(form.price_month) * 0.10).toFixed(2)}€</span>
+              </div>
+              <div className="flex justify-between text-orange-600">
+                <span>Frais Stripe</span>
+                <span>+ {((parseFloat(form.price_month) * 1.10 * 0.015) + 0.25).toFixed(2)}€</span>
+              </div>
+              <div className="border-t pt-1 flex justify-between font-bold text-blue-700">
+                <span>Prix affiché au locataire</span>
+                <span>{Math.ceil((parseFloat(form.price_month) * 1.10 + (parseFloat(form.price_month) * 1.10 * 0.015) + 0.25) * 100) / 100}€/mois</span>
+              </div>
+              <div className="flex justify-between text-green-600 font-semibold">
+                <span>Vous recevez</span>
+                <span>{parseFloat(form.price_month).toFixed(2)}€/mois</span>
+              </div>
+            </div>
           </div>
-          <a href="/stripe/connect"
-            className="block w-full bg-blue-600 text-white rounded-xl p-4 font-bold hover:bg-blue-700">
-            🔗 Connecter mon compte Stripe
-          </a>
+
+          <div className="space-y-3 text-sm">
+            <div className="flex gap-3 items-start">
+              <span className="text-xl">🏦</span>
+              <div>
+                <p className="font-semibold">Virement direct sur votre IBAN</p>
+                <p className="text-gray-500 text-xs">Vos loyers arrivent automatiquement sur votre compte bancaire</p>
+              </div>
+            </div>
+            <div className="flex gap-3 items-start">
+              <span className="text-xl">🔒</span>
+              <div>
+                <p className="font-semibold">Sécurisé et certifié PCI-DSS</p>
+                <p className="text-gray-500 text-xs">Stripe est le standard de sécurité bancaire internationale</p>
+              </div>
+            </div>
+            <div className="flex gap-3 items-start">
+              <span className="text-xl">📋</span>
+              <div>
+                <p className="font-semibold">Ce dont vous aurez besoin</p>
+                <p className="text-gray-500 text-xs">Pièce d'identité + IBAN + environ 5 minutes</p>
+              </div>
+            </div>
+          </div>
+
+          {error && <p className="text-red-500 text-sm bg-red-50 p-3 rounded-lg">{error}</p>}
+
+          <button onClick={handleSubmit} disabled={loading}
+            className="w-full bg-blue-600 text-white rounded-xl p-4 font-bold hover:bg-blue-700 disabled:opacity-50">
+            {loading ? '⏳ Publication...' : '🚀 Publier et connecter Stripe'}
+          </button>
+
+          <p className="text-center text-xs text-gray-400">
+            Vous serez redirigé vers Stripe pour finaliser la connexion.
+            Votre annonce sera publiée immédiatement.
+          </p>
         </div>
       </div>
     </div>
@@ -234,9 +283,9 @@ export default function NewSpacePage() {
             <label htmlFor="access_24h" className="text-sm text-gray-700">Accès 24h/24</label>
           </div>
 
-          <button onClick={handleSubmit} disabled={loading}
-            className="w-full bg-blue-600 text-white rounded-lg p-3 font-semibold hover:bg-blue-700 disabled:opacity-50">
-            {loading ? 'Publication...' : '🚀 Publier mon annonce'}
+          <button onClick={handleNext}
+            className="w-full bg-blue-600 text-white rounded-lg p-3 font-semibold hover:bg-blue-700">
+            Continuer →
           </button>
         </div>
       </div>
