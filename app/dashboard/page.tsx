@@ -216,7 +216,7 @@ export default async function DashboardPage() {
                         Modifier
                       </a>
                       {!space.hasActiveBooking && (
-<DeleteSpaceButton spaceId={space.id} />
+<DeleteSpaceButton spaceId={space['id']} />
                       )}
                     </div>
                   </div>
