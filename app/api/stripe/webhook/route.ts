@@ -3,179 +3,196 @@ import { createClient } from '@supabase/supabase-js'
 import { sendEmail } from '@/lib/mailer'
 import { NextResponse } from 'next/server'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-02-25.clover' })
 
-function invoiceHtml({
-  renterName,
-  ownerName,
-  spaceTitle,
-  spaceAddress,
-  spaceCity,
-  loyer_ht,
-  loyer_ttc,
-  reference,
-  date,
-}: {
-  renterName: string
-  ownerName: string
-  spaceTitle: string
-  spaceAddress: string
-  spaceCity: string
-  loyer_ht: number
-  loyer_ttc: number
-  reference: string
-  date: string
-}) {
-  return `
-<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #1f2937;">
-  <div style="background: #2563eb; padding: 24px; border-radius: 12px 12px 0 0;">
-    <h1 style="color: white; margin: 0; font-size: 24px;">Nestock</h1>
-    <p style="color: #bfdbfe; margin: 4px 0 0;">Confirmation de location</p>
-  </div>
-  <div style="background: white; padding: 24px; border: 1px solid #e5e7eb; border-top: none;">
-    <p style="color: #16a34a; font-weight: bold; font-size: 18px;">✅ Votre location est maintenant active !</p>
-    <table style="width: 100%; border-collapse: collapse; margin-top: 16px;">
-      <tr style="border-bottom: 1px solid #e5e7eb;">
-        <td style="padding: 8px 0; color: #6b7280;">Référence</td>
-        <td style="padding: 8px 0; font-weight: bold;">${reference}</td>
-      </tr>
-      <tr style="border-bottom: 1px solid #e5e7eb;">
-        <td style="padding: 8px 0; color: #6b7280;">Espace</td>
-        <td style="padding: 8px 0;">${spaceTitle}</td>
-      </tr>
-      <tr style="border-bottom: 1px solid #e5e7eb;">
-        <td style="padding: 8px 0; color: #6b7280;">Adresse</td>
-        <td style="padding: 8px 0;">${spaceAddress}, ${spaceCity}</td>
-      </tr>
-      <tr style="border-bottom: 1px solid #e5e7eb;">
-        <td style="padding: 8px 0; color: #6b7280;">Locataire</td>
-        <td style="padding: 8px 0;">${renterName}</td>
-      </tr>
-      <tr style="border-bottom: 1px solid #e5e7eb;">
-        <td style="padding: 8px 0; color: #6b7280;">Propriétaire</td>
-        <td style="padding: 8px 0;">${ownerName}</td>
-      </tr>
-      <tr style="border-bottom: 1px solid #e5e7eb;">
-        <td style="padding: 8px 0; color: #6b7280;">Loyer HT</td>
-        <td style="padding: 8px 0;">${loyer_ht.toFixed(2)} €</td>
-      </tr>
-      <tr style="border-bottom: 1px solid #e5e7eb;">
-        <td style="padding: 8px 0; color: #6b7280;">Frais de service (10%)</td>
-        <td style="padding: 8px 0;">${(loyer_ttc - loyer_ht).toFixed(2)} €</td>
-      </tr>
-      <tr>
-        <td style="padding: 8px 0; font-weight: bold;">Total TTC</td>
-        <td style="padding: 8px 0; font-weight: bold; color: #2563eb;">${loyer_ttc.toFixed(2)} €/mois</td>
-      </tr>
-    </table>
-    <p style="color: #6b7280; font-size: 13px; margin-top: 16px;">Date d'activation : ${date}</p>
-    <a href="${process.env.NEXT_PUBLIC_SITE_URL}/dashboard"
-      style="display: inline-block; margin-top: 20px; background: #2563eb; color: white;
-             padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold;">
-      Voir mon tableau de bord
-    </a>
-  </div>
-  <div style="background: #f9fafb; padding: 16px; border-radius: 0 0 12px 12px; text-align: center;">
-    <p style="color: #9ca3af; font-size: 12px; margin: 0;">
-      Nestock — nestock.tsukee.fr · Ce document tient lieu de reçu de paiement
-    </p>
-  </div>
-</div>`
-}
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
 
 export async function POST(req: Request) {
   const body = await req.text()
   const sig = req.headers.get('stripe-signature')!
-
+  
   let event: Stripe.Event
+  
   try {
-    event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET ?? '')
-  } catch {
-    return NextResponse.json({ error: 'Webhook invalide' }, { status: 400 })
+    event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET!)
+  } catch (err: any) {
+    return NextResponse.json({ error: 'Webhook signature invalid' }, { status: 400 })
   }
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session
-    const bookingId = session.metadata?.bookingId
-
+    const { bookingId, contractId } = session.metadata || {}
+    
     if (!bookingId) return NextResponse.json({ received: true })
-
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    )
-
-    await supabase
-      .from('bookings')
-      .update({
-        status: 'active',
-        stripe_payment_intent_id: (session.payment_intent ?? session.subscription) as string,
-      })
-      .eq('id', bookingId)
 
     const { data: booking } = await supabase
       .from('bookings')
-      .select('*, spaces(title, address, city, price_month), contracts(reference, loyer_ht, loyer_ttc)')
+      .select('*, spaces(title, owner_id, price_month)')
       .eq('id', bookingId)
       .single()
 
     if (!booking) return NextResponse.json({ received: true })
 
-    const space = booking.spaces as any
-    const contract = Array.isArray(booking.contracts) ? booking.contracts[0] : booking.contracts as any
+    const spaceData = booking.spaces as any
 
-    const { data: renterAuth } = await supabase.auth.admin.getUserById(booking.renter_id)
-    const { data: ownerAuth } = await supabase.auth.admin.getUserById(booking.owner_id)
-    const { data: renterProfile } = await supabase.from('profiles').select('full_name').eq('id', booking.renter_id).single()
-    const { data: ownerProfile } = await supabase.from('profiles').select('full_name').eq('id', booking.owner_id).single()
+    await supabase.from('bookings').update({ 
+      status: 'active',
+      stripe_subscription_id: session.subscription as string
+    }).eq('id', bookingId)
 
-    const renterEmail = renterAuth?.user?.email
-    const ownerEmail = ownerAuth?.user?.email
-    const renterName = (renterProfile as any)?.full_name ?? 'Locataire'
-    const ownerName = (ownerProfile as any)?.full_name ?? 'Propriétaire'
-    const reference = contract?.reference ?? bookingId.slice(0, 8).toUpperCase()
-    const loyer_ht = contract?.loyer_ht ?? space?.price_month ?? 0
-    const loyer_ttc = contract?.loyer_ttc ?? Math.round(loyer_ht * 1.10 * 100) / 100
-    const date = new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })
+    const { data: invoice } = await supabase.from('invoices').insert({
+      booking_id: bookingId,
+      contract_id: contractId || null,
+      owner_id: spaceData.owner_id,
+      renter_id: booking.renter_id,
+      amount: session.amount_total ? session.amount_total / 100 : spaceData.price_month,
+      stripe_payment_id: session.payment_intent as string,
+      status: 'paid'
+    }).select().single()
 
-    const html = invoiceHtml({
-      renterName,
-      ownerName,
-      spaceTitle: space?.title ?? '',
-      spaceAddress: space?.address ?? '',
-      spaceCity: space?.city ?? '',
-      loyer_ht,
-      loyer_ttc,
-      reference,
-      date,
+    await supabase.from('messages').insert({
+      booking_id: bookingId,
+      sender_id: spaceData.owner_id,
+      content: 'Paiement recu ! Votre location est maintenant active. Bienvenue !'
     })
 
-    await Promise.all([
-      supabase.from('notifications').insert({
+    await supabase.from('notifications').insert([
+      {
         user_id: booking.renter_id,
-        type: 'booking',
-        title: 'Location active !',
-        message: `Votre paiement a été confirmé. La location de "${space?.title}" est maintenant active.`,
-        link: '/dashboard',
-      }),
-      supabase.from('notifications').insert({
-        user_id: booking.owner_id,
-        type: 'booking',
-        title: 'Paiement reçu !',
-        message: `Le paiement pour "${space?.title}" a été validé. La location est active.`,
-        link: '/dashboard',
-      }),
-      renterEmail && sendEmail({
-        to: renterEmail,
-        subject: `✅ Location active — ${space?.title ?? 'votre espace'}`,
-        html,
-      }),
-      ownerEmail && sendEmail({
-        to: ownerEmail,
-        subject: `💰 Paiement reçu — ${space?.title ?? 'votre espace'}`,
-        html,
-      }),
+        type: 'payment',
+        title: 'Paiement confirme !',
+        message: 'Votre location pour ' + spaceData.title + ' est maintenant active.',
+        link: '/dashboard'
+      },
+      {
+        user_id: spaceData.owner_id,
+        type: 'payment',
+        title: 'Paiement recu !',
+        message: 'Le locataire a paye pour ' + spaceData.title + '. Location active !',
+        link: '/dashboard'
+      }
     ])
+
+    const { data: renterUser } = await supabase.auth.admin.getUserById(booking.renter_id)
+    const { data: ownerUser } = await supabase.auth.admin.getUserById(spaceData.owner_id)
+
+    const invoiceRef = invoice?.reference || 'N/A'
+    const amount = session.amount_total ? (session.amount_total / 100).toFixed(2) : spaceData.price_month
+
+    if (renterUser?.user?.email) {
+      await sendEmail({
+        to: renterUser.user.email,
+        subject: 'Facture Nestock - ' + invoiceRef,
+        html: '<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">' +
+          '<div style="text-align: center; margin-bottom: 30px;">' +
+          '<h1 style="color: #2563eb; margin: 0;">NESTOCK</h1>' +
+          '<p style="color: #64748b; margin: 5px 0;">Location d espaces de stockage</p>' +
+          '</div>' +
+          '<div style="background: #f8fafc; border-radius: 8px; padding: 20px; margin-bottom: 20px;">' +
+          '<h2 style="margin: 0 0 10px; color: #1e293b;">FACTURE</h2>' +
+          '<p style="margin: 5px 0; color: #64748b;">Reference : <strong style="color: #1e293b;">' + invoiceRef + '</strong></p>' +
+          '<p style="margin: 5px 0; color: #64748b;">Date : <strong style="color: #1e293b;">' + new Date().toLocaleDateString("fr-FR") + '</strong></p>' +
+          '</div>' +
+          '<table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">' +
+          '<thead><tr style="background: #2563eb; color: white;">' +
+          '<th style="padding: 12px; text-align: left;">Description</th>' +
+          '<th style="padding: 12px; text-align: right;">Montant</th>' +
+          '</tr></thead>' +
+          '<tbody><tr style="border-bottom: 1px solid #e2e8f0;">' +
+          '<td style="padding: 12px;">Location - ' + spaceData.title + '</td>' +
+          '<td style="padding: 12px; text-align: right;">' + amount + ' EUR</td>' +
+          '</tr></tbody>' +
+          '<tfoot><tr style="background: #f8fafc; font-weight: bold;">' +
+          '<td style="padding: 12px;">TOTAL TTC</td>' +
+          '<td style="padding: 12px; text-align: right; color: #2563eb;">' + amount + ' EUR</td>' +
+          '</tr></tfoot>' +
+          '</table>' +
+          '<p style="color: #64748b; font-size: 12px; text-align: center;">Nestock - nestock.tsukee.fr - contact@tsukee.fr</p>' +
+          '</div>'
+      })
+    }
+
+    if (ownerUser?.user?.email) {
+      await sendEmail({
+        to: ownerUser.user.email,
+        subject: 'Paiement recu - ' + spaceData.title,
+        html: '<div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto;">' +
+          '<h2 style="color: #2563eb;">Nestock</h2>' +
+          '<p>Vous avez recu un paiement pour <strong>' + spaceData.title + '</strong>.</p>' +
+          '<p>Reference facture : <strong>' + invoiceRef + '</strong></p>' +
+          '<p>Montant : <strong>' + amount + ' EUR</strong></p>' +
+          '<a href="' + process.env.NEXT_PUBLIC_SITE_URL + '/dashboard" style="background: #2563eb; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block; margin-top: 16px;">Voir le dashboard</a>' +
+          '</div>'
+      })
+    }
+  }
+
+  if (event.type === 'invoice.paid') {
+    const invoice = event.data.object as Stripe.Invoice
+    const subscriptionId = invoice.subscription as string
+    
+    if (!subscriptionId) return NextResponse.json({ received: true })
+
+    const { data: booking } = await supabase
+      .from('bookings')
+      .select('*, spaces(title, owner_id, price_month)')
+      .eq('stripe_subscription_id', subscriptionId)
+      .single()
+
+    if (!booking || invoice.billing_reason === 'subscription_create') {
+      return NextResponse.json({ received: true })
+    }
+
+    const spaceData = booking.spaces as any
+    const amount = invoice.amount_paid / 100
+
+    const { data: newInvoice } = await supabase.from('invoices').insert({
+      booking_id: booking.id,
+      owner_id: spaceData.owner_id,
+      renter_id: booking.renter_id,
+      amount,
+      stripe_payment_id: invoice.payment_intent as string,
+      status: 'paid'
+    }).select().single()
+
+    await supabase.from('notifications').insert([
+      {
+        user_id: booking.renter_id,
+        type: 'payment',
+        title: 'Loyer preleve',
+        message: 'Votre loyer de ' + amount + 'EUR pour ' + spaceData.title + ' a ete preleve.',
+        link: '/dashboard'
+      },
+      {
+        user_id: spaceData.owner_id,
+        type: 'payment',
+        title: 'Loyer recu !',
+        message: 'Vous avez recu ' + amount + 'EUR pour ' + spaceData.title + '.',
+        link: '/dashboard'
+      }
+    ])
+
+    const { data: renterUser } = await supabase.auth.admin.getUserById(booking.renter_id)
+    const invoiceRef = newInvoice?.reference || 'N/A'
+
+    if (renterUser?.user?.email) {
+      await sendEmail({
+        to: renterUser.user.email,
+        subject: 'Facture mensuelle Nestock - ' + invoiceRef,
+        html: '<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">' +
+          '<h1 style="color: #2563eb;">NESTOCK</h1>' +
+          '<h2>Facture mensuelle</h2>' +
+          '<p>Reference : <strong>' + invoiceRef + '</strong></p>' +
+          '<p>Date : <strong>' + new Date().toLocaleDateString("fr-FR") + '</strong></p>' +
+          '<p>Location : <strong>' + spaceData.title + '</strong></p>' +
+          '<p>Montant : <strong>' + amount + ' EUR TTC</strong></p>' +
+          '<p style="color: #64748b; font-size: 12px;">Nestock - nestock.tsukee.fr</p>' +
+          '</div>'
+      })
+    }
   }
 
   return NextResponse.json({ received: true })
