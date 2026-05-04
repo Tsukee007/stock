@@ -6,7 +6,6 @@ import PayButton from '@/components/ui/PayButton'
 import { statusLabels, statusColors } from '@/lib/utils'
 import DeleteSpaceButton from '@/components/ui/DeleteSpaceButton'
 
-
 export default async function DashboardPage() {
   const supabase = await createClient()
 
@@ -54,16 +53,16 @@ export default async function DashboardPage() {
       <div className="max-w-4xl mx-auto p-6 space-y-8">
 
         <div>
-<div className="flex items-center justify-between">
-  <div>
-    <h1 className="text-2xl font-bold text-gray-800">Tableau de bord</h1>
-    <p className="text-gray-500 text-sm mt-1">{user.email}</p>
-  </div>
-  <a href="/dashboard/stats"
-    className="text-sm bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">
-    📊 Mes stats
-  </a>
-</div>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-800">Tableau de bord</h1>
+              <p className="text-gray-500 text-sm mt-1">{user.email}</p>
+            </div>
+            <a href="/dashboard/stats"
+              className="text-sm bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">
+              📊 Mes stats
+            </a>
+          </div>
         </div>
 
         <div className="grid grid-cols-3 gap-4">
@@ -101,13 +100,13 @@ export default async function DashboardPage() {
                     </div>
                     <div className="flex gap-2">
                       <a href={'/contracts/' + booking.id}
-  className="text-xs bg-green-100 text-green-700 hover:bg-green-200 px-3 py-1.5 rounded-lg font-medium transition">
-  Accepter et signer
-</a>
+                        className="text-xs bg-green-100 text-green-700 hover:bg-green-200 px-3 py-1.5 rounded-lg font-medium transition">
+                        Accepter et signer
+                      </a>
                       <BookingAction bookingId={booking.id} status="cancelled" label="Refuser" color="red" />
                     </div>
                   </div>
-<div className="flex gap-3 mt-2">
+                  <div className="flex gap-3 mt-2">
                     <a href={'/messages?booking_id=' + booking['id']}
                       className="text-xs text-blue-600 hover:underline">
                       Voir la conversation
@@ -209,20 +208,13 @@ export default async function DashboardPage() {
                         </span>
                       </div>
                     </div>
-<div className="flex gap-2 items-center flex-wrap">
+                    <div className="flex gap-2 items-center flex-wrap">
                       <a href={'/spaces/' + space['id']} className="text-sm text-blue-600 hover:underline">
                         Voir
                       </a>
                       <a href={'/spaces/' + space['id'] + '/edit'} className="text-sm text-orange-500 hover:underline">
                         Modifier
                       </a>
-                      <div className="flex gap-2 items-center flex-wrap">
-<div className="flex gap-2 items-center flex-wrap">
-  ...
-  {!space.hasActiveBooking && (
-    <DeleteSpaceButton spaceId={space['id']} />
-  )}
-</div>
                       {!space.hasActiveBooking && (
                         <DeleteSpaceButton spaceId={space['id']} />
                       )}
