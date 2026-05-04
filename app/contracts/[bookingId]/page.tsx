@@ -37,6 +37,9 @@ export default async function ContractPage({
     .single()
 
   if (!contract) {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+    const reference = 'CTRT-' + Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join('')
+
     const { data: newContract } = await supabase
       .from('contracts')
       .insert({
@@ -47,6 +50,7 @@ export default async function ContractPage({
         loyer_ht: space.price_month,
         loyer_ttc: Math.round(space.price_month * 1.10 * 100) / 100,
         date_debut: booking.start_date,
+        reference,
       })
       .select()
       .single()
@@ -80,6 +84,9 @@ export default async function ContractPage({
         <div className="bg-white rounded-xl shadow-sm p-6 space-y-4 text-sm">
           <h2 className="text-xl font-bold text-center text-blue-600">CONTRAT DE LOCATION D'ESPACE DE STOCKAGE</h2>
           <p className="text-center text-gray-500">Via la plateforme Nestock — nestock.tsukee.fr</p>
+          {contract?.reference && (
+            <p className="text-center text-xs font-mono text-gray-400">Réf. {contract.reference}</p>
+          )}
           <hr />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
