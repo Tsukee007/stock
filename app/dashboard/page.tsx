@@ -216,6 +216,13 @@ export default async function DashboardPage() {
                       <a href={'/spaces/' + space['id'] + '/edit'} className="text-sm text-orange-500 hover:underline">
                         Modifier
                       </a>
+                      <div className="flex gap-2 items-center flex-wrap">
+<div className="flex gap-2 items-center flex-wrap">
+  ...
+  {!space.hasActiveBooking && (
+    <DeleteSpaceButton spaceId={space['id']} />
+  )}
+</div>
                       {!space.hasActiveBooking && (
                         <DeleteSpaceButton spaceId={space['id']} />
                       )}
