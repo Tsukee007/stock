@@ -1,14 +1,21 @@
-// Dans DeleteSpaceButton.tsx
 import React from 'react';
 
-const DeleteSpaceButton = ({ spaceId, onDelete }) => {
+type DeleteSpaceButtonProps = {
+  spaceId: string;
+  onDelete: (spaceId: string) => void;
+};
+
+const DeleteSpaceButton = ({
+  spaceId,
+  onDelete,
+}: DeleteSpaceButtonProps) => {
   const handleDelete = () => {
     onDelete(spaceId);
   };
 
   return (
     <button onClick={handleDelete}>
-      Supprimer
+      Delete
     </button>
   );
 };
