@@ -48,14 +48,6 @@ export default async function DashboardPage() {
       .map(b => ({ ...b, spaceTitle: space.title }))
   ) ?? []
 
-  const handleDeleteSpace = async (spaceId: string) => {
-    await fetch(`/api/spaces/${spaceId}`, {
-      method: 'DELETE',
-    });
-    // Rafraîchir la liste des annonces ici, par exemple :
-    // mutate('/api/spaces');
-  };
-
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto p-6 space-y-8">
@@ -224,10 +216,7 @@ export default async function DashboardPage() {
                         Modifier
                       </a>
                       {!space.hasActiveBooking && (
-                        <DeleteSpaceButton 
-                          spaceId={space['id']}
-                          onDelete={handleDeleteSpace}
-                        />
+<DeleteSpaceButton spaceId={space.id} />
                       )}
                     </div>
                   </div>
