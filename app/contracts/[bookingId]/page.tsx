@@ -15,7 +15,7 @@ export default async function ContractPage({
 
   const { data: booking } = await supabase
     .from('bookings')
-    .select('*, spaces(title, address, city, surface_m2, type, price_month, owner_id), profiles!bookings_renter_id_fkey(full_name, avatar_url)')
+    .select('*, spaces(title, address, city, surface_m2, type, price_month, owner_id, access_24h), profiles!bookings_renter_id_fkey(full_name, address, city, postal_code, phone)')
     .eq('id', bookingId)
     .single()
 
@@ -26,7 +26,7 @@ export default async function ContractPage({
 
   const { data: ownerProfile } = await supabase
     .from('profiles')
-    .select('full_name')
+    .select('full_name, address, city, postal_code, phone')
     .eq('id', space.owner_id)
     .single()
 
@@ -37,9 +37,6 @@ export default async function ContractPage({
     .single()
 
   if (!contract) {
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
-    const reference = 'CTRT-' + Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join('')
-
     const { data: newContract } = await supabase
       .from('contracts')
       .insert({
@@ -48,9 +45,8 @@ export default async function ContractPage({
         owner_id: space.owner_id,
         renter_id: booking.renter_id,
         loyer_ht: space.price_month,
-        loyer_ttc: Math.round(space.price_month * 1.10 * 100) / 100,
+        loyer_ttc: Math.round(space.price_month * 100) / 100,
         date_debut: booking.start_date,
-        reference,
       })
       .select()
       .single()
@@ -59,6 +55,11 @@ export default async function ContractPage({
 
   const isOwner = user.id === space.owner_id
   const isRenter = user.id === booking.renter_id
+
+  const formatDate = (date: string) => {
+    if (!date) return '__ / __ / ____'
+    return new Date(date).toLocaleDateString('fr-FR')
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
@@ -77,67 +78,127 @@ export default async function ContractPage({
         }`}>
           {contract?.status === 'fully_signed' && '✅ Contrat signé par les deux parties'}
           {contract?.status === 'owner_signed' && '⏳ En attente de la signature du locataire'}
-          {contract?.status === 'pending' && '📝 En attente de la signature du propriétaire'}
+          {contract?.status === 'pending' && '📝 En attente de la signature du bailleur'}
+          {contract?.reference && (
+            <p className="text-sm mt-1 font-normal">Réf. {contract.reference}</p>
+          )}
         </div>
 
-        {/* Contenu du contrat */}
-        <div className="bg-white rounded-xl shadow-sm p-6 space-y-4 text-sm">
-          <h2 className="text-xl font-bold text-center text-blue-600">CONTRAT DE LOCATION D'ESPACE DE STOCKAGE</h2>
-          <p className="text-center text-gray-500">Via la plateforme Nestock — nestock.tsukee.fr</p>
-          {contract?.reference && (
-            <p className="text-center text-xs font-mono text-gray-400">Réf. {contract.reference}</p>
-          )}
+        {/* Contrat */}
+        <div className="bg-white rounded-xl shadow-sm p-6 md:p-8 space-y-6 text-sm">
+          <div className="text-center space-y-1">
+            <h2 className="text-lg font-bold uppercase">Contrat de location d'un espace de stockage entre particuliers</h2>
+            <p className="text-gray-500 text-xs">Via la plateforme Nestock — nestock.tsukee.fr</p>
+          </div>
+
           <hr />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-gray-50 rounded-lg p-4 space-y-1">
-              <p className="font-bold text-blue-700">LE PROPRIÉTAIRE</p>
-              <p><span className="text-gray-500">Nom :</span> {ownerProfile?.full_name ?? '—'}</p>
-              {contract?.owner_birth_date && <p><span className="text-gray-500">Naissance :</span> {new Date(contract.owner_birth_date).toLocaleDateString('fr-FR')}</p>}
-              {contract?.owner_phone && <p><span className="text-gray-500">Tél :</span> {contract.owner_phone}</p>}
-              {contract?.owner_email && <p><span className="text-gray-500">Email :</span> {contract.owner_email}</p>}
-            </div>
-            <div className="bg-gray-50 rounded-lg p-4 space-y-1">
-              <p className="font-bold text-blue-700">LE LOCATAIRE</p>
-              <p><span className="text-gray-500">Nom :</span> {renter?.full_name ?? '—'}</p>
-              {contract?.renter_birth_date && <p><span className="text-gray-500">Naissance :</span> {new Date(contract.renter_birth_date).toLocaleDateString('fr-FR')}</p>}
-              {contract?.renter_phone && <p><span className="text-gray-500">Tél :</span> {contract.renter_phone}</p>}
-              {contract?.renter_email && <p><span className="text-gray-500">Email :</span> {contract.renter_email}</p>}
+          {/* Parties */}
+          <div>
+            <p className="font-bold text-center mb-4">ENTRE LES SOUSSIGNÉS</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="border rounded-lg p-4 space-y-2">
+                <p className="font-bold text-blue-700">Le Bailleur</p>
+                <p><span className="text-gray-500">Nom / Prénom :</span> {ownerProfile?.full_name ?? '—'}</p>
+                <p><span className="text-gray-500">Adresse :</span> {ownerProfile?.address ? ownerProfile.address + ', ' + ownerProfile.postal_code + ' ' + ownerProfile.city : '—'}</p>
+                <p><span className="text-gray-500">Téléphone :</span> {contract?.owner_phone ?? ownerProfile?.phone ?? '—'}</p>
+                <p><span className="text-gray-500">E-mail :</span> {contract?.owner_email ?? '—'}</p>
+                {contract?.owner_signed && (
+                  <p className="text-green-600 text-xs">✅ Signé le {formatDate(contract.owner_signed_at)}</p>
+                )}
+              </div>
+              <div className="border rounded-lg p-4 space-y-2">
+                <p className="font-bold text-blue-700">Le Locataire</p>
+                <p><span className="text-gray-500">Nom / Prénom :</span> {renter?.full_name ?? '—'}</p>
+                <p><span className="text-gray-500">Adresse :</span> {renter?.address ? renter.address + ', ' + renter.postal_code + ' ' + renter.city : '—'}</p>
+                <p><span className="text-gray-500">Téléphone :</span> {contract?.renter_phone ?? renter?.phone ?? '—'}</p>
+                <p><span className="text-gray-500">E-mail :</span> {contract?.renter_email ?? '—'}</p>
+                {contract?.renter_signed && (
+                  <p className="text-green-600 text-xs">✅ Signé le {formatDate(contract.renter_signed_at)}</p>
+                )}
+              </div>
             </div>
           </div>
 
           <hr />
 
-          <div className="space-y-3">
+          {/* Articles */}
+          <div className="space-y-5">
             <div>
-              <p className="font-bold">ARTICLE 1 — OBJET</p>
-              <p>Location d'un espace de type <strong>{space.type}</strong> situé au <strong>{space.address}, {space.city}</strong>, surface approximative <strong>{space.surface_m2} m²</strong>.</p>
+              <p className="font-bold">ARTICLE 1 — OBJET DU CONTRAT</p>
+              <p className="mt-1 text-gray-700">Le Bailleur met à disposition du Locataire un espace de stockage situé à l'adresse suivante :</p>
+              <div className="bg-gray-50 rounded-lg p-3 mt-2 space-y-1">
+                <p><span className="text-gray-500">Adresse :</span> <strong>{space.address}, {space.city}</strong></p>
+                <p><span className="text-gray-500">Type :</span> <strong className="capitalize">{space.type}</strong></p>
+                <p><span className="text-gray-500">Surface :</span> <strong>{space.surface_m2} m²</strong></p>
+                <p><span className="text-gray-500">Accès :</span> <strong>{space.access_24h ? '24h/24' : 'Horaires normaux'}</strong></p>
+              </div>
+              <p className="mt-2 text-gray-700">Cet espace est destiné exclusivement au stockage de biens personnels du Locataire.</p>
             </div>
+
             <div>
-              <p className="font-bold">ARTICLE 2 — DURÉE</p>
-              <p>Prise d'effet le <strong>{new Date(booking.start_date).toLocaleDateString('fr-FR')}</strong>. Reconduction tacite mensuelle avec préavis de <strong>30 jours</strong>.</p>
+              <p className="font-bold">ARTICLE 2 — DURÉE DE LA LOCATION</p>
+              <div className="bg-gray-50 rounded-lg p-3 mt-2 space-y-1">
+                <p>☑ Indéterminée à compter du <strong>{formatDate(booking.start_date)}</strong></p>
+                <p>Préavis de résiliation : <strong>30 jours</strong>, transmis par écrit via la messagerie Nestock.</p>
+              </div>
             </div>
+
             <div>
               <p className="font-bold">ARTICLE 3 — LOYER</p>
-              <p>Loyer : <strong>{space.price_month}€ HT</strong> — Total TTC (frais inclus) : <strong>{Math.round(space.price_month * 1.10)}€</strong>/mois</p>
-              <p>Paiement mensuel automatique par prélèvement via Stripe.</p>
+              <div className="bg-gray-50 rounded-lg p-3 mt-2 space-y-1">
+                <p>Montant : <strong>{space.price_month}€ par mois TTC</strong></p>
+                <p>Paiement : <strong>par prélèvement automatique via Stripe</strong></p>
+                <p>Date de prélèvement : <strong>le {new Date(booking.start_date).getDate()} de chaque mois</strong></p>
+              </div>
             </div>
+
             <div>
-              <p className="font-bold">ARTICLE 4 — OBLIGATIONS</p>
-              <p>Le Propriétaire garantit l'accès libre et le bon état de l'espace. Le Locataire s'engage à n'y stocker que des biens licites et non dangereux.</p>
+              <p className="font-bold">ARTICLE 4 — DÉPÔT DE GARANTIE</p>
+              <p className="mt-1 text-gray-700">Aucun dépôt de garantie n'est requis dans le cadre de cette location via la plateforme Nestock.</p>
             </div>
+
             <div>
-              <p className="font-bold">ARTICLE 5 — RESPONSABILITÉ</p>
-              <p>Le Locataire est seul responsable de l'assurance de ses biens. Nestock intervient uniquement comme intermédiaire.</p>
+              <p className="font-bold">ARTICLE 5 — UTILISATION DE L'ESPACE</p>
+              <p className="mt-1 text-gray-700">Le Locataire s'engage à :</p>
+              <ul className="mt-1 space-y-1 text-gray-700 list-none">
+                <li>• utiliser l'espace uniquement pour du stockage légal ;</li>
+                <li>• maintenir le lieu en bon état ;</li>
+                <li>• ne pas stocker de produits dangereux, inflammables, illégaux ou périssables ;</li>
+                <li>• ne pas sous-louer l'espace sans accord écrit du Bailleur.</li>
+              </ul>
             </div>
+
             <div>
-              <p className="font-bold">ARTICLE 6 — RÉSILIATION</p>
-              <p>Préavis de 30 jours via la messagerie Nestock. Résiliation immédiate possible en cas de manquement grave après mise en demeure de 72h.</p>
+              <p className="font-bold">ARTICLE 6 — RESPONSABILITÉ ET ASSURANCE</p>
+              <p className="mt-1 text-gray-700">Les biens stockés restent sous la responsabilité exclusive du Locataire. Le Bailleur ne pourra être tenu responsable des vols, dégradations, incendies, dégâts des eaux ou tout autre dommage affectant les biens stockés. Le Locataire est invité à vérifier qu'il dispose d'une assurance couvrant ses biens personnels.</p>
             </div>
+
             <div>
-              <p className="font-bold">ARTICLE 7 — DROIT APPLICABLE</p>
-              <p>Contrat soumis au droit français. Tout litige porté devant les tribunaux compétents après tentative de médiation.</p>
+              <p className="font-bold">ARTICLE 7 — ACCÈS À L'ESPACE</p>
+              <div className="bg-gray-50 rounded-lg p-3 mt-2">
+                <p>Accès : <strong>{space.access_24h ? '24h/24, 7j/7' : 'Selon les horaires convenus avec le Bailleur'}</strong></p>
+                <p className="text-gray-500 text-xs mt-1">Les modalités détaillées d'accès (remise des clés, code, etc.) sont convenues directement entre les parties via la messagerie Nestock.</p>
+              </div>
             </div>
+
+            <div>
+              <p className="font-bold">ARTICLE 8 — RÉSILIATION</p>
+              <p className="mt-1 text-gray-700">En cas de non-paiement ou de non-respect des obligations du présent contrat, le Bailleur pourra résilier la location après mise en demeure restée sans effet pendant <strong>72 heures</strong>. Le Locataire devra restituer l'espace vide et propre à la fin du contrat.</p>
+            </div>
+
+            <div>
+              <p className="font-bold">ARTICLE 9 — LITIGES</p>
+              <p className="mt-1 text-gray-700">Les parties privilégieront une résolution amiable en cas de litige. À défaut d'accord amiable, le litige relèvera des juridictions compétentes du domicile du Bailleur. Nestock peut proposer une médiation entre les parties.</p>
+            </div>
+          </div>
+
+          <hr />
+
+          <div className="text-sm text-gray-500 space-y-1">
+            <p>Fait via la plateforme Nestock — nestock.tsukee.fr</p>
+            <p>Le : {formatDate(contract?.created_at ?? new Date().toISOString())}</p>
+            <p>En deux exemplaires électroniques.</p>
           </div>
         </div>
 
@@ -148,7 +209,7 @@ export default async function ContractPage({
             isOwner={isOwner}
             isRenter={isRenter}
             bookingId={bookingId}
-            spacePrice={Math.round(space.price_month * 1.10)}
+            spacePrice={space.price_month}
           />
         )}
 
