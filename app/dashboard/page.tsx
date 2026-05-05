@@ -105,11 +105,20 @@ export default async function DashboardPage() {
                       </p>
                     </div>
                     <div className="flex gap-2">
-                      <a href={'/contracts/' + booking.id}
-                        className="text-xs bg-green-100 text-green-700 hover:bg-green-200 px-3 py-1.5 rounded-lg font-medium transition">
-                        Accepter et signer
-                      </a>
-                      <BookingAction bookingId={booking.id} status="cancelled" label="Refuser" color="red" />
+                      {booking.status === 'pending' && (
+                        <>
+                          <a href={'/contracts/' + booking.id}
+                            className="text-xs bg-green-100 text-green-700 hover:bg-green-200 px-3 py-1.5 rounded-lg font-medium transition">
+                            Accepter et signer
+                          </a>
+                          <BookingAction bookingId={booking.id} status="cancelled" label="Refuser" color="red" />
+                        </>
+                      )}
+                      {booking.status === 'awaiting_signature' && (
+                        <span className="text-xs bg-yellow-100 text-yellow-700 px-3 py-1.5 rounded-lg font-medium">
+                          ⏳ En attente signature locataire
+                        </span>
+                      )}
                     </div>
                   </div>
                   <div className="flex gap-3 mt-2">

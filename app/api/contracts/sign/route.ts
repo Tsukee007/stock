@@ -40,6 +40,8 @@ export async function POST(req: Request) {
       status: 'owner_signed'
     }).eq('id', contractId)
 
+    await supabase.from('bookings').update({ status: 'awaiting_signature' }).eq('id', bookingId)
+
     const { data: renterAuth } = await adminClient.auth.admin.getUserById(contract.renter_id)
     const renterEmail = renterAuth?.user?.email
 
