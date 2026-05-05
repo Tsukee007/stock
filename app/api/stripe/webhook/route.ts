@@ -3,6 +3,12 @@ import { createClient } from '@supabase/supabase-js'
 import { sendEmail } from '@/lib/mailer'
 import { NextResponse } from 'next/server'
 
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+}
+
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-02-25.clover' })
 
 const supabase = createClient(
@@ -16,9 +22,11 @@ export async function POST(req: Request) {
   
   let event: Stripe.Event
   
-  try {
+try {
     event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET!)
   } catch (err: any) {
+    console.error('Webhook error:', err.message)
+    console.error('Secret used:', process.env.STRIPE_WEBHOOK_SECRET?.substring(0, 10))
     return NextResponse.json({ error: 'Webhook signature invalid' }, { status: 400 })
   }
 
