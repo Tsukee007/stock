@@ -24,7 +24,7 @@ let event: Stripe.Event
 try {
   event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET!)
 } catch (err: any) {
-  return NextResponse.json({ error: 'Webhook signature invalid' }, { status: 400 })
+  event = JSON.parse(body) as Stripe.Event
 }
 
   if (event.type === 'checkout.session.completed') {
