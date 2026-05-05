@@ -263,7 +263,9 @@ export default async function DashboardPage() {
                 <div key={booking.id} className="bg-white rounded-xl shadow-sm p-4 space-y-3">
                   <div className="flex items-start justify-between">
                     <div>
-                      <h3 className="font-semibold">{space?.title}</h3>
+                      <a href={'/dashboard/bookings/' + booking.id} className="hover:underline">
+                        <h3 className="font-semibold">{space?.title}</h3>
+                      </a>
                       <p className="text-gray-600 text-sm">
                         {space?.city} · {space?.price_month}€/mois
                       </p>
