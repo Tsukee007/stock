@@ -22,6 +22,22 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Vous ne pouvez pas reserver votre propre espace' }, { status: 400 })
   }
 
+  // Vérifier si une réservation active existe déjà
+  const { data: existingBooking } = await supabase
+    .from('bookings')
+    .select('id, status')
+    .eq('space_id', space.id)
+    .eq('renter_id', user.id)
+    .in('status', ['pending', 'awaiting_signature', 'confirmed', 'active'])
+    .single()
+
+  if (existingBooking) {
+    return NextResponse.json({ 
+      error: 'Vous avez deja une reservation en cours pour cet espace',
+      bookingId: existingBooking.id
+    }, { status: 400 })
+  }
+
   const { data: booking, error: bookingError } = await supabase
     .from('bookings')
     .insert({
