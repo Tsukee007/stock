@@ -45,7 +45,7 @@ export default async function DashboardPage() {
   const manageableBookings = spaces?.flatMap(space =>
     ((space.bookings as any[]) ?? [])
       .filter(b => ['confirmed', 'active', 'ending'].includes(b.status))
-      .map(b => ({ ...b, spaceTitle: space.title }))
+      .map(b => ({ ...b, spaceTitle: space.title, spaceCity: space.city, spacePrice: space.price_month }))
   ) ?? []
 
   return (
@@ -148,8 +148,11 @@ export default async function DashboardPage() {
                       <a href={'/dashboard/bookings/' + booking.id} className="hover:underline">
                         <h3 className="font-semibold">{booking.spaceTitle}</h3>
                       </a>
+                      <p className="text-gray-600 text-sm">
+                        {booking.spaceCity} · {booking.spacePrice}€/mois
+                      </p>
                       <p className="text-gray-600 text-xs mt-0.5">
-                        Depuis le {new Date(booking.start_date).toLocaleDateString('fr-FR')}
+                        Depuis le {booking.start_date ? new Date(booking.start_date).toLocaleDateString('fr-FR') : '—'}
                       </p>
                       <span className={`text-xs px-2 py-0.5 rounded-full mt-1 inline-block ${statusColors[booking.status] ?? 'bg-gray-100 text-gray-500'}`}>
                         {statusLabels[booking.status] ?? booking.status}
