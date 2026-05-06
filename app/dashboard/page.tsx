@@ -282,7 +282,10 @@ export default async function DashboardPage() {
                       {booking.status === 'confirmed' && (
                         <PayButton bookingId={booking.id} />
                       )}
-                      <a href={`/messages?booking_id=${booking.id}`}
+                      {booking.status === 'active' && (
+                        <BookingAction bookingId={booking.id} status="ended" label="Terminer" color="gray" />
+                      )}
+                      <a href={'/messages?booking_id=' + booking.id}
                         className="text-xs text-blue-600 hover:underline">
                         Messages
                       </a>
