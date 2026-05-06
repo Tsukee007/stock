@@ -21,7 +21,7 @@ export default async function DashboardPage() {
   const spacesWithStatus = spaces?.map(space => ({
     ...space,
     hasActiveBooking: (space.bookings as any[])?.some(b => 
-      ['pending', 'awaiting_signature', 'confirmed', 'active'].includes(b.status)
+      ['pending', 'awaiting_signature', 'confirmed', 'active', 'ending'].includes(b.status)
     ) ?? false
   })) ?? []
 
