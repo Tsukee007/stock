@@ -14,7 +14,7 @@ export default async function BookingDetailPage({
 
   const { data: booking } = await supabase
     .from('bookings')
-    .select('*, spaces(title, address, city, surface_m2, type, price_month, owner_id, access_24h), profiles!bookings_renter_id_fkey(full_name)')
+    .select('*, spaces(title, address, city, surface_m2, type, price_month, owner_id, access_24h), profiles!bookings_renter_id_fkey(full_name), ending_date')
     .eq('id', id)
     .single()
 
@@ -132,7 +132,16 @@ export default async function BookingDetailPage({
             </div>
             <div className="bg-gray-50 rounded-lg p-3">
               <p className="text-gray-500">Fin</p>
-              <p className="font-semibold">{booking.end_date ? new Date(booking.end_date).toLocaleDateString('fr-FR') : 'Reconduction tacite'}</p>
+              <p className="font-semibold">
+                {booking.ending_date 
+                  ? new Date(booking.ending_date).toLocaleDateString('fr-FR')
+                  : booking.end_date 
+                    ? new Date(booking.end_date).toLocaleDateString('fr-FR')
+                    : 'Reconduction tacite'}
+              </p>
+              {booking.ending_date && (
+                <p className="text-xs text-orange-600 mt-1">⏳ Préavis en cours</p>
+              )}
             </div>
           </div>
         </div>

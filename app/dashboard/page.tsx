@@ -148,9 +148,22 @@ export default async function DashboardPage() {
                       <a href={'/dashboard/bookings/' + booking.id} className="hover:underline">
                         <h3 className="font-semibold">{booking.spaceTitle}</h3>
                       </a>
-                      <span className={`text-xs px-2 py-0.5 rounded-full ${statusColors[booking.status] ?? 'bg-gray-100 text-gray-500'}`}>
+                      <p className="text-gray-600 text-xs mt-0.5">
+                        Depuis le {new Date(booking.start_date).toLocaleDateString('fr-FR')}
+                      </p>
+                      <span className={`text-xs px-2 py-0.5 rounded-full mt-1 inline-block ${statusColors[booking.status] ?? 'bg-gray-100 text-gray-500'}`}>
                         {statusLabels[booking.status] ?? booking.status}
                       </span>
+                      {booking.status === 'ending' && booking.ending_date && (
+                        <div className="mt-1">
+                          <p className="text-xs text-orange-600 font-semibold">
+                            ⏳ Fin dans {getDaysLeft(booking.ending_date)} jour{getDaysLeft(booking.ending_date) > 1 ? 's' : ''}
+                          </p>
+                          <p className="text-xs text-gray-400">
+                            Le {new Date(booking.ending_date).toLocaleDateString('fr-FR')}
+                          </p>
+                        </div>
+                      )}
                     </div>
                     <div className="flex gap-2">
                       {booking.status === 'confirmed' && (
