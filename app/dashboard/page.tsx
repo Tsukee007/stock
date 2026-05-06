@@ -145,13 +145,11 @@ export default async function DashboardPage() {
                 <div key={booking.id} className="bg-white rounded-xl shadow-sm p-4 border-l-4 border-blue-400">
                   <div className="flex items-start justify-between">
                     <div>
-                      <h3 className="font-semibold">{booking.spaceTitle}</h3>
-                      <span className={`text-xs px-2 py-0.5 rounded-full ${
-                        booking.status === 'active'
-                          ? 'bg-green-100 text-green-600'
-                          : 'bg-blue-100 text-blue-600'
-                      }`}>
-                        {booking.status === 'active' ? 'Active' : 'Confirmee'}
+                      <a href={'/dashboard/bookings/' + booking.id} className="hover:underline">
+                        <h3 className="font-semibold">{booking.spaceTitle}</h3>
+                      </a>
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${statusColors[booking.status] ?? 'bg-gray-100 text-gray-500'}`}>
+                        {statusLabels[booking.status] ?? booking.status}
                       </span>
                     </div>
                     <div className="flex gap-2">
