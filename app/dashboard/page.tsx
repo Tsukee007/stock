@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import BookingAction from '@/components/ui/BookingAction'
 import ReviewForm from '@/components/ui/ReviewForm'
 import PayButton from '@/components/ui/PayButton'
-import { statusLabels, statusColors } from '@/lib/utils'
+import { statusLabels, statusColors, getDaysLeft } from '@/lib/utils'
 import DeleteSpaceButton from '@/components/ui/DeleteSpaceButton'
 
 export default async function DashboardPage() {
@@ -27,7 +27,7 @@ export default async function DashboardPage() {
 
   const { data: bookings } = await supabase
     .from('bookings')
-    .select('*, spaces(id, title, city, price_month, owner_id), reviews(id, author_id)')
+    .select('*, spaces(id, title, city, price_month, owner_id), reviews(id, author_id), ending_date, start_date')
     .eq('renter_id', user.id)
     .order('created_at', { ascending: false })
 
@@ -44,7 +44,7 @@ export default async function DashboardPage() {
 
   const manageableBookings = spaces?.flatMap(space =>
     ((space.bookings as any[]) ?? [])
-      .filter(b => b.status === 'confirmed' || b.status === 'active')
+      .filter(b => ['confirmed', 'active', 'ending'].includes(b.status))
       .map(b => ({ ...b, spaceTitle: space.title }))
   ) ?? []
 
@@ -159,7 +159,17 @@ export default async function DashboardPage() {
                         <BookingAction bookingId={booking.id} status="active" label="Marquer actif" color="blue" />
                       )}
                       {booking.status === 'active' && (
-                        <BookingAction bookingId={booking.id} status="ended" label="Terminer" color="gray" />
+                        <BookingAction bookingId={booking.id} status="ending" label="Résilier (préavis 15j)" color="gray" />
+                      )}
+                      {booking.status === 'ending' && booking.ending_date && (
+                        <div className="text-center">
+                          <p className="text-xs text-orange-600 font-semibold">
+                            ⏳ Fin dans {getDaysLeft(booking.ending_date)} jour{getDaysLeft(booking.ending_date) > 1 ? 's' : ''}
+                          </p>
+                          <p className="text-xs text-gray-400">
+                            Le {new Date(booking.ending_date).toLocaleDateString('fr-FR')}
+                          </p>
+                        </div>
                       )}
                     </div>
                   </div>
@@ -283,7 +293,17 @@ export default async function DashboardPage() {
                         <PayButton bookingId={booking.id} />
                       )}
                       {booking.status === 'active' && (
-                        <BookingAction bookingId={booking.id} status="ended" label="Terminer" color="gray" />
+                        <BookingAction bookingId={booking.id} status="ending" label="Résilier (préavis 15j)" color="gray" />
+                      )}
+                      {booking.status === 'ending' && booking.ending_date && (
+                        <div className="text-center">
+                          <p className="text-xs text-orange-600 font-semibold">
+                            ⏳ Fin dans {getDaysLeft(booking.ending_date)} jour{getDaysLeft(booking.ending_date) > 1 ? 's' : ''}
+                          </p>
+                          <p className="text-xs text-gray-400">
+                            Le {new Date(booking.ending_date).toLocaleDateString('fr-FR')}
+                          </p>
+                        </div>
                       )}
                       <a href={'/messages?booking_id=' + booking.id}
                         className="text-xs text-blue-600 hover:underline">
