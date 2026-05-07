@@ -152,3 +152,14 @@ git add nestock-context.md && git commit -m "docs: mise a jour contexte" && git 
 
 Afficher le contenu pour une nouvelle conversation Claude :
 cat /workspaces/stock/nestock-context.md
+
+
+### Corrections en attente - Mai 2026
+- Prix incohérent : annonce 7€, contrat 6€, Stripe 6.60€ -> unifier partout
+- Contrat : supprimer tel/email dans le formulaire de signature (déjà en en-tête)
+- Contrat : afficher prix TTC + détail des charges (Nestock 10% + Stripe)
+- Contrat : statut "en attente paiement" alors que paiement reçu -> bug webhook
+- Dashboard : renommer bouton "Factures" en "Quittances"
+- Page détail location : quittances ne s'affichent pas
+- Créer pages CGU et Confidentialité
+- Footer présent sur toutes les pages de l'application
