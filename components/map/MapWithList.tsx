@@ -13,6 +13,7 @@ type Space = {
   type: string
   surface_m2?: number
   address?: string
+  price_ttc?: number
 }
 
 const typeEmoji: Record<string, string> = {
