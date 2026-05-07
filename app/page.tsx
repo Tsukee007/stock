@@ -332,8 +332,8 @@ export default async function Home({
           </div>
           <div className="space-y-2">
             <p className="text-gray-900 font-semibold">Legal</p>
-            <a href="/about" className="block hover:text-gray-900 transition">CGU</a>
-            <a href="/about" className="block hover:text-gray-900 transition">Confidentialite</a>
+<a href="/cgu" className="block hover:text-gray-900 transition">CGU</a>
+<a href="/confidentialite" className="block hover:text-gray-900 transition">Confidentialite</a>
           </div>
         </div>
         <div className="max-w-5xl mx-auto mt-8 pt-8 border-t border-gray-100 text-center text-xs text-gray-400">
