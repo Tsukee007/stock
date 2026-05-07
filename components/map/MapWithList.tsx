@@ -86,7 +86,7 @@ export default function MapWithList({ spaces }: { spaces: Space[] }) {
                   )}
                 </div>
                 <div className="text-right ml-2">
-                  <p className="font-bold text-blue-600">{Math.round(space.price_month * 1.10)}€</p>
+                  <p className="font-bold text-blue-600">{(space.price_ttc ?? Math.round(space.price_month * 1.10)).toFixed(2)}€</p>
                   <p className="text-gray-400 text-xs">/mois TTC</p>
                 </div>
               </div>

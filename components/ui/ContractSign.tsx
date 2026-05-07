@@ -15,8 +15,6 @@ export default function ContractSign({ contract, isOwner, isRenter, bookingId, s
   const [form, setForm] = useState({
     name: '',
     birth_date: '',
-    phone: '',
-    email: '',
   })
   const [checked, setChecked] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -32,8 +30,6 @@ export default function ContractSign({ contract, isOwner, isRenter, bookingId, s
     if (!checked) { setError('Veuillez cocher la case pour confirmer votre accord'); return }
     if (!form.name.trim()) { setError('Veuillez entrer votre nom complet'); return }
     if (!form.birth_date) { setError('Veuillez entrer votre date de naissance'); return }
-    if (!form.phone.trim()) { setError('Veuillez entrer votre numéro de téléphone'); return }
-    if (!form.email.trim()) { setError('Veuillez entrer votre email'); return }
 
     setLoading(true)
     setError('')
@@ -46,8 +42,6 @@ export default function ContractSign({ contract, isOwner, isRenter, bookingId, s
         bookingId,
         signatureName: form.name.trim(),
         birthDate: form.birth_date,
-        phone: form.phone.trim(),
-        email: form.email.trim(),
         isOwner,
       })
     })
@@ -147,20 +141,7 @@ export default function ContractSign({ contract, isOwner, isRenter, bookingId, s
             onChange={e => setForm(prev => ({ ...prev, birth_date: e.target.value }))}
             className="w-full border rounded-lg p-3" />
         </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Téléphone *</label>
-          <input type="tel" value={form.phone}
-            onChange={e => setForm(prev => ({ ...prev, phone: e.target.value }))}
-            placeholder="06 12 34 56 78"
-            className="w-full border rounded-lg p-3" />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-          <input type="email" value={form.email}
-            onChange={e => setForm(prev => ({ ...prev, email: e.target.value }))}
-            placeholder="jean@email.com"
-            className="w-full border rounded-lg p-3" />
-        </div>
+
       </div>
 
       <div className="flex items-start gap-3">

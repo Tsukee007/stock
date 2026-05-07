@@ -61,7 +61,7 @@ export default async function DashboardPage() {
             <div className="flex gap-2">
               <a href="/dashboard/invoices"
                 className="text-sm bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
-                🧾 Factures
+                🧾 Quittances
               </a>
               <a href="/dashboard/stats"
                 className="text-sm bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">

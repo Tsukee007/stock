@@ -66,7 +66,7 @@ export default function NewSpacePage() {
     const nestock = priceHT * 0.10
     const subtotal = priceHT + nestock
     const stripeFees = subtotal * 0.015 + 0.25
-    const priceTTC = Math.ceil((subtotal + stripeFees) * 100) / 100
+    const priceTTC = Math.round((subtotal + stripeFees) * 100) / 100
 
     const { error: insertError } = await supabase.from('spaces').insert({
       id: spaceId,
@@ -79,7 +79,8 @@ export default function NewSpacePage() {
       lng: form.lng,
       surface_m2: parseFloat(form.surface_m2),
       type: form.type,
-      price_month: priceTTC,
+      price_month: priceHT,
+      price_ttc: priceTTC,
       available_from: form.available_from || null,
       access_24h: form.access_24h,
       owner_id: user.id,

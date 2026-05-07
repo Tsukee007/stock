@@ -15,7 +15,7 @@ export default async function ContractPage({
 
   const { data: booking } = await supabase
     .from('bookings')
-    .select('*, spaces(title, address, city, surface_m2, type, price_month, owner_id, access_24h), profiles!bookings_renter_id_fkey(full_name, address, city, postal_code, phone)')
+    .select('*, spaces(title, address, city, surface_m2, type, price_month, price_ttc, owner_id, access_24h), profiles!bookings_renter_id_fkey(full_name, address, city, postal_code, phone)')
     .eq('id', bookingId)
     .single()
 
@@ -45,7 +45,7 @@ export default async function ContractPage({
         owner_id: space.owner_id,
         renter_id: booking.renter_id,
         loyer_ht: space.price_month,
-        loyer_ttc: Math.round(space.price_month * 100) / 100,
+        loyer_ttc: space.price_ttc ?? Math.round(space.price_month * 1.10 * 1.015 * 100 + 25) / 100,
         date_debut: booking.start_date,
       })
       .select()
@@ -147,7 +147,10 @@ export default async function ContractPage({
             <div>
               <p className="font-bold">ARTICLE 3 — LOYER</p>
               <div className="bg-gray-50 rounded-lg p-3 mt-2 space-y-1">
-                <p>Montant : <strong>{space.price_month}€ par mois TTC</strong></p>
+                <p>Prix propriétaire (HT) : <strong>{space.price_month}€/mois</strong></p>
+                    <p>Commission Nestock (10%) : <strong>{(space.price_month * 0.10).toFixed(2)}€/mois</strong></p>
+                    <p>Frais Stripe : <strong>{((space.price_ttc ?? space.price_month * 1.10) * 0.015 + 0.25).toFixed(2)}€/mois</strong></p>
+                    <p>Montant total TTC : <strong>{(space.price_ttc ?? Math.round(space.price_month * 1.10)).toFixed(2)}€ par mois</strong></p>
                 <p>Paiement : <strong>par prélèvement automatique via Stripe</strong></p>
                 <p>Date de prélèvement : <strong>le {new Date(booking.start_date).getDate()} de chaque mois</strong></p>
               </div>
@@ -209,7 +212,7 @@ export default async function ContractPage({
             isOwner={isOwner}
             isRenter={isRenter}
             bookingId={bookingId}
-            spacePrice={space.price_month}
+            spacePrice={space.price_ttc ?? Math.round(space.price_month * 1.10)}
           />
         )}
 

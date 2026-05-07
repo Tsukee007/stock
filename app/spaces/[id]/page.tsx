@@ -9,7 +9,7 @@ export default async function SpacePage({ params }: { params: Promise<{ id: stri
 
   const { data: space } = await supabase
     .from('spaces')
-    .select('*, profiles(full_name, avatar_url, rating_avg), space_photos(url, position)')
+    .select('*, profiles(full_name, avatar_url, rating_avg), space_photos(url, position), price_ttc')
     .eq('id', id)
     .single()
 
@@ -45,7 +45,7 @@ export default async function SpacePage({ params }: { params: Promise<{ id: stri
               <p className="text-gray-500 mt-1">📍 {space.address}, {space.city}</p>
             </div>
             <div className="text-right">
-              <p className="text-3xl font-bold text-blue-600">{Math.round(space.price_month * 1.10)}€</p>
+              <p className="text-3xl font-bold text-blue-600">{(space.price_ttc ?? Math.round(space.price_month * 1.10)).toFixed(2)}€</p>
               <p className="text-gray-400 text-sm">/mois TTC</p>
             </div>
           </div>
@@ -127,7 +127,7 @@ export default async function SpacePage({ params }: { params: Promise<{ id: stri
             <p>✅ Discutez des modalités par messagerie</p>
             <p>✅ Payez en ligne en toute sécurité</p>
           </div>
-<a href={'/booking/new?space_id=' + space['id'] + '&title=' + encodeURIComponent(space.title) + '&price=' + Math.round(space.price_month * 1.10)}
+<a href={'/booking/new?space_id=' + space['id'] + '&title=' + encodeURIComponent(space.title) + '&price=' + Math.round((space.price_ttc ?? space.price_month * 1.10))}
   className="block w-full bg-blue-600 text-white rounded-xl p-4 font-bold text-lg hover:bg-blue-700 text-center">
   📦 Demander à réserver
 </a>
