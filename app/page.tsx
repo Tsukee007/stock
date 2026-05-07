@@ -68,34 +68,34 @@ export default async function Home({
   return (
     <main className="bg-white">
 
-      {/* Hero */}
-      <section className="bg-white py-24 px-4 border-b border-gray-100">
+      {/* Hero - fond sombre sobre */}
+      <section className="bg-gray-900 text-white py-24 px-4">
         <div className="max-w-5xl mx-auto text-center space-y-8">
-          <div className="inline-block bg-gray-100 text-gray-600 text-sm px-4 py-1.5 rounded-full font-medium">
+          <div className="inline-block bg-gray-800 text-gray-300 text-sm px-4 py-1.5 rounded-full font-medium border border-gray-700">
             La marketplace francaise du stockage entre particuliers
           </div>
-          <h1 className="text-4xl md:text-6xl font-extrabold leading-tight text-gray-900">
-            Louez un espace de stockage<br />
-            <span className="text-gray-500">pres de chez vous</span>
+          <h1 className="text-4xl md:text-6xl font-extrabold leading-tight text-white">
+            Trouvez ou louez un espace<br />
+            <span className="text-gray-400">de stockage pres de chez vous</span>
           </h1>
-          <p className="text-lg text-gray-500 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-400 max-w-2xl mx-auto">
             Caves, garages, boxes, greniers... Nestock connecte proprietaires et locataires
             pour des locations simples, securisees et avec contrat electronique.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4 pt-2">
-            <a href="/register" className="bg-blue-600 text-white font-bold px-8 py-4 rounded-xl hover:bg-blue-700 transition text-lg shadow-sm">
+            <a href="/register" className="bg-white text-gray-900 font-bold px-8 py-4 rounded-xl hover:bg-gray-100 transition text-lg shadow-lg">
               Trouver un espace
             </a>
-            <a href="/register" className="border border-gray-200 text-gray-700 font-bold px-8 py-4 rounded-xl hover:bg-gray-50 transition text-lg">
+            <a href="/register" className="border border-gray-600 text-gray-300 font-bold px-8 py-4 rounded-xl hover:bg-gray-800 transition text-lg">
               Louer mon espace
             </a>
           </div>
-          <p className="text-gray-400 text-sm">Inscription gratuite - Aucun frais cache - Contrat inclus</p>
+          <p className="text-gray-500 text-sm">Inscription gratuite - Aucun frais cache - Contrat inclus</p>
         </div>
       </section>
 
       {/* Stats */}
-      <section className="bg-gray-50 border-b border-gray-100 py-12 px-4">
+      <section className="bg-white border-b py-12 px-4">
         <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
           <div>
             <p className="text-3xl font-extrabold text-gray-900">{spaces?.length ?? 0}+</p>
@@ -117,33 +117,33 @@ export default async function Home({
       </section>
 
       {/* Comment ca marche */}
-      <section className="py-20 px-4 bg-white">
+      <section className="py-20 px-4 bg-gray-50">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900">Comment louer un espace ?</h2>
             <p className="text-gray-500 mt-2">En quelques etapes simples</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className="bg-gray-50 rounded-2xl p-6 text-center space-y-3 border border-gray-100">
-              <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-sm mx-auto">1</div>
+            <div className="bg-white rounded-2xl p-6 shadow-sm text-center space-y-3 border border-gray-100">
+              <div className="w-8 h-8 bg-gray-900 text-white rounded-full flex items-center justify-center font-bold text-sm mx-auto">1</div>
               <div className="text-4xl">🔍</div>
               <h3 className="font-bold text-gray-800">Recherchez</h3>
               <p className="text-gray-500 text-sm">Parcourez les annonces sur la carte. Filtrez par ville, type et prix.</p>
             </div>
-            <div className="bg-gray-50 rounded-2xl p-6 text-center space-y-3 border border-gray-100">
-              <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-sm mx-auto">2</div>
+            <div className="bg-white rounded-2xl p-6 shadow-sm text-center space-y-3 border border-gray-100">
+              <div className="w-8 h-8 bg-gray-900 text-white rounded-full flex items-center justify-center font-bold text-sm mx-auto">2</div>
               <div className="text-4xl">📩</div>
               <h3 className="font-bold text-gray-800">Demandez</h3>
               <p className="text-gray-500 text-sm">Envoyez une demande de reservation avec votre date souhaitee.</p>
             </div>
-            <div className="bg-gray-50 rounded-2xl p-6 text-center space-y-3 border border-gray-100">
-              <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-sm mx-auto">3</div>
+            <div className="bg-white rounded-2xl p-6 shadow-sm text-center space-y-3 border border-gray-100">
+              <div className="w-8 h-8 bg-gray-900 text-white rounded-full flex items-center justify-center font-bold text-sm mx-auto">3</div>
               <div className="text-4xl">✍️</div>
               <h3 className="font-bold text-gray-800">Signez</h3>
               <p className="text-gray-500 text-sm">Signez le contrat electronique directement sur la plateforme.</p>
             </div>
-            <div className="bg-gray-50 rounded-2xl p-6 text-center space-y-3 border border-gray-100">
-              <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-sm mx-auto">4</div>
+            <div className="bg-white rounded-2xl p-6 shadow-sm text-center space-y-3 border border-gray-100">
+              <div className="w-8 h-8 bg-gray-900 text-white rounded-full flex items-center justify-center font-bold text-sm mx-auto">4</div>
               <div className="text-4xl">🔑</div>
               <h3 className="font-bold text-gray-800">Stockez</h3>
               <p className="text-gray-500 text-sm">Paiement automatique chaque mois. Resiliez avec 15j de preavis.</p>
@@ -153,48 +153,48 @@ export default async function Home({
       </section>
 
       {/* Pour les proprietaires */}
-      <section className="py-20 px-4 bg-gray-50 border-t border-gray-100">
+      <section className="py-20 px-4 bg-white">
         <div className="max-w-5xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             <div className="space-y-6">
-              <div className="inline-block bg-gray-200 text-gray-700 text-sm px-4 py-1.5 rounded-full font-medium">
+              <div className="inline-block bg-gray-100 text-gray-700 text-sm px-4 py-1.5 rounded-full font-medium">
                 Pour les proprietaires
               </div>
               <h2 className="text-3xl font-bold text-gray-900">Votre espace inutilise peut vous rapporter</h2>
               <p className="text-gray-600">Garage vide, cave disponible ? Louez-le et generez des revenus passifs chaque mois.</p>
-              <div className="space-y-2 text-sm text-gray-600">
+              <div className="space-y-2 text-sm text-gray-700">
                 <p>✓ Annonce gratuite et rapide a creer</p>
                 <p>✓ Contrat electronique automatique</p>
                 <p>✓ Paiement securise via Stripe Connect</p>
                 <p>✓ Virements directs sur votre IBAN</p>
                 <p>✓ Vous fixez votre prix, vous gardez tout</p>
               </div>
-              <a href="/register" className="inline-block bg-blue-600 text-white font-bold px-8 py-3 rounded-xl hover:bg-blue-700 transition">
+              <a href="/register" className="inline-block bg-gray-900 text-white font-bold px-8 py-3 rounded-xl hover:bg-gray-700 transition">
                 Deposer mon annonce gratuitement
               </a>
             </div>
-            <div className="bg-white rounded-2xl p-8 space-y-4 border border-gray-100 shadow-sm">
+            <div className="bg-gray-50 rounded-2xl p-8 space-y-4 border border-gray-100">
               <p className="font-bold text-gray-700 text-center mb-4">Simulateur de revenus</p>
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between py-2 border-b border-gray-100">
+              <div className="bg-white rounded-xl p-4 space-y-3 text-sm border border-gray-100">
+                <div className="flex justify-between">
                   <span className="text-gray-500">Votre prix</span>
                   <span className="font-bold text-gray-900">100 euros/mois</span>
                 </div>
-                <div className="flex justify-between py-2 border-b border-gray-100">
-                  <span className="text-gray-500">Commission Nestock (10%)</span>
-                  <span className="text-gray-600">+ 10 euros</span>
+                <div className="flex justify-between text-gray-500">
+                  <span>Commission Nestock (10%)</span>
+                  <span>+ 10 euros</span>
                 </div>
-                <div className="flex justify-between py-2 border-b border-gray-100">
-                  <span className="text-gray-500">Frais Stripe</span>
-                  <span className="text-gray-600">+ 1.75 euros</span>
+                <div className="flex justify-between text-gray-500">
+                  <span>Frais Stripe</span>
+                  <span>+ 1.75 euros</span>
                 </div>
-                <div className="flex justify-between py-2 border-b border-gray-100">
-                  <span className="font-semibold text-gray-900">Locataire paie</span>
-                  <span className="font-bold text-gray-900">111.75 euros/mois</span>
+                <div className="border-t pt-2 flex justify-between font-bold text-gray-900">
+                  <span>Locataire paie</span>
+                  <span>111.75 euros/mois</span>
                 </div>
-                <div className="flex justify-between py-2">
-                  <span className="font-semibold text-gray-900">Vous recevez</span>
-                  <span className="font-bold text-blue-600">100 euros/mois ✓</span>
+                <div className="flex justify-between text-green-700 font-bold">
+                  <span>Vous recevez</span>
+                  <span>100 euros/mois ✓</span>
                 </div>
               </div>
             </div>
@@ -203,32 +203,32 @@ export default async function Home({
       </section>
 
       {/* Avantages */}
-      <section className="py-20 px-4 bg-white">
+      <section className="py-20 px-4 bg-gray-50">
         <div className="max-w-5xl mx-auto">
           <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">Pourquoi choisir Nestock ?</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="flex gap-4 p-5 rounded-xl border border-gray-100 hover:bg-gray-50 transition">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="flex gap-4 p-5 rounded-xl border border-gray-200 bg-white hover:border-gray-300 transition">
               <span className="text-3xl">🛡️</span>
               <div>
                 <h3 className="font-bold text-gray-900">Contrats legaux</h3>
                 <p className="text-gray-500 text-sm mt-1">Contrats conformes au droit francais, signes electroniquement (article 1366 du Code civil).</p>
               </div>
             </div>
-            <div className="flex gap-4 p-5 rounded-xl border border-gray-100 hover:bg-gray-50 transition">
+            <div className="flex gap-4 p-5 rounded-xl border border-gray-200 bg-white hover:border-gray-300 transition">
               <span className="text-3xl">💳</span>
               <div>
                 <h3 className="font-bold text-gray-900">Paiements securises</h3>
                 <p className="text-gray-500 text-sm mt-1">Paiements automatiques via Stripe, certifie PCI-DSS. Proprietaire paye sur son IBAN chaque mois.</p>
               </div>
             </div>
-            <div className="flex gap-4 p-5 rounded-xl border border-gray-100 hover:bg-gray-50 transition">
+            <div className="flex gap-4 p-5 rounded-xl border border-gray-200 bg-white hover:border-gray-300 transition">
               <span className="text-3xl">📍</span>
               <div>
                 <h3 className="font-bold text-gray-900">Carte interactive</h3>
                 <p className="text-gray-500 text-sm mt-1">Visualisez tous les espaces disponibles sur une carte. Filtrez par distance, prix et surface.</p>
               </div>
             </div>
-            <div className="flex gap-4 p-5 rounded-xl border border-gray-100 hover:bg-gray-50 transition">
+            <div className="flex gap-4 p-5 rounded-xl border border-gray-200 bg-white hover:border-gray-300 transition">
               <span className="text-3xl">📄</span>
               <div>
                 <h3 className="font-bold text-gray-900">Quittances automatiques</h3>
@@ -240,19 +240,19 @@ export default async function Home({
       </section>
 
       {/* Apercu carte */}
-      <section className="py-12 px-4 bg-gray-50 border-t border-gray-100">
+      <section className="py-12 px-4 bg-white border-t border-gray-100">
         <div className="max-w-5xl mx-auto mb-6">
           <h2 className="text-2xl font-bold text-gray-900">Espaces disponibles pres de chez vous</h2>
           <p className="text-gray-500 text-sm mt-1">Inscrivez-vous gratuitement pour contacter les proprietaires et reserver.</p>
         </div>
-        <div className="relative rounded-2xl overflow-hidden border border-gray-200" style={{ height: '500px' }}>
+        <div className="relative rounded-2xl overflow-hidden border border-gray-100" style={{ height: '500px' }}>
           <SearchFilters initialFilters={filters} />
           <div className="h-full pt-14">
             <MapWithList spaces={spaces ?? []} />
           </div>
-          <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-gray-50 to-transparent pointer-events-none" />
+          <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-white to-transparent pointer-events-none" />
           <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10">
-            <a href="/register" className="bg-blue-600 text-white font-bold px-8 py-3 rounded-xl shadow-md hover:bg-blue-700 transition whitespace-nowrap text-lg">
+            <a href="/register" className="bg-gray-900 text-white font-bold px-8 py-3 rounded-xl shadow-lg hover:bg-gray-700 transition whitespace-nowrap text-lg">
               S'inscrire gratuitement pour reserver
             </a>
           </div>
@@ -260,52 +260,52 @@ export default async function Home({
       </section>
 
       {/* FAQ */}
-      <section className="py-20 px-4 bg-white">
+      <section className="py-20 px-4 bg-gray-50">
         <div className="max-w-3xl mx-auto">
           <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">Questions frequentes</h2>
-          <div className="space-y-3">
-            <details className="rounded-xl p-5 cursor-pointer border border-gray-100 hover:border-gray-200 transition">
+          <div className="space-y-4">
+            <details className="bg-white rounded-xl p-5 cursor-pointer border border-gray-200">
               <summary className="font-semibold text-gray-900 list-none flex justify-between items-center">
                 Est-ce que Nestock est gratuit ?
                 <span className="text-gray-400 text-xl">+</span>
               </summary>
-              <p className="text-gray-500 text-sm mt-3">L'inscription est entierement gratuite. Nestock prend une commission de 10% uniquement sur les transactions realisees.</p>
+              <p className="text-gray-600 text-sm mt-3">L'inscription est entierement gratuite. Nestock prend une commission de 10% uniquement sur les transactions realisees.</p>
             </details>
-            <details className="rounded-xl p-5 cursor-pointer border border-gray-100 hover:border-gray-200 transition">
+            <details className="bg-white rounded-xl p-5 cursor-pointer border border-gray-200">
               <summary className="font-semibold text-gray-900 list-none flex justify-between items-center">
                 Le contrat est-il legalement valide ?
                 <span className="text-gray-400 text-xl">+</span>
               </summary>
-              <p className="text-gray-500 text-sm mt-3">Oui. Les contrats signes sur Nestock ont la meme valeur juridique qu'une signature manuscrite, conformement a l'article 1366 du Code civil francais.</p>
+              <p className="text-gray-600 text-sm mt-3">Oui. Les contrats signes sur Nestock ont la meme valeur juridique qu'une signature manuscrite, conformement a l'article 1366 du Code civil francais.</p>
             </details>
-            <details className="rounded-xl p-5 cursor-pointer border border-gray-100 hover:border-gray-200 transition">
+            <details className="bg-white rounded-xl p-5 cursor-pointer border border-gray-200">
               <summary className="font-semibold text-gray-900 list-none flex justify-between items-center">
                 Comment je recois mon argent en tant que proprietaire ?
                 <span className="text-gray-400 text-xl">+</span>
               </summary>
-              <p className="text-gray-500 text-sm mt-3">Via Stripe Connect, vos loyers sont vires automatiquement sur votre IBAN chaque mois, sans intermediaire.</p>
+              <p className="text-gray-600 text-sm mt-3">Via Stripe Connect, vos loyers sont vires automatiquement sur votre IBAN chaque mois, sans intermediaire.</p>
             </details>
-            <details className="rounded-xl p-5 cursor-pointer border border-gray-100 hover:border-gray-200 transition">
+            <details className="bg-white rounded-xl p-5 cursor-pointer border border-gray-200">
               <summary className="font-semibold text-gray-900 list-none flex justify-between items-center">
                 Puis-je resilier a tout moment ?
                 <span className="text-gray-400 text-xl">+</span>
               </summary>
-              <p className="text-gray-500 text-sm mt-3">Oui, proprietaire et locataire peuvent resilier avec un preavis de 15 jours via la messagerie Nestock.</p>
+              <p className="text-gray-600 text-sm mt-3">Oui, proprietaire et locataire peuvent resilier avec un preavis de 15 jours via la messagerie Nestock.</p>
             </details>
           </div>
         </div>
       </section>
 
       {/* CTA final */}
-      <section className="bg-gray-50 border-t border-gray-100 py-20 px-4 text-center">
+      <section className="bg-gray-900 text-white py-20 px-4 text-center">
         <div className="max-w-2xl mx-auto space-y-6">
-          <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900">Pret a commencer ?</h2>
-          <p className="text-gray-500 text-lg">Rejoignez Nestock gratuitement et trouvez votre espace de stockage ideal.</p>
+          <h2 className="text-3xl md:text-4xl font-extrabold">Pret a commencer ?</h2>
+          <p className="text-gray-400 text-lg">Rejoignez Nestock gratuitement et trouvez votre espace de stockage ideal.</p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <a href="/register" className="bg-blue-600 text-white font-bold px-8 py-4 rounded-xl hover:bg-blue-700 transition text-lg shadow-sm">
+            <a href="/register" className="bg-white text-gray-900 font-bold px-8 py-4 rounded-xl hover:bg-gray-100 transition text-lg shadow-lg">
               Creer un compte gratuit
             </a>
-            <a href="/login" className="border border-gray-200 text-gray-700 font-bold px-8 py-4 rounded-xl hover:bg-gray-100 transition text-lg">
+            <a href="/login" className="border border-gray-600 text-gray-300 font-bold px-8 py-4 rounded-xl hover:bg-gray-800 transition text-lg">
               Se connecter
             </a>
           </div>
@@ -313,30 +313,30 @@ export default async function Home({
       </section>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-gray-100 text-gray-500 py-10 px-4">
+      <footer className="bg-gray-950 text-gray-500 py-10 px-4">
         <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-sm">
           <div className="col-span-2 md:col-span-1 space-y-3">
-            <p className="text-gray-900 font-bold text-lg">Nestock</p>
-            <p className="text-xs text-gray-400">La marketplace francaise du stockage entre particuliers.</p>
-            <p className="text-xs text-gray-400">contact@tsukee.fr</p>
+            <p className="text-white font-bold text-lg">Nestock</p>
+            <p className="text-xs">La marketplace francaise du stockage entre particuliers.</p>
+            <p className="text-xs">contact@tsukee.fr</p>
           </div>
           <div className="space-y-2">
-            <p className="text-gray-900 font-semibold">Produit</p>
-            <a href="/about" className="block hover:text-gray-900 transition">A propos</a>
-            <a href="/contact" className="block hover:text-gray-900 transition">Contact</a>
+            <p className="text-white font-semibold">Produit</p>
+            <a href="/about" className="block hover:text-white transition">A propos</a>
+            <a href="/contact" className="block hover:text-white transition">Contact</a>
           </div>
           <div className="space-y-2">
-            <p className="text-gray-900 font-semibold">Compte</p>
-            <a href="/register" className="block hover:text-gray-900 transition">S'inscrire</a>
-            <a href="/login" className="block hover:text-gray-900 transition">Se connecter</a>
+            <p className="text-white font-semibold">Compte</p>
+            <a href="/register" className="block hover:text-white transition">S'inscrire</a>
+            <a href="/login" className="block hover:text-white transition">Se connecter</a>
           </div>
           <div className="space-y-2">
-            <p className="text-gray-900 font-semibold">Legal</p>
-            <a href="/about" className="block hover:text-gray-900 transition">CGU</a>
-            <a href="/about" className="block hover:text-gray-900 transition">Confidentialite</a>
+            <p className="text-white font-semibold">Legal</p>
+            <a href="/about" className="block hover:text-white transition">CGU</a>
+            <a href="/about" className="block hover:text-white transition">Confidentialite</a>
           </div>
         </div>
-        <div className="max-w-5xl mx-auto mt-8 pt-8 border-t border-gray-100 text-center text-xs text-gray-400">
+        <div className="max-w-5xl mx-auto mt-8 pt-8 border-t border-gray-800 text-center text-xs">
           <p>2025 Nestock - Tous droits reserves</p>
         </div>
       </footer>
