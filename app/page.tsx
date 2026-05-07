@@ -342,8 +342,3 @@ export default async function Home({
     </main>
   )
 }
-"""
-with open('app/page.tsx', 'w') as f:
-    f.write(content)
-print('Done')
-PYEOF
