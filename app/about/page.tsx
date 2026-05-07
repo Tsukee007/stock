@@ -112,7 +112,7 @@ export default function AboutPage() {
         </div>
         <div className="max-w-5xl mx-auto mt-8 pt-8 border-t border-gray-100 text-center text-xs text-gray-400">
           <p>2026 Nestock - Tous droits reserves</p>
+    <footer
         </div>
-    </footer>
   )
 }
