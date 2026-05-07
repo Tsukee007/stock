@@ -163,3 +163,4 @@ cat /workspaces/stock/nestock-context.md
 - Page détail location : quittances ne s'affichent pas
 - Créer pages CGU et Confidentialité
 - Footer présent sur toutes les pages de l'application
+- 07/05/2026 : Prix TTC unifie, CGU/Confidentialite, footer about/contact, table invoices creee, statut contrat corrige
