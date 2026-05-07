@@ -213,6 +213,7 @@ export default async function ContractPage({
             isRenter={isRenter}
             bookingId={bookingId}
             spacePrice={space.price_ttc ?? Math.round(space.price_month * 1.10)}
+            bookingStatus={booking.status}
           />
         )}
 

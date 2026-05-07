@@ -9,9 +9,10 @@ type Props = {
   isRenter: boolean
   bookingId: string
   spacePrice: number
+  bookingStatus: string
 }
 
-export default function ContractSign({ contract, isOwner, isRenter, bookingId, spacePrice }: Props) {
+export default function ContractSign({ contract, isOwner, isRenter, bookingId, spacePrice, bookingStatus }: Props) {
   const [form, setForm] = useState({
     name: '',
     birth_date: '',
@@ -66,6 +67,17 @@ export default function ContractSign({ contract, isOwner, isRenter, bookingId, s
     return (
       <div className="bg-green-50 rounded-xl p-6 space-y-4">
         <h3 className="font-bold text-green-700 text-lg">✅ Contrat signé par les deux parties</h3>
+        {bookingStatus === 'active' || bookingStatus === 'ending' ? (
+          <div className="bg-green-100 rounded-lg p-4 text-sm text-green-700">
+            <p className="font-semibold">✅ Location active</p>
+            <p>Le paiement a été validé. La location est en cours.</p>
+          </div>
+        ) : (
+          <div className="bg-yellow-50 rounded-lg p-4 text-sm text-yellow-700">
+            <p className="font-semibold">⏳ En attente du paiement</p>
+            <p>Le contrat est signé. La location sera active après validation du paiement mensuel.</p>
+          </div>
+        )}
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div className="bg-white rounded-lg p-3">
             <p className="text-gray-500 text-xs mb-1">Signature propriétaire</p>
@@ -78,10 +90,7 @@ export default function ContractSign({ contract, isOwner, isRenter, bookingId, s
             <p className="text-gray-400 text-xs">{new Date(contract.renter_signed_at).toLocaleDateString('fr-FR')}</p>
           </div>
         </div>
-        <div className="bg-blue-50 rounded-lg p-4 text-sm text-blue-700">
-          <p className="font-semibold mb-1">⏳ En attente du paiement</p>
-          <p>Le contrat est signé. La location sera active après validation du paiement mensuel.</p>
-        </div>
+
         <a href="/dashboard" className="block text-center text-sm text-blue-600 hover:underline">
           Retour au dashboard →
         </a>
