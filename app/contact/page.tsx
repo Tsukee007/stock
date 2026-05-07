@@ -89,7 +89,7 @@ export default function ContactPage() {
       </div>
     </div>
 
-      <footer className="bg-white border-t border-gray-100 text-gray-500 py-10 px-4 mt-8">
+    <footer className="bg-white border-t border-gray-100 text-gray-500 py-10 px-4 mt-8">
         <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-sm">
           <div className="col-span-2 md:col-span-1 space-y-3">
             <p className="text-gray-900 font-bold text-lg">Nestock</p>
@@ -115,6 +115,6 @@ export default function ContactPage() {
         <div className="max-w-5xl mx-auto mt-8 pt-8 border-t border-gray-100 text-center text-xs text-gray-400">
           <p>2026 Nestock - Tous droits reserves</p>
         </div>
-      </footer>
+    </footer>
   )
 }
