@@ -164,3 +164,13 @@ cat /workspaces/stock/nestock-context.md
 - Créer pages CGU et Confidentialité
 - Footer présent sur toutes les pages de l'application
 - 07/05/2026 : Prix TTC unifie, CGU/Confidentialite, footer about/contact, table invoices creee, statut contrat corrige
+
+### Corrections prioritaires - Mai 2026
+- Prix incohérent : 6.95 sur annonce vs 7 sur réservation -> utiliser price_ttc partout avec 2 décimales
+- Annonce active ne peut pas être réservée, annonce en préavis réservable après fin préavis
+- Après onboarding Stripe -> rediriger vers page détail annonce (pas nouvelle annonce)
+- Si compte Stripe existe déjà -> utiliser le compte existant (ne pas recréer)
+- Page profil à créer avec infos perso + infos Stripe
+- Infos bailleur/locataire obligatoires dans contrat, sinon rediriger vers page profil
+- Montants incohérents : contrat 46.03, quittance 45.10, carte 45 -> unifier avec price_ttc 2 décimales
+- Revenus dashboard incorrects : 41+6=47 mais affiche 45
