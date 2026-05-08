@@ -174,3 +174,21 @@ cat /workspaces/stock/nestock-context.md
 - Infos bailleur/locataire obligatoires dans contrat, sinon rediriger vers page profil
 - Montants incohérents : contrat 46.03, quittance 45.10, carte 45 -> unifier avec price_ttc 2 décimales
 - Revenus dashboard incorrects : 41+6=47 mais affiche 45
+
+### Corrections effectuées - 08/05/2026
+- Prix TTC unifié partout avec 2 décimales (price_ttc)
+- Annonce active bloquée à la réservation
+- Annonce en préavis : affiche date de disponibilité
+- Redirection après onboarding Stripe vers page annonce
+- Quittances visibles dans page détail location
+- Bouton imprimer quittance (PrintButton composant client)
+- Pages CGU et Confidentialité créées
+- Footer sur pages About et Contact
+- Revenus dashboard corrigés
+- Statut contrat "Location active" après paiement
+
+### A faire ce soir
+- Page profil (infos perso + compte Stripe)
+- Infos bailleur/locataire obligatoires dans contrat
+- Tester redirection Stripe après onboarding
+- Vue propriétaire identique locataire dans dashboard
