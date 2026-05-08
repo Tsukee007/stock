@@ -147,10 +147,10 @@ export default async function ContractPage({
             <div>
               <p className="font-bold">ARTICLE 3 — LOYER</p>
               <div className="bg-gray-50 rounded-lg p-3 mt-2 space-y-1">
-                <p>Prix propriétaire (HT) : <strong>{space.price_month}€/mois</strong></p>
+                <p>Prix propriétaire (HT) : <strong>{Number(space.price_month).toFixed(2)}€/mois</strong></p>
                     <p>Commission Nestock (10%) : <strong>{(space.price_month * 0.10).toFixed(2)}€/mois</strong></p>
-                    <p>Frais Stripe : <strong>{((space.price_ttc ?? space.price_month * 1.10) * 0.015 + 0.25).toFixed(2)}€/mois</strong></p>
-                    <p>Montant total TTC : <strong>{(space.price_ttc ?? Math.round(space.price_month * 1.10)).toFixed(2)}€ par mois</strong></p>
+                    <p>Frais Stripe (~1.5% + 0.25€) : <strong>{(space.price_ttc - space.price_month - space.price_month * 0.10).toFixed(2)}€/mois</strong></p>
+                    <p>Montant total TTC : <strong>{Number(space.price_ttc).toFixed(2)}€ par mois</strong></p>
                 <p>Paiement : <strong>par prélèvement automatique via Stripe</strong></p>
                 <p>Date de prélèvement : <strong>le {new Date(booking.start_date).getDate()} de chaque mois</strong></p>
               </div>
@@ -212,7 +212,7 @@ export default async function ContractPage({
             isOwner={isOwner}
             isRenter={isRenter}
             bookingId={bookingId}
-            spacePrice={space.price_ttc ?? Math.round(space.price_month * 1.10)}
+            spacePrice={Number(space.price_ttc)}
             bookingStatus={booking.status}
           />
         )}

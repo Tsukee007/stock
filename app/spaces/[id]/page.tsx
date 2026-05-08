@@ -127,7 +127,7 @@ export default async function SpacePage({ params }: { params: Promise<{ id: stri
             <p>✅ Discutez des modalités par messagerie</p>
             <p>✅ Payez en ligne en toute sécurité</p>
           </div>
-<a href={'/booking/new?space_id=' + space['id'] + '&title=' + encodeURIComponent(space.title) + '&price=' + Math.round((space.price_ttc ?? space.price_month * 1.10))}
+<a href={'/booking/new?space_id=' + space['id'] + '&title=' + encodeURIComponent(space.title) + '&price=' + (space.price_ttc ?? space.price_month * 1.10).toFixed(2)}
   className="block w-full bg-blue-600 text-white rounded-xl p-4 font-bold text-lg hover:bg-blue-700 text-center">
   📦 Demander à réserver
 </a>

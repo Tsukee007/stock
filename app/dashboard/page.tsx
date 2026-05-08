@@ -33,7 +33,7 @@ export default async function DashboardPage() {
 
   const totalRevenue = spaces?.reduce((acc, space) => {
     const activeBookings = (space.bookings as any[])?.filter(b => b.status === 'active').length ?? 0
-    return acc + (activeBookings * space.price_month * 0.95)
+    return acc + (activeBookings * space.price_month)
   }, 0) ?? 0
 
   const pendingBookings = spaces?.flatMap(space =>
