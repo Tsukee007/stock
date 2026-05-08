@@ -7,6 +7,8 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-02
 export async function POST(req: Request) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
+  const body = await req.json().catch(() => ({}))
+  const spaceId = body.spaceId || ''
   if (!user) return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
 
   const { data: profile } = await supabase
@@ -37,8 +39,8 @@ export async function POST(req: Request) {
 
   const accountLink = await stripe.accountLinks.create({
     account: accountId,
-    refresh_url: process.env.NEXT_PUBLIC_SITE_URL + '/stripe/connect?refresh=true',
-    return_url: process.env.NEXT_PUBLIC_SITE_URL + '/stripe/connect?success=true',
+    refresh_url: process.env.NEXT_PUBLIC_SITE_URL + '/stripe/connect?refresh=true&space_id=' + (spaceId || ''),
+    return_url: process.env.NEXT_PUBLIC_SITE_URL + '/stripe/connect?success=true&space_id=' + (spaceId || ''),
     type: 'account_onboarding'
   })
 

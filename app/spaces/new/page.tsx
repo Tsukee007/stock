@@ -102,7 +102,7 @@ export default function NewSpacePage() {
     const stripeData = await res.json()
 
     if (!stripeData.connected) {
-      const connectRes = await fetch('/api/stripe/connect', { method: 'POST' })
+      const connectRes = await fetch('/api/stripe/connect', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ spaceId }) })
       const connectData = await connectRes.json()
       if (connectData.url) {
         window.location.href = connectData.url

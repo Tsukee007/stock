@@ -10,6 +10,7 @@ export default function StripeConnectPage() {
   const searchParams = useSearchParams()
   const success = searchParams.get('success')
   const refresh = searchParams.get('refresh')
+  const spaceId = searchParams.get('space_id')
 
   useEffect(() => {
     checkStatus()
@@ -57,9 +58,9 @@ export default function StripeConnectPage() {
           <p>✅ Virements directs sur votre compte</p>
           <p>✅ Tableau de bord Stripe disponible</p>
         </div>
-        <button onClick={() => router.push('/spaces/new')}
+        <button onClick={() => router.push(spaceId ? '/spaces/' + spaceId : '/spaces/new')}
           className="w-full bg-blue-600 text-white rounded-lg p-3 font-semibold hover:bg-blue-700">
-          Déposer mon annonce →
+          {spaceId ? 'Voir mon annonce →' : 'Deposer mon annonce →'}
         </button>
       </div>
     </div>
