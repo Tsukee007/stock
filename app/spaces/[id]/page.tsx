@@ -14,6 +14,15 @@ export default async function SpacePage({ params }: { params: Promise<{ id: stri
     .single()
 
   if (!space) notFound()
+  const { data: activeBookingsData } = await supabase
+    .from('bookings')
+    .select('id, status, ending_date')
+    .eq('space_id', id)
+    .in('status', ['active', 'confirmed', 'awaiting_signature', 'pending', 'ending'])
+
+  const isFullyBooked = activeBookingsData?.some(b => ['active', 'confirmed'].includes(b.status)) ?? false
+  const isEnding = activeBookingsData?.some(b => b.status === 'ending') ?? false
+  const endingDate = activeBookingsData?.find(b => b.status === 'ending')?.ending_date ?? null
 
   const { data: spaceReviews } = await supabase
     .from('reviews')
