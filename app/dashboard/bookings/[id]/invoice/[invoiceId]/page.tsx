@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound, redirect } from 'next/navigation'
+import PrintButton from '@/components/ui/PrintButton'
 
 export default async function InvoicePage({
   params
@@ -55,10 +56,7 @@ export default async function InvoicePage({
           <a href={'/dashboard/bookings/' + id} className="text-gray-500 hover:text-blue-600 text-sm">
             ← Retour
           </a>
-          <button onclick="window.print()"
-            className="text-sm bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-            🖨️ Imprimer
-          </button>
+          <PrintButton />
         </div>
 
         {/* Quittance */}
