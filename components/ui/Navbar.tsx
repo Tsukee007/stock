@@ -57,7 +57,7 @@ export default function Navbar({ user }: Props) {
             {user ? (
               <>
 <NotificationBell userId={user.id} />
-<span className="text-sm text-gray-500 truncate max-w-40">👤 {user.email}</span>
+<a href="/profile" className="text-sm text-gray-500 truncate max-w-40 hover:text-blue-600">👤 {user.email}</a>
 <a href="/api/logout" className="text-sm text-gray-400 hover:text-red-500">
   Déconnexion
 </a>
