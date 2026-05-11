@@ -30,7 +30,7 @@ export default async function ProfilePage() {
         </div>
 
         {/* Formulaire infos perso */}
-        <ProfileForm profile={profile} userId={user.id} />
+        <ProfileForm profile={profile} userId={user.id} userEmail={user.email ?? ""} />
 
         {/* Stripe Connect */}
         <div className="bg-white rounded-xl shadow-sm p-6 space-y-4">
