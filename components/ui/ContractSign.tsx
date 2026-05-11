@@ -10,9 +10,10 @@ type Props = {
   bookingId: string
   spacePrice: number
   bookingStatus: string
+  profileIncomplete: boolean
 }
 
-export default function ContractSign({ contract, isOwner, isRenter, bookingId, spacePrice, bookingStatus }: Props) {
+export default function ContractSign({ contract, isOwner, isRenter, bookingId, spacePrice, bookingStatus, profileIncomplete }: Props) {
   const [form, setForm] = useState({
     name: '',
     birth_date: '',
@@ -177,7 +178,7 @@ export default function ContractSign({ contract, isOwner, isRenter, bookingId, s
         </div>
       )}
 
-      <button onClick={handleSign} disabled={loading || !checked || !form.name.trim()}
+      <button onClick={handleSign} disabled={loading || !checked || !form.name.trim() || profileIncomplete}
         className="w-full bg-blue-600 text-white rounded-lg p-4 font-bold hover:bg-blue-700 disabled:opacity-50">
         {loading ? 'Signature en cours...' : isRenter ? '✍️ Signer et payer' : '✍️ Signer le contrat'}
       </button>

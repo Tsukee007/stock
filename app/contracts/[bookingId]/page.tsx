@@ -56,6 +56,10 @@ export default async function ContractPage({
   const isOwner = user.id === space.owner_id
   const isRenter = user.id === booking.renter_id
 
+  // Verifier si le profil de l'utilisateur connecte est complet
+  const currentProfile = isOwner ? ownerProfile : renter
+  const profileIncomplete = !currentProfile?.full_name || !currentProfile?.address || !currentProfile?.phone
+
   const formatDate = (date: string) => {
     if (!date) return '__ / __ / ____'
     return new Date(date).toLocaleDateString('fr-FR')
@@ -69,6 +73,17 @@ export default async function ContractPage({
           <a href="/dashboard" className="text-gray-500 hover:text-blue-600">← Dashboard</a>
           <h1 className="text-xl font-bold">📄 Contrat de location</h1>
         </div>
+
+        {/* Alerte profil incomplet */}
+        {profileIncomplete && (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4 space-y-3">
+            <p className="font-semibold text-red-700">⚠️ Profil incomplet</p>
+            <p className="text-sm text-red-600">Vos informations personnelles sont incompletes. Vous devez completer votre profil avant de pouvoir signer ce contrat.</p>
+            <a href="/profile" className="inline-block bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-red-700">
+              Completer mon profil →
+            </a>
+          </div>
+        )}
 
         {/* Statut */}
         <div className={`rounded-xl p-4 text-center font-semibold ${
@@ -214,6 +229,7 @@ export default async function ContractPage({
             bookingId={bookingId}
             spacePrice={Number(space.price_ttc)}
             bookingStatus={booking.status}
+            profileIncomplete={profileIncomplete}
           />
         )}
 
