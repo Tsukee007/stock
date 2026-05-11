@@ -126,7 +126,8 @@ export default async function ContractPage({
                 <p><span className="text-gray-500">Nom / Prénom :</span> {ownerProfile?.full_name ?? '—'}</p>
                 <p><span className="text-gray-500">Adresse :</span> {ownerProfile?.address ? ownerProfile.address + ', ' + ownerProfile.postal_code + ' ' + ownerProfile.city : '—'}</p>
                 <p><span className="text-gray-500">Téléphone :</span> {contract?.owner_phone ?? ownerProfile?.phone ?? '—'}</p>
-                <p><span className="text-gray-500">E-mail :</span> {contract?.owner_email ?? ownerEmail}</p>
+                <p><span className="text-gray-500">E-mail (profil) :</span> {ownerEmail}</p>
+                <p><span className="text-gray-500">E-mail (signature) :</span> {contract?.owner_email ?? '—'}</p>
                 <p><span className="text-gray-500">E-mail :</span> {contract?.owner_email ?? '—'}</p>
                 {contract?.owner_signed && (
                   <p className="text-green-600 text-xs">✅ Signé le {formatDate(contract.owner_signed_at)}</p>
@@ -137,7 +138,8 @@ export default async function ContractPage({
                 <p><span className="text-gray-500">Nom / Prénom :</span> {renter?.full_name ?? '—'}</p>
                 <p><span className="text-gray-500">Adresse :</span> {renter?.address ? renter.address + ', ' + renter.postal_code + ' ' + renter.city : '—'}</p>
                 <p><span className="text-gray-500">Téléphone :</span> {contract?.renter_phone ?? renter?.phone ?? '—'}</p>
-                <p><span className="text-gray-500">E-mail :</span> {contract?.renter_email ?? renterEmail}</p>
+                <p><span className="text-gray-500">E-mail (profil) :</span> {renterEmail}</p>
+                <p><span className="text-gray-500">E-mail (signature) :</span> {contract?.renter_email ?? '—'}</p>
                 <p><span className="text-gray-500">E-mail :</span> {contract?.renter_email ?? '—'}</p>
                 {contract?.renter_signed && (
                   <p className="text-green-600 text-xs">✅ Signé le {formatDate(contract.renter_signed_at)}</p>
