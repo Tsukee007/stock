@@ -1,5 +1,4 @@
-python3 << 'PYEOF'
-content = """'use client'
+'use client'
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -35,7 +34,7 @@ export default function ProfileForm({ profile, userId, userEmail }: { profile: P
 
   const handleSubmit = async () => {
     if (!form.full_name.trim()) { setError('Le nom est obligatoire'); return }
-    if (!form.phone.trim()) { setError('Le téléphone est obligatoire'); return }
+    if (!form.phone.trim()) { setError('Le telephone est obligatoire'); return }
     if (!form.address.trim()) { setError('L adresse est obligatoire'); return }
     if (!form.postal_code.trim()) { setError('Le code postal est obligatoire'); return }
     if (!form.city.trim()) { setError('La ville est obligatoire'); return }
@@ -85,10 +84,9 @@ export default function ProfileForm({ profile, userId, userEmail }: { profile: P
       <p className="text-xs text-gray-500">Ces informations apparaissent sur vos contrats de location. Tous les champs sont obligatoires.</p>
 
       {error && <p className="text-red-500 text-sm bg-red-50 p-3 rounded-lg">{error}</p>}
-      {saved && <p className="text-green-600 text-sm bg-green-50 p-3 rounded-lg">✅ Profil mis à jour !</p>}
-      {emailSent && <p className="text-blue-600 text-sm bg-blue-50 p-3 rounded-lg">📧 Un email de confirmation a été envoyé à {newEmail}</p>}
+      {saved && <p className="text-green-600 text-sm bg-green-50 p-3 rounded-lg">Profil mis a jour !</p>}
+      {emailSent && <p className="text-blue-600 text-sm bg-blue-50 p-3 rounded-lg">Un email de confirmation a ete envoye a {newEmail}</p>}
 
-      {/* Email */}
       <div className="bg-gray-50 rounded-lg p-4 space-y-2">
         <div className="flex items-center justify-between">
           <div>
@@ -105,7 +103,7 @@ export default function ProfileForm({ profile, userId, userEmail }: { profile: P
             <input type="email" value={newEmail} onChange={e => setNewEmail(e.target.value)}
               placeholder="nouveau@email.com"
               className="w-full border rounded-lg p-2 text-sm" />
-            <p className="text-xs text-gray-400">Un email de confirmation sera envoyé à la nouvelle adresse.</p>
+            <p className="text-xs text-gray-400">Un email de confirmation sera envoye a la nouvelle adresse.</p>
             <div className="flex gap-2">
               <button onClick={handleEmailChange} disabled={loading}
                 className="flex-1 bg-blue-600 text-white rounded-lg p-2 text-sm font-semibold hover:bg-blue-700 disabled:opacity-50">
@@ -128,7 +126,7 @@ export default function ProfileForm({ profile, userId, userEmail }: { profile: P
             className="w-full border rounded-lg p-3 text-sm" />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Téléphone *</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Telephone *</label>
           <input name="phone" value={form.phone} onChange={handleChange}
             placeholder="06 12 34 56 78"
             className="w-full border rounded-lg p-3 text-sm" />
@@ -162,8 +160,3 @@ export default function ProfileForm({ profile, userId, userEmail }: { profile: P
     </div>
   )
 }
-"""
-with open('components/ui/ProfileForm.tsx', 'w') as f:
-    f.write(content)
-print('Done')
-PYEOF
