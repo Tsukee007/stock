@@ -30,6 +30,15 @@ export default async function ContractPage({
     .eq('id', space.owner_id)
     .single()
 
+  const adminSupabase = (await import('@supabase/supabase-js')).createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+  const { data: ownerAuth } = await adminSupabase.auth.admin.getUserById(space.owner_id)
+  const { data: renterAuth } = await adminSupabase.auth.admin.getUserById(booking.renter_id)
+  const ownerEmail = ownerAuth?.user?.email ?? '—'
+  const renterEmail = renterAuth?.user?.email ?? '—'
+
   let { data: contract } = await supabase
     .from('contracts')
     .select('*')
@@ -117,6 +126,7 @@ export default async function ContractPage({
                 <p><span className="text-gray-500">Nom / Prénom :</span> {ownerProfile?.full_name ?? '—'}</p>
                 <p><span className="text-gray-500">Adresse :</span> {ownerProfile?.address ? ownerProfile.address + ', ' + ownerProfile.postal_code + ' ' + ownerProfile.city : '—'}</p>
                 <p><span className="text-gray-500">Téléphone :</span> {contract?.owner_phone ?? ownerProfile?.phone ?? '—'}</p>
+                <p><span className="text-gray-500">E-mail :</span> {contract?.owner_email ?? ownerEmail}</p>
                 <p><span className="text-gray-500">E-mail :</span> {contract?.owner_email ?? '—'}</p>
                 {contract?.owner_signed && (
                   <p className="text-green-600 text-xs">✅ Signé le {formatDate(contract.owner_signed_at)}</p>
@@ -127,6 +137,7 @@ export default async function ContractPage({
                 <p><span className="text-gray-500">Nom / Prénom :</span> {renter?.full_name ?? '—'}</p>
                 <p><span className="text-gray-500">Adresse :</span> {renter?.address ? renter.address + ', ' + renter.postal_code + ' ' + renter.city : '—'}</p>
                 <p><span className="text-gray-500">Téléphone :</span> {contract?.renter_phone ?? renter?.phone ?? '—'}</p>
+                <p><span className="text-gray-500">E-mail :</span> {contract?.renter_email ?? renterEmail}</p>
                 <p><span className="text-gray-500">E-mail :</span> {contract?.renter_email ?? '—'}</p>
                 {contract?.renter_signed && (
                   <p className="text-green-600 text-xs">✅ Signé le {formatDate(contract.renter_signed_at)}</p>
