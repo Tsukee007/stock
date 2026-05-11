@@ -192,3 +192,22 @@ cat /workspaces/stock/nestock-context.md
 - Infos bailleur/locataire obligatoires dans contrat
 - Tester redirection Stripe après onboarding
 - Vue propriétaire identique locataire dans dashboard
+
+### Corrections effectuées - 09/05/2026
+- Page profil créée avec infos perso + modification email + statut Stripe
+- Lien profil dans navbar (clic sur email)
+- Champs profil obligatoires (nom, tel, adresse, CP, ville)
+- Infos bailleur/locataire dans contrat (email profil + email signature)
+- Alerte profil incomplet avant signature contrat
+- Bouton signature désactivé si profil incomplet
+- Annonce active bloquée à la réservation
+- Annonce en préavis : date de disponibilité affichée
+- Redirection après onboarding Stripe vers page annonce
+- Prix TTC uniformes avec 2 décimales partout
+- Revenus dashboard corrigés
+
+### A faire
+- Tester redirection Stripe après onboarding
+- Vue propriétaire identique locataire dans dashboard
+- Stripe Connect avec transferts automatiques vers propriétaire
+- Stripe en production (clés live)
