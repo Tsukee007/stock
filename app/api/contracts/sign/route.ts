@@ -17,7 +17,7 @@ export async function POST(req: Request) {
 
   const { data: contract } = await supabase
     .from('contracts')
-    .select('*, spaces(title, price_month)')
+    .select('*, spaces(title, price_month, price_ttc, owner_id)')
     .eq('id', contractId)
     .single()
 
