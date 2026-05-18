@@ -211,3 +211,9 @@ cat /workspaces/stock/nestock-context.md
 - Vue propriétaire identique locataire dans dashboard
 - Stripe Connect avec transferts automatiques vers propriétaire
 - Stripe en production (clés live)
+
+### En cours - 09/05/2026
+- Stripe Connect transferts automatiques vers propriétaire
+- Session Stripe avec application_fee_percent 10% + transfer_data vers stripe_account_id propriétaire
+- price_ttc utilisé pour le montant de la session Stripe
+- ownerProfile récupéré dans contracts/sign/route.ts pour le stripe_account_id
