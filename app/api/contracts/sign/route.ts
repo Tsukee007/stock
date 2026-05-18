@@ -24,6 +24,11 @@ export async function POST(req: Request) {
   if (!contract) return NextResponse.json({ error: 'Contrat introuvable' }, { status: 404 })
 
   const spaceData = contract.spaces as any
+  const { data: ownerProfile } = await supabase
+    .from('profiles')
+    .select('stripe_account_id, stripe_onboarding_complete')
+    .eq('id', spaceData.owner_id)
+    .single()
   const adminClient = createAdminClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -101,7 +106,7 @@ export async function POST(req: Request) {
       })
     }
 
-    const priceInCents = Math.round(spaceData.price_month * 1.10 * 100)
+    const priceInCents = Math.round((spaceData.price_ttc ?? spaceData.price_month * 1.10) * 100)
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
