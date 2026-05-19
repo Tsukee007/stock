@@ -24,6 +24,8 @@ export default async function SpacePage({ params }: { params: Promise<{ id: stri
   const isEnding = activeBookingsData?.some(b => b.status === 'ending') ?? false
   const endingDate = activeBookingsData?.find(b => b.status === 'ending')?.ending_date ?? null
 
+  const isSpaceBooked = activeBookingsData?.some(b => ['active', 'confirmed'].includes(b.status)) ?? false
+
   const { data: spaceReviews } = await supabase
     .from('reviews')
     .select('*, profiles!reviews_author_id_fkey(full_name, avatar_url)')

@@ -11,7 +11,9 @@ type Space = {
   lat: number
   lng: number
   price_month: number
+  price_ttc?: number
   type: string
+  is_booked?: boolean
   surface_m2?: number
 }
 
@@ -69,7 +71,7 @@ export default function SpacesMap({ spaces, selectedId, onSelect }: Props) {
                 : 'bg-white text-blue-600 border border-blue-200 hover:bg-blue-50'
               }
             `}>
-              {Math.round(space.price_month * 1.10)}€
+              {(space.price_ttc ?? Math.round(space.price_month * 1.10)).toFixed(2)}€
             </div>
           </Marker>
         )
@@ -88,11 +90,14 @@ export default function SpacesMap({ spaces, selectedId, onSelect }: Props) {
           >
             <div className="p-2 min-w-40">
               <h3 className="font-bold text-sm">{space.title}</h3>
+              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${space.is_booked ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}`}>
+                {space.is_booked ? 'En location' : 'A louer'}
+              </span>
               <p className="text-gray-500 text-xs">📍 {space.city}</p>
               {space.surface_m2 && (
                 <p className="text-gray-500 text-xs">📐 {space.surface_m2} m²</p>
               )}
-              <p className="text-blue-600 font-bold text-sm mt-1">{Math.round(space.price_month * 1.10)}€/mois</p>
+              <p className="text-blue-600 font-bold text-sm mt-1">{(space.price_ttc ?? Math.round(space.price_month * 1.10)).toFixed(2)}€/mois</p>
               <a
                 href={`/spaces/${space.id}`}
                 className="text-xs text-blue-500 underline block mt-1"
