@@ -46,7 +46,8 @@ export default async function Home({
   let { data: rawSpaces } = await query
   let spaces = rawSpaces?.map(s => ({
     ...s,
-    is_booked: (s.bookings as any[])?.some((b: any) => ['active', 'confirmed', 'awaiting_signature'].includes(b.status)) ?? false
+    is_booked: (s.bookings as any[])?.some((b: any) => ['active', 'confirmed', 'awaiting_signature'].includes(b.status)) ?? false,
+    profiles: Array.isArray(s.profiles) ? s.profiles[0] : s.profiles
   }))
 
   if (spaces && filters.lat && filters.lng && filters.radius) {
