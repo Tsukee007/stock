@@ -42,11 +42,37 @@ export default async function DashboardPage() {
       .map(b => ({ ...b, spaceTitle: space.title, spaceId: space.id }))
   ) ?? []
 
-  const manageableBookings = spaces?.flatMap(space =>
+  const awaitingSignatureBookings = spaces?.flatMap(space =>
     ((space.bookings as any[]) ?? [])
-      .filter(b => ['confirmed', 'active', 'ending'].includes(b.status))
+      .filter(b => b.status === 'awaiting_signature')
+      .map(b => ({ ...b, spaceTitle: space.title, spaceId: space.id }))
+  ) ?? []
+
+  const confirmedBookings = spaces?.flatMap(space =>
+    ((space.bookings as any[]) ?? [])
+      .filter(b => b.status === 'confirmed')
       .map(b => ({ ...b, spaceTitle: space.title, spaceCity: space.city, spacePrice: space.price_month }))
   ) ?? []
+
+  const activeBookingsList = spaces?.flatMap(space =>
+    ((space.bookings as any[]) ?? [])
+      .filter(b => b.status === 'active')
+      .map(b => ({ ...b, spaceTitle: space.title, spaceCity: space.city, spacePrice: space.price_month }))
+  ) ?? []
+
+  const endingBookingsList = spaces?.flatMap(space =>
+    ((space.bookings as any[]) ?? [])
+      .filter(b => b.status === 'ending')
+      .map(b => ({ ...b, spaceTitle: space.title, spaceCity: space.city, spacePrice: space.price_month }))
+  ) ?? []
+
+  const endedBookingsList = spaces?.flatMap(space =>
+    ((space.bookings as any[]) ?? [])
+      .filter(b => b.status === 'ended')
+      .map(b => ({ ...b, spaceTitle: space.title, spaceCity: space.city, spacePrice: space.price_month }))
+  ) ?? []
+
+  const manageableBookings = [...confirmedBookings, ...activeBookingsList, ...endingBookingsList]
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -86,13 +112,12 @@ export default async function DashboardPage() {
           </div>
         </div>
 
+        {/* Demandes de reservation */}
         {pendingBookings.length > 0 && (
           <div>
-            <h2 className="text-lg font-bold text-gray-700 mb-4">
-              Demandes recues
-              <span className="ml-2 bg-yellow-400 text-white text-xs px-2 py-0.5 rounded-full">
-                {pendingBookings.length}
-              </span>
+            <h2 className="text-lg font-bold text-gray-700 mb-3 flex items-center gap-2">
+              📩 Demandes de reservation
+              <span className="bg-yellow-400 text-white text-xs px-2 py-0.5 rounded-full">{pendingBookings.length}</span>
             </h2>
             <div className="space-y-3">
               {pendingBookings.map(booking => (
@@ -100,36 +125,18 @@ export default async function DashboardPage() {
                   <div className="flex items-start justify-between">
                     <div>
                       <h3 className="font-semibold">{booking.spaceTitle}</h3>
-                      <p className="text-gray-600 text-xs mt-1">
-                        Demande recue le {new Date(booking.created_at).toLocaleDateString('fr-FR')}
-                      </p>
+                      <p className="text-gray-500 text-xs mt-1">Recue le {new Date(booking.created_at).toLocaleDateString('fr-FR')}</p>
                     </div>
                     <div className="flex gap-2">
-                      {booking.status === 'pending' && (
-                        <>
-                          <a href={'/contracts/' + booking.id}
-                            className="text-xs bg-green-100 text-green-700 hover:bg-green-200 px-3 py-1.5 rounded-lg font-medium transition">
-                            Accepter et signer
-                          </a>
-                          <BookingAction bookingId={booking.id} status="cancelled" label="Refuser" color="red" />
-                        </>
-                      )}
-                      {booking.status === 'awaiting_signature' && (
-                        <span className="text-xs bg-yellow-100 text-yellow-700 px-3 py-1.5 rounded-lg font-medium">
-                          ⏳ En attente signature locataire
-                        </span>
-                      )}
+                      <a href={'/contracts/' + booking.id} className="text-xs bg-green-100 text-green-700 hover:bg-green-200 px-3 py-1.5 rounded-lg font-medium">
+                        Accepter et signer
+                      </a>
+                      <BookingAction bookingId={booking.id} status="cancelled" label="Refuser" color="red" />
                     </div>
                   </div>
                   <div className="flex gap-3 mt-2">
-                    <a href={'/messages?booking_id=' + booking['id']}
-                      className="text-xs text-blue-600 hover:underline">
-                      Voir la conversation
-                    </a>
-                    <a href={'/contracts/' + booking['id']}
-                      className="text-xs text-purple-600 hover:underline">
-                      📄 Voir le contrat
-                    </a>
+                    <a href={'/messages?booking_id=' + booking['id']} className="text-xs text-blue-600 hover:underline">Messages</a>
+                    <a href={'/contracts/' + booking['id']} className="text-xs text-purple-600 hover:underline">📄 Contrat</a>
                   </div>
                 </div>
               ))}
@@ -137,65 +144,153 @@ export default async function DashboardPage() {
           </div>
         )}
 
-        {manageableBookings.length > 0 && (
+        {/* En attente de signature locataire */}
+        {awaitingSignatureBookings.length > 0 && (
           <div>
-            <h2 className="text-lg font-bold text-gray-700 mb-4">Locations en cours</h2>
+            <h2 className="text-lg font-bold text-gray-700 mb-3 flex items-center gap-2">
+              ✍️ En attente de signature locataire
+              <span className="bg-orange-400 text-white text-xs px-2 py-0.5 rounded-full">{awaitingSignatureBookings.length}</span>
+            </h2>
             <div className="space-y-3">
-              {manageableBookings.map(booking => (
+              {awaitingSignatureBookings.map(booking => (
+                <div key={booking.id} className="bg-white rounded-xl shadow-sm p-4 border-l-4 border-orange-400">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h3 className="font-semibold">{booking.spaceTitle}</h3>
+                      <p className="text-gray-500 text-xs mt-1">Demande du {new Date(booking.created_at).toLocaleDateString('fr-FR')}</p>
+                    </div>
+                    <span className="text-xs bg-orange-100 text-orange-700 px-3 py-1.5 rounded-lg font-medium">⏳ En attente</span>
+                  </div>
+                  <div className="flex gap-3 mt-2">
+                    <a href={'/messages?booking_id=' + booking['id']} className="text-xs text-blue-600 hover:underline">Messages</a>
+                    <a href={'/contracts/' + booking['id']} className="text-xs text-purple-600 hover:underline">📄 Contrat</a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* En attente de paiement */}
+        {confirmedBookings.length > 0 && (
+          <div>
+            <h2 className="text-lg font-bold text-gray-700 mb-3 flex items-center gap-2">
+              💳 En attente de paiement
+              <span className="bg-blue-400 text-white text-xs px-2 py-0.5 rounded-full">{confirmedBookings.length}</span>
+            </h2>
+            <div className="space-y-3">
+              {confirmedBookings.map(booking => (
                 <div key={booking.id} className="bg-white rounded-xl shadow-sm p-4 border-l-4 border-blue-400">
                   <div className="flex items-start justify-between">
                     <div>
                       <a href={'/dashboard/bookings/' + booking.id} className="hover:underline">
                         <h3 className="font-semibold">{booking.spaceTitle}</h3>
                       </a>
-                      <p className="text-gray-600 text-sm">
-                        {booking.spaceCity} · {booking.spacePrice}€/mois
-                      </p>
-                      <p className="text-gray-600 text-xs mt-0.5">
-                        Depuis le {booking.start_date ? new Date(booking.start_date).toLocaleDateString('fr-FR') : '—'}
-                      </p>
-                      <span className={`text-xs px-2 py-0.5 rounded-full mt-1 inline-block ${statusColors[booking.status] ?? 'bg-gray-100 text-gray-500'}`}>
-                        {statusLabels[booking.status] ?? booking.status}
-                      </span>
-                      {booking.status === 'ending' && booking.ending_date && (
-                        <div className="mt-1">
-                          <p className="text-xs text-orange-600 font-semibold">
-                            ⏳ Fin dans {getDaysLeft(booking.ending_date)} jour{getDaysLeft(booking.ending_date) > 1 ? 's' : ''}
-                          </p>
-                          <p className="text-xs text-gray-400">
-                            Le {new Date(booking.ending_date).toLocaleDateString('fr-FR')}
-                          </p>
-                        </div>
-                      )}
+                      <p className="text-gray-500 text-xs mt-1">Contrat signé — en attente du premier paiement</p>
                     </div>
-                    <div className="flex gap-2">
-                      {booking.status === 'confirmed' && (
-                        <BookingAction bookingId={booking.id} status="active" label="Marquer actif" color="blue" />
-                      )}
-                      {booking.status === 'active' && (
-                        <BookingAction bookingId={booking.id} status="ending" label="Résilier (préavis 15j)" color="gray" />
-                      )}
-                      {booking.status === 'ending' && booking.ending_date && (
-                        <div className="text-center">
-                          <p className="text-xs text-orange-600 font-semibold">
-                            ⏳ Fin dans {getDaysLeft(booking.ending_date)} jour{getDaysLeft(booking.ending_date) > 1 ? 's' : ''}
-                          </p>
-                          <p className="text-xs text-gray-400">
-                            Le {new Date(booking.ending_date).toLocaleDateString('fr-FR')}
-                          </p>
-                        </div>
-                      )}
-                    </div>
+                    <span className="text-xs bg-blue-100 text-blue-700 px-3 py-1.5 rounded-lg font-medium">💳 Paiement</span>
                   </div>
-                  <a href={`/messages?booking_id=${booking.id}`}
-                    className="text-xs text-blue-600 hover:underline mt-2 inline-block">
-                    Voir la conversation
-                  </a>
+                  <div className="flex gap-3 mt-2">
+                    <a href={'/messages?booking_id=' + booking['id']} className="text-xs text-blue-600 hover:underline">Messages</a>
+                    <a href={'/contracts/' + booking['id']} className="text-xs text-purple-600 hover:underline">📄 Contrat</a>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
         )}
+
+        {/* Locations actives */}
+        {activeBookingsList.length > 0 && (
+          <div>
+            <h2 className="text-lg font-bold text-gray-700 mb-3 flex items-center gap-2">
+              ✅ Locations actives
+              <span className="bg-green-500 text-white text-xs px-2 py-0.5 rounded-full">{activeBookingsList.length}</span>
+            </h2>
+            <div className="space-y-3">
+              {activeBookingsList.map(booking => (
+                <div key={booking.id} className="bg-white rounded-xl shadow-sm p-4 border-l-4 border-green-500">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <a href={'/dashboard/bookings/' + booking.id} className="hover:underline">
+                        <h3 className="font-semibold">{booking.spaceTitle}</h3>
+                      </a>
+                      <p className="text-gray-600 text-sm">{booking.spaceCity} · {booking.spacePrice}€/mois</p>
+                      <p className="text-gray-500 text-xs mt-0.5">Depuis le {new Date(booking.start_date).toLocaleDateString('fr-FR')}</p>
+                    </div>
+                    <BookingAction bookingId={booking.id} status="ending" label="Résilier (15j)" color="gray" />
+                  </div>
+                  <div className="flex gap-3 mt-2">
+                    <a href={'/messages?booking_id=' + booking['id']} className="text-xs text-blue-600 hover:underline">Messages</a>
+                    <a href={'/contracts/' + booking['id']} className="text-xs text-purple-600 hover:underline">📄 Contrat</a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Préavis en cours */}
+        {endingBookingsList.length > 0 && (
+          <div>
+            <h2 className="text-lg font-bold text-gray-700 mb-3 flex items-center gap-2">
+              ⏳ Préavis en cours
+              <span className="bg-orange-500 text-white text-xs px-2 py-0.5 rounded-full">{endingBookingsList.length}</span>
+            </h2>
+            <div className="space-y-3">
+              {endingBookingsList.map(booking => (
+                <div key={booking.id} className="bg-white rounded-xl shadow-sm p-4 border-l-4 border-orange-500">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <a href={'/dashboard/bookings/' + booking.id} className="hover:underline">
+                        <h3 className="font-semibold">{booking.spaceTitle}</h3>
+                      </a>
+                      <p className="text-gray-600 text-sm">{booking.spaceCity} · {booking.spacePrice}€/mois</p>
+                      {booking.ending_date && (
+                        <p className="text-orange-600 text-xs mt-0.5 font-semibold">
+                          ⏳ Fin dans {getDaysLeft(booking.ending_date)} jour{getDaysLeft(booking.ending_date) > 1 ? 's' : ''} — le {new Date(booking.ending_date).toLocaleDateString('fr-FR')}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex gap-3 mt-2">
+                    <a href={'/messages?booking_id=' + booking['id']} className="text-xs text-blue-600 hover:underline">Messages</a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Locations terminées */}
+        {endedBookingsList.length > 0 && (
+          <div>
+            <h2 className="text-lg font-bold text-gray-700 mb-3 flex items-center gap-2">
+              🏁 Locations terminées
+              <span className="bg-gray-400 text-white text-xs px-2 py-0.5 rounded-full">{endedBookingsList.length}</span>
+            </h2>
+            <div className="space-y-3">
+              {endedBookingsList.map(booking => (
+                <div key={booking.id} className="bg-white rounded-xl shadow-sm p-4 border-l-4 border-gray-300">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <a href={'/dashboard/bookings/' + booking.id} className="hover:underline">
+                        <h3 className="font-semibold">{booking.spaceTitle}</h3>
+                      </a>
+                      <p className="text-gray-600 text-sm">{booking.spaceCity} · {booking.spacePrice}€/mois</p>
+                    </div>
+                    <span className="text-xs bg-gray-100 text-gray-500 px-3 py-1.5 rounded-lg">Terminée</span>
+                  </div>
+                  <div className="flex gap-3 mt-2">
+                    <a href={'/messages?booking_id=' + booking['id']} className="text-xs text-blue-600 hover:underline">Messages</a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+
 
         <div>
           <div className="flex items-center justify-between mb-4">

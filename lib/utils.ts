@@ -1,11 +1,11 @@
 export const statusLabels: Record<string, string> = {
   message_only: 'Message',
-  pending: 'En attente',
-  confirmed: 'Confirmée',
+  pending: 'Demande de réservation en cours',
+  confirmed: 'En attente de paiement',
   active: 'Active',
   ended: 'Terminée',
   ending: 'Préavis en cours',
-  awaiting_signature: 'En attente de signature',
+  awaiting_signature: 'En attente de signature locataire',
   cancelled: 'Annulée'
 }
 
