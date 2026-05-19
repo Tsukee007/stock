@@ -82,7 +82,12 @@ export default function MapWithList({ spaces }: { spaces: Space[] }) {
                   <h3 className="font-semibold text-sm text-gray-800 leading-tight">
                     {space.title}
                   </h3>
-                  <p className="text-gray-400 text-xs mt-0.5">📍 {space.city}</p>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <p className="text-gray-400 text-xs">📍 {space.city}</p>
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${space.is_booked ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}`}>
+                      {space.is_booked ? 'En location' : 'A louer'}
+                    </span>
+                  </div>
                   {space.surface_m2 && (
                     <p className="text-gray-400 text-xs">📐 {space.surface_m2} m²</p>
                   )}
