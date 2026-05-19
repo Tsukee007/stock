@@ -113,6 +113,7 @@ export default async function ContractPage({
           <div className="text-center space-y-1">
             <h2 className="text-lg font-bold uppercase">Contrat de location d'un espace de stockage entre particuliers</h2>
             <p className="text-gray-500 text-xs">Via la plateforme Nestock — nestock.tsukee.fr</p>
+            <p className="text-gray-700 font-semibold mt-2">Annonce : {space.title}</p>
           </div>
 
           <hr />
