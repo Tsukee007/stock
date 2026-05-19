@@ -224,3 +224,11 @@ cat /workspaces/stock/nestock-context.md
 - Carte remontée en 2ème section landing page
 - Message d'erreur clair pour réservation en doublon
 - Stripe Connect transferts automatiques configurés dans contracts/sign/route.ts
+
+### Corrections effectuées - 10/05/2026
+- Dashboard restructuré par sections de statut
+- Répartition prix TTC dans page détail annonce
+- Nom de l'annonce dans en-tête contrat
+- Badge "En location" / "A louer" sur liste, carte et page détail
+- Nom propriétaire dans liste annonces
+- Carte remontée en 2ème section landing page
