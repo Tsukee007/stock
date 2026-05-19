@@ -15,6 +15,7 @@ type Space = {
   address?: string
   price_ttc?: number
   is_booked?: boolean
+  profiles?: { full_name?: string } | null
 }
 
 const typeEmoji: Record<string, string> = {
@@ -88,6 +89,9 @@ export default function MapWithList({ spaces }: { spaces: Space[] }) {
                       {space.is_booked ? 'En location' : 'A louer'}
                     </span>
                   </div>
+                  {space.profiles?.full_name && (
+                    <p className="text-gray-400 text-xs">👤 {space.profiles.full_name}</p>
+                  )}
                   {space.surface_m2 && (
                     <p className="text-gray-400 text-xs">📐 {space.surface_m2} m²</p>
                   )}

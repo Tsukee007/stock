@@ -34,7 +34,7 @@ export default async function Home({
 
   let query = supabase
     .from('spaces')
-    .select('id, title, city, lat, lng, price_month, type, surface_m2, address, price_ttc, bookings(status)')
+    .select('id, title, city, lat, lng, price_month, type, surface_m2, address, price_ttc, bookings(status), profiles(full_name)')
     .eq('is_active', true)
 
   if (filters.city && !filters.lat) query = query.ilike('city', `%${filters.city}%`)
