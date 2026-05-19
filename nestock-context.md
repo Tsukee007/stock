@@ -217,3 +217,10 @@ cat /workspaces/stock/nestock-context.md
 - Session Stripe avec application_fee_percent 10% + transfer_data vers stripe_account_id propriétaire
 - price_ttc utilisé pour le montant de la session Stripe
 - ownerProfile récupéré dans contracts/sign/route.ts pour le stripe_account_id
+
+### Corrections effectuées - 09/05/2026 (suite)
+- Badge statut "En location" / "A louer" sur carte, liste et page détail annonce
+- Nom propriétaire dans liste annonces
+- Carte remontée en 2ème section landing page
+- Message d'erreur clair pour réservation en doublon
+- Stripe Connect transferts automatiques configurés dans contracts/sign/route.ts
