@@ -98,6 +98,26 @@ export default async function Home({
         </div>
       </section>
 
+      {/* Apercu carte */}
+      <section className="py-12 px-4 bg-gray-50 border-t border-gray-100">
+        <div className="max-w-5xl mx-auto mb-6">
+          <h2 className="text-2xl font-bold text-gray-900">Espaces disponibles pres de chez vous</h2>
+          <p className="text-gray-500 text-sm mt-1">Inscrivez-vous gratuitement pour contacter les proprietaires et reserver.</p>
+        </div>
+        <div className="relative rounded-2xl overflow-hidden border border-gray-200" style={{ height: '500px' }}>
+          <SearchFilters initialFilters={filters} />
+          <div className="h-full pt-14">
+            <MapWithList spaces={spaces ?? []} />
+          </div>
+          <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-gray-50 to-transparent pointer-events-none" />
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10">
+            <a href="/register" className="bg-blue-600 text-white font-bold px-8 py-3 rounded-xl shadow-md hover:bg-blue-700 transition whitespace-nowrap text-lg">
+              S'inscrire gratuitement pour reserver
+            </a>
+          </div>
+        </div>
+      </section>
+
       {/* Stats */}
       <section className="bg-gray-50 border-b border-gray-100 py-12 px-4">
         <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
@@ -239,26 +259,6 @@ export default async function Home({
                 <p className="text-gray-500 text-sm mt-1">Une quittance de loyer est generee et envoyee par email apres chaque paiement mensuel.</p>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Apercu carte */}
-      <section className="py-12 px-4 bg-gray-50 border-t border-gray-100">
-        <div className="max-w-5xl mx-auto mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Espaces disponibles pres de chez vous</h2>
-          <p className="text-gray-500 text-sm mt-1">Inscrivez-vous gratuitement pour contacter les proprietaires et reserver.</p>
-        </div>
-        <div className="relative rounded-2xl overflow-hidden border border-gray-200" style={{ height: '500px' }}>
-          <SearchFilters initialFilters={filters} />
-          <div className="h-full pt-14">
-            <MapWithList spaces={spaces ?? []} />
-          </div>
-          <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-gray-50 to-transparent pointer-events-none" />
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10">
-            <a href="/register" className="bg-blue-600 text-white font-bold px-8 py-3 rounded-xl shadow-md hover:bg-blue-700 transition whitespace-nowrap text-lg">
-              S'inscrire gratuitement pour reserver
-            </a>
           </div>
         </div>
       </section>
