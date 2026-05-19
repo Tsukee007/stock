@@ -58,6 +58,11 @@ export default async function SpacePage({ params }: { params: Promise<{ id: stri
             <div className="text-right">
               <p className="text-3xl font-bold text-blue-600">{(space.price_ttc ?? Math.round(space.price_month * 1.10)).toFixed(2)}€</p>
               <p className="text-gray-400 text-sm">/mois TTC</p>
+              <div className="mt-2 text-xs text-gray-400 text-right space-y-0.5">
+                <p>Propriétaire : {Number(space.price_month).toFixed(2)}€</p>
+                <p>Commission Nestock : {(space.price_month * 0.10).toFixed(2)}€</p>
+                <p>Frais Stripe : {(Number(space.price_ttc) - space.price_month - space.price_month * 0.10).toFixed(2)}€</p>
+              </div>
             </div>
           </div>
         </div>
