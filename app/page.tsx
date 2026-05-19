@@ -34,7 +34,7 @@ export default async function Home({
 
   let query = supabase
     .from('spaces')
-    .select('id, title, city, lat, lng, price_month, type, surface_m2, address')
+    .select('id, title, city, lat, lng, price_month, type, surface_m2, address, price_ttc, bookings(status)')
     .eq('is_active', true)
 
   if (filters.city && !filters.lat) query = query.ilike('city', `%${filters.city}%`)
@@ -43,7 +43,11 @@ export default async function Home({
   if (filters.maxPrice) query = query.lte('price_month', parseFloat(filters.maxPrice))
   if (filters.minSurface) query = query.gte('surface_m2', parseFloat(filters.minSurface))
 
-  let { data: spaces } = await query
+  let { data: rawSpaces } = await query
+  let spaces = rawSpaces?.map(s => ({
+    ...s,
+    is_booked: (s.bookings as any[])?.some((b: any) => ['active', 'confirmed', 'awaiting_signature'].includes(b.status)) ?? false
+  }))
 
   if (spaces && filters.lat && filters.lng && filters.radius) {
     const lat = parseFloat(filters.lat)

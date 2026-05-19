@@ -32,8 +32,14 @@ export async function POST(req: Request) {
     .single()
 
   if (existingBooking) {
+    const statusMessages: Record<string, string> = {
+      pending: 'Vous avez déjà une demande en attente pour cet espace.',
+      awaiting_signature: 'Vous avez déjà un contrat en cours de signature pour cet espace.',
+      confirmed: 'Vous avez déjà une réservation confirmée pour cet espace.',
+      active: 'Vous louez déjà cet espace.',
+    }
     return NextResponse.json({ 
-      error: 'Vous avez deja une reservation en cours pour cet espace',
+      error: statusMessages[existingBooking.status] || 'Vous avez déjà une réservation en cours pour cet espace.',
       bookingId: existingBooking.id
     }, { status: 400 })
   }

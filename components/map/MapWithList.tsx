@@ -14,6 +14,7 @@ type Space = {
   surface_m2?: number
   address?: string
   price_ttc?: number
+  is_booked?: boolean
 }
 
 const typeEmoji: Record<string, string> = {
