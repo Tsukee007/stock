@@ -232,3 +232,22 @@ cat /workspaces/stock/nestock-context.md
 - Badge "En location" / "A louer" sur liste, carte et page détail
 - Nom propriétaire dans liste annonces
 - Carte remontée en 2ème section landing page
+
+### Migration domaine - 10/05/2026
+- Nouveau domaine : nestock.pro (anciennement nestock.tsukee.fr)
+- Vercel : domaine ajouté
+- Supabase : URLs mises à jour
+- Stripe : webhook mis à jour vers nestock.pro
+- Email : contact@nestock.pro créé sur Hostinger
+- Variables Vercel mises à jour
+- Code : toutes les références nestock.tsukee.fr remplacées
+- Pages forgot-password et reset-password existantes et fonctionnelles
+
+### Bugs à corriger - 11/05/2026
+- Page annonce : masquer bouton réservation pour le propriétaire
+- Page réservation : rediriger après envoi de la demande
+- Contrat : afficher adresse du local
+- Contrat propriétaire : rediriger après signature
+- Dashboard : statuts incohérents entre proprio et locataire
+- Navbar : accès profil et Stripe plus visible
+- Stripe Connect : ne pas proposer aux locataires
