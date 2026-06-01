@@ -251,3 +251,21 @@ cat /workspaces/stock/nestock-context.md
 - Dashboard : statuts incohérents entre proprio et locataire
 - Navbar : accès profil et Stripe plus visible
 - Stripe Connect : ne pas proposer aux locataires
+
+### Bugs prioritaires - 11/05/2026
+- Page annonce : masquer bouton réservation pour le propriétaire de l'annonce
+- Page réservation : rediriger vers messages après envoi de la demande (page reste figée)
+- Contrat : afficher adresse complète du local dans article 1
+- Contrat propriétaire : rediriger vers dashboard après signature
+- Dashboard : statuts incohérents proprio vs locataire
+- Navbar : accès profil et Stripe plus visible (pas seulement via email)
+- Stripe Connect : ne pas proposer aux locataires, uniquement aux propriétaires
+- Lien reset password invalide (Supabase redirect URLs à configurer)
+
+### Workflow GitHub Codespace
+- Codespace : "probable orbit"
+- Toujours utiliser Python pour éditer les fichiers complexes
+- Eviter backticks dans JSX -> utiliser space['id']
+- Git : git add . && git commit -m "message" && git push origin main
+- Si rejet : git pull origin main --rebase && git push origin main
+- Pour afficher le contexte : cat /workspaces/stock/nestock-context.md
