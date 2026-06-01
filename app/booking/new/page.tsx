@@ -51,6 +51,8 @@ export default function NewBookingPage() {
     }
 
     router.push('/messages?booking_id=' + data.bookingId)
+    return
+return
   }
 
   return (
