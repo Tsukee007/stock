@@ -6,6 +6,7 @@ import PhotoLightbox from '@/components/ui/PhotoLightbox'
 export default async function SpacePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
 
   const { data: space } = await supabase
     .from('spaces')
@@ -14,6 +15,9 @@ export default async function SpacePage({ params }: { params: Promise<{ id: stri
     .single()
 
   if (!space) notFound()
+
+  const isOwner = user?.id === space.user_id
+
   const { data: activeBookingsData } = await supabase
     .from('bookings')
     .select('id, status, ending_date')
@@ -23,7 +27,6 @@ export default async function SpacePage({ params }: { params: Promise<{ id: stri
   const isFullyBooked = activeBookingsData?.some(b => ['active', 'confirmed'].includes(b.status)) ?? false
   const isEnding = activeBookingsData?.some(b => b.status === 'ending') ?? false
   const endingDate = activeBookingsData?.find(b => b.status === 'ending')?.ending_date ?? null
-
   const isSpaceBooked = activeBookingsData?.some(b => ['active', 'confirmed'].includes(b.status)) ?? false
 
   const { data: spaceReviews } = await supabase
@@ -39,11 +42,11 @@ export default async function SpacePage({ params }: { params: Promise<{ id: stri
       <div className="max-w-2xl mx-auto p-6 space-y-6">
 
         {/* Photos */}
-{photos.length > 0 && (
-  <div className="bg-white rounded-xl shadow-sm p-4">
-    <PhotoLightbox photos={photos} />
-  </div>
-)}
+        {photos.length > 0 && (
+          <div className="bg-white rounded-xl shadow-sm p-4">
+            <PhotoLightbox photos={photos} />
+          </div>
+        )}
 
         {/* Titre et type */}
         <div className="bg-white rounded-xl shadow-sm p-6">
@@ -136,35 +139,38 @@ export default async function SpacePage({ params }: { params: Promise<{ id: stri
         )}
 
         {/* Boutons */}
-        <div className="bg-white rounded-xl shadow-sm p-6 space-y-3">
-          <h3 className="font-bold text-lg">Intéressé par cet espace ?</h3>
-          <div className="bg-gray-50 rounded-lg p-3 text-sm text-gray-600 space-y-1">
-            <p>✅ Envoyez une demande au propriétaire</p>
-            <p>✅ Discutez des modalités par messagerie</p>
-            <p>✅ Payez en ligne en toute sécurité</p>
-          </div>
-{isFullyBooked ? (
-            <div className="w-full bg-gray-100 text-gray-500 rounded-xl p-4 text-center font-semibold">
-              🔒 Espace actuellement loue
+        {!isOwner && (
+          <div className="bg-white rounded-xl shadow-sm p-6 space-y-3">
+            <h3 className="font-bold text-lg">Intéressé par cet espace ?</h3>
+            <div className="bg-gray-50 rounded-lg p-3 text-sm text-gray-600 space-y-1">
+              <p>✅ Envoyez une demande au propriétaire</p>
+              <p>✅ Discutez des modalités par messagerie</p>
+              <p>✅ Payez en ligne en toute sécurité</p>
             </div>
-          ) : isEnding && endingDate ? (
-            <div className="space-y-3">
-              <div className="w-full bg-orange-50 text-orange-700 rounded-xl p-3 text-center text-sm">
-                ⏳ Disponible le {new Date(endingDate).toLocaleDateString('fr-FR')}
+            {isFullyBooked ? (
+              <div className="w-full bg-gray-100 text-gray-500 rounded-xl p-4 text-center font-semibold">
+                🔒 Espace actuellement loué
               </div>
+            ) : isEnding && endingDate ? (
+              <div className="space-y-3">
+                <div className="w-full bg-orange-50 text-orange-700 rounded-xl p-3 text-center text-sm">
+                  ⏳ Disponible le {new Date(endingDate).toLocaleDateString('fr-FR')}
+                </div>
+                <a href={'/booking/new?space_id=' + space['id'] + '&title=' + encodeURIComponent(space.title) + '&price=' + (space.price_ttc ?? space.price_month * 1.10).toFixed(2)}
+                  className="block w-full bg-blue-600 text-white rounded-xl p-4 font-bold text-lg hover:bg-blue-700 text-center">
+                  Demander à réserver
+                </a>
+              </div>
+            ) : (
               <a href={'/booking/new?space_id=' + space['id'] + '&title=' + encodeURIComponent(space.title) + '&price=' + (space.price_ttc ?? space.price_month * 1.10).toFixed(2)}
                 className="block w-full bg-blue-600 text-white rounded-xl p-4 font-bold text-lg hover:bg-blue-700 text-center">
-                Demander a reserver
+                Faire une demande de réservation
               </a>
-            </div>
-          ) : (
-            <a href={'/booking/new?space_id=' + space['id'] + '&title=' + encodeURIComponent(space.title) + '&price=' + (space.price_ttc ?? space.price_month * 1.10).toFixed(2)}
-              className="block w-full bg-blue-600 text-white rounded-xl p-4 font-bold text-lg hover:bg-blue-700 text-center">
-              Faire une demande de reservation
-            </a>
-          )}
-          <p className="text-center text-xs text-gray-400">Gratuit et sans engagement</p>
-        </div>
+            )}
+            <p className="text-center text-xs text-gray-400">Gratuit et sans engagement</p>
+          </div>
+        )}
+
       </div>
     </div>
   )
