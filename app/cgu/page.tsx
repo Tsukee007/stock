@@ -9,7 +9,7 @@ export default function CGUPage() {
         <div className="bg-white rounded-xl shadow-sm p-8 space-y-6 text-sm text-gray-700 leading-relaxed">
           <div className="space-y-3">
             <h2 className="text-lg font-bold text-gray-900">Article 1 - Objet</h2>
-            <p>Les presentes CGU regissent l utilisation de la plateforme Nestock accessible a nestock.tsukee.fr. En accedant a la plateforme, l utilisateur accepte sans reserve les presentes CGU.</p>
+            <p>Les presentes CGU regissent l utilisation de la plateforme Nestock accessible a nestock.pro. En accedant a la plateforme, l utilisateur accepte sans reserve les presentes CGU.</p>
           </div>
           <div className="space-y-3">
             <h2 className="text-lg font-bold text-gray-900">Article 2 - Role de Nestock</h2>
@@ -41,7 +41,7 @@ export default function CGUPage() {
           </div>
           <div className="space-y-3">
             <h2 className="text-lg font-bold text-gray-900">Contact</h2>
-            <p>contact@tsukee.fr</p>
+            <p>contact@nestock.pro</p>
           </div>
         </div>
       </div>

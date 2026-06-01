@@ -112,7 +112,7 @@ export default async function ContractPage({
         <div className="bg-white rounded-xl shadow-sm p-6 md:p-8 space-y-6 text-sm">
           <div className="text-center space-y-1">
             <h2 className="text-lg font-bold uppercase">Contrat de location d'un espace de stockage entre particuliers</h2>
-            <p className="text-gray-500 text-xs">Via la plateforme Nestock — nestock.tsukee.fr</p>
+            <p className="text-gray-500 text-xs">Via la plateforme Nestock — nestock.pro</p>
             <p className="text-gray-700 font-semibold mt-2">Annonce : {space.title}</p>
           </div>
 
@@ -226,7 +226,7 @@ export default async function ContractPage({
           <hr />
 
           <div className="text-sm text-gray-500 space-y-1">
-            <p>Fait via la plateforme Nestock — nestock.tsukee.fr</p>
+            <p>Fait via la plateforme Nestock — nestock.pro</p>
             <p>Le : {formatDate(contract?.created_at ?? new Date().toISOString())}</p>
             <p>En deux exemplaires électroniques.</p>
           </div>

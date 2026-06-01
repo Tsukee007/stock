@@ -12,7 +12,7 @@ export default function ConfidentialitePage() {
 
           <div className="space-y-3">
             <h2 className="text-lg font-bold text-gray-900">1 — Responsable du traitement</h2>
-            <p>Nestock, accessible à nestock.tsukee.fr, est responsable du traitement de vos données personnelles. Contact : contact@tsukee.fr</p>
+            <p>Nestock, accessible à nestock.pro, est responsable du traitement de vos données personnelles. Contact : contact@nestock.pro</p>
           </div>
 
           <div className="space-y-3">
@@ -70,7 +70,7 @@ export default function ConfidentialitePage() {
               <li>Droit à la portabilité</li>
               <li>Droit d'opposition</li>
             </ul>
-            <p>Pour exercer ces droits : <a href="mailto:contact@tsukee.fr" className="text-blue-600 hover:underline">contact@tsukee.fr</a></p>
+            <p>Pour exercer ces droits : <a href="mailto:contact@nestock.pro" className="text-blue-600 hover:underline">contact@nestock.pro</a></p>
           </div>
 
           <div className="space-y-3">
@@ -85,7 +85,7 @@ export default function ConfidentialitePage() {
 
           <div className="space-y-3">
             <h2 className="text-lg font-bold text-gray-900">10 — Contact et réclamations</h2>
-            <p>Pour toute question : <a href="mailto:contact@tsukee.fr" className="text-blue-600 hover:underline">contact@tsukee.fr</a></p>
+            <p>Pour toute question : <a href="mailto:contact@nestock.pro" className="text-blue-600 hover:underline">contact@nestock.pro</a></p>
             <p>Vous pouvez également adresser une réclamation à la CNIL : <a href="https://www.cnil.fr" className="text-blue-600 hover:underline" target="_blank">www.cnil.fr</a></p>
           </div>
 

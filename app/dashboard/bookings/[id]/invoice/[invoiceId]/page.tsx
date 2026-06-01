@@ -65,7 +65,7 @@ export default async function InvoicePage({
           {/* En-tête */}
           <div className="text-center border-b-2 border-blue-600 pb-6">
             <h1 className="text-2xl font-bold text-blue-600">NESTOCK</h1>
-            <p className="text-gray-500 text-xs">nestock.tsukee.fr</p>
+            <p className="text-gray-500 text-xs">nestock.pro</p>
             <h2 className="text-xl font-bold mt-4 text-gray-800">QUITTANCE DE LOYER</h2>
             <p className="text-gray-500 text-sm mt-1">Ref. {invoice.reference}</p>
             <p className="text-gray-500 text-sm">Date : {dateStr}</p>
@@ -127,7 +127,7 @@ export default async function InvoicePage({
           <div className="border-t pt-4 text-center text-xs text-gray-400 space-y-1">
             <p>Quittance générée automatiquement par la plateforme Nestock</p>
             <p>Ce document atteste du paiement effectué et vaut quittance de loyer.</p>
-            <p>nestock.tsukee.fr — contact@tsukee.fr</p>
+            <p>nestock.pro — contact@nestock.pro</p>
           </div>
 
         </div>

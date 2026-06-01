@@ -30,7 +30,7 @@ function generateQuittanceHtml(data: {
       
       <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #2563eb; padding-bottom: 20px;">
         <h1 style="color: #2563eb; margin: 0; font-size: 24px;">NESTOCK</h1>
-        <p style="color: #64748b; margin: 5px 0 0; font-size: 12px;">nestock.tsukee.fr</p>
+        <p style="color: #64748b; margin: 5px 0 0; font-size: 12px;">nestock.pro</p>
         <h2 style="margin: 15px 0 0; font-size: 18px; color: #1e293b;">QUITTANCE DE LOYER</h2>
         <p style="margin: 5px 0 0; color: #64748b; font-size: 13px;">Réf. ${data.reference}</p>
       </div>
@@ -89,7 +89,7 @@ function generateQuittanceHtml(data: {
 
       <div style="border-top: 1px solid #e2e8f0; padding-top: 15px; text-align: center;">
         <p style="color: #64748b; font-size: 12px; margin: 0;">
-          Quittance générée automatiquement par la plateforme Nestock — nestock.tsukee.fr
+          Quittance générée automatiquement par la plateforme Nestock — nestock.pro
         </p>
         <p style="color: #64748b; font-size: 12px; margin: 5px 0 0;">
           Ce document atteste du paiement effectué et vaut quittance de loyer.
