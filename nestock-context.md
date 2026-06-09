@@ -276,3 +276,12 @@ cat /workspaces/stock/nestock-context.md
 - Stripe Connect uniquement affiché pour les propriétaires (page profil)
 - Redirection vers dashboard après signature propriétaire dans contrat
 - Navbar : lien profil visible en desktop (bouton) et mobile (barre du bas + menu hamburger)
+
+### Corrections effectuées - 09/06/2026 (suite)
+- Route API /api/stripe/portal créée pour accès portail paiement locataire
+- Lien dashboard Stripe pour propriétaire connecté dans page profil
+- Lien portail paiement Stripe pour locataire actif dans page profil
+- NEXT_PUBLIC_SITE_URL mis à jour vers https://nestock.pro dans Vercel
+- Webhook Stripe : gestion annulation abonnement par locataire (customer.subscription.deleted / cancel_at_period_end)
+- Notification + email au propriétaire quand locataire annule sur Stripe
+- Booking passé en statut "ending" automatiquement lors d'une annulation Stripe
