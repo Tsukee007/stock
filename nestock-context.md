@@ -269,3 +269,10 @@ cat /workspaces/stock/nestock-context.md
 - Git : git add . && git commit -m "message" && git push origin main
 - Si rejet : git pull origin main --rebase && git push origin main
 - Pour afficher le contexte : cat /workspaces/stock/nestock-context.md
+
+### Corrections effectuées - 09/06/2026
+- Bouton réservation masqué pour le propriétaire sur page annonce
+- Redirection vers messages après envoi demande de réservation
+- Stripe Connect uniquement affiché pour les propriétaires (page profil)
+- Redirection vers dashboard après signature propriétaire dans contrat
+- Navbar : lien profil visible en desktop (bouton) et mobile (barre du bas + menu hamburger)
