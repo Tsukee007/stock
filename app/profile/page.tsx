@@ -21,6 +21,15 @@ export default async function ProfilePage() {
 
   const isOwner = mySpaces && mySpaces.length > 0
 
+  const { data: myBookings } = await supabase
+    .from('bookings')
+    .select('id')
+    .eq('renter_id', user.id)
+    .in('status', ['active', 'confirmed', 'ending'])
+    .limit(1)
+
+  const isRenter = myBookings && myBookings.length > 0
+
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       <div className="max-w-2xl mx-auto p-4 md:p-6 space-y-6">
@@ -33,13 +42,19 @@ export default async function ProfilePage() {
 
         {isOwner && (
           <div className="bg-white rounded-xl shadow-sm p-6 space-y-4">
-            <h2 className="font-bold text-lg">💳 Compte Stripe</h2>
+            <h2 className="font-bold text-lg">💳 Compte Stripe — Propriétaire</h2>
             {profile?.stripe_onboarding_complete ? (
               <div className="space-y-3">
                 <div className="bg-green-50 rounded-lg p-4 text-sm text-green-700">
                   <p className="font-semibold">✅ Compte Stripe connecté</p>
                   <p>Vos loyers sont virés automatiquement sur votre compte.</p>
                 </div>
+                <a href="https://dashboard.stripe.com/login"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block text-center bg-green-600 text-white px-4 py-3 rounded-lg hover:bg-green-700 transition text-sm font-semibold">
+                  Accéder à mon dashboard Stripe →
+                </a>
               </div>
             ) : (
               <div className="space-y-3">
@@ -53,6 +68,20 @@ export default async function ProfilePage() {
                 </a>
               </div>
             )}
+          </div>
+        )}
+
+        {isRenter && (
+          <div className="bg-white rounded-xl shadow-sm p-6 space-y-4">
+            <h2 className="font-bold text-lg">💳 Mes paiements — Locataire</h2>
+            <div className="bg-blue-50 rounded-lg p-4 text-sm text-blue-700">
+              <p className="font-semibold">ℹ️ Gérer mes paiements</p>
+              <p>Accédez au portail Stripe pour gérer votre abonnement, vos moyens de paiement et consulter vos factures.</p>
+            </div>
+            <a href="/api/stripe/portal"
+              className="block text-center bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition text-sm font-semibold">
+              Accéder à mon espace paiement →
+            </a>
           </div>
         )}
 
