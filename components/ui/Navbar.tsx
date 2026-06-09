@@ -26,13 +26,14 @@ export default function Navbar({ user }: Props) {
     { href: '/messages', label: '💬', title: 'Messages' },
     { href: '/dashboard', label: '📋', title: 'Dashboard' },
     { href: '/spaces/new', label: '➕', title: 'Déposer' },
+    { href: '/profile', label: '👤', title: 'Profil' },
   ]
 
   return (
     <>
       <header className="bg-white shadow-sm sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-          
+
           {/* Logo */}
           <a href="/" className="text-xl font-bold text-blue-600 flex items-center gap-2">
             🗄️ Nestock
@@ -56,11 +57,18 @@ export default function Navbar({ user }: Props) {
           <div className="hidden md:flex items-center gap-3">
             {user ? (
               <>
-<NotificationBell userId={user.id} />
-<a href="/profile" className="text-sm text-gray-500 truncate max-w-40 hover:text-blue-600">👤 {user.email}</a>
-<a href="/api/logout" className="text-sm text-gray-400 hover:text-red-500">
-  Déconnexion
-</a>
+                <NotificationBell userId={user.id} />
+                <a href="/profile"
+                  className={`text-sm font-medium px-3 py-1.5 rounded-lg transition ${
+                    pathname === '/profile'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-blue-50 hover:text-blue-600'
+                  }`}>
+                  👤 Mon profil
+                </a>
+                <a href="/api/logout" className="text-sm text-gray-400 hover:text-red-500">
+                  Déconnexion
+                </a>
               </>
             ) : (
               <>
@@ -104,6 +112,11 @@ export default function Navbar({ user }: Props) {
               ))}
               {user ? (
                 <div className="pt-2 space-y-2">
+                  <a href="/profile"
+                    onClick={() => setMenuOpen(false)}
+                    className="block text-sm font-medium py-2 text-blue-600 border-b border-gray-100">
+                    👤 Mon profil
+                  </a>
                   <p className="text-xs text-gray-400 truncate">{user.email}</p>
                   <a href="/api/logout" className="block text-sm text-red-500 py-2">
                     Déconnexion
