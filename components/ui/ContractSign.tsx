@@ -14,10 +14,7 @@ type Props = {
 }
 
 export default function ContractSign({ contract, isOwner, isRenter, bookingId, spacePrice, bookingStatus, profileIncomplete }: Props) {
-  const [form, setForm] = useState({
-    name: '',
-    birth_date: '',
-  })
+  const [form, setForm] = useState({ name: '', birth_date: '' })
   const [checked, setChecked] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -58,12 +55,11 @@ export default function ContractSign({ contract, isOwner, isRenter, bookingId, s
     if (!isOwner && data.checkoutUrl) {
       window.location.href = data.checkoutUrl
     } else {
-      router.refresh()
+      router.push('/dashboard')
     }
     setLoading(false)
   }
 
-  // Contrat entièrement signé
   if (fullySigned) {
     return (
       <div className="bg-green-50 rounded-xl p-6 space-y-4">
@@ -91,7 +87,6 @@ export default function ContractSign({ contract, isOwner, isRenter, bookingId, s
             <p className="text-gray-400 text-xs">{new Date(contract.renter_signed_at).toLocaleDateString('fr-FR')}</p>
           </div>
         </div>
-
         <a href="/dashboard" className="block text-center text-sm text-blue-600 hover:underline">
           Retour au dashboard →
         </a>
@@ -99,7 +94,6 @@ export default function ContractSign({ contract, isOwner, isRenter, bookingId, s
     )
   }
 
-  // Déjà signé par cet utilisateur
   if (alreadySigned) {
     return (
       <div className="bg-blue-50 rounded-xl p-6 space-y-3">
@@ -111,7 +105,6 @@ export default function ContractSign({ contract, isOwner, isRenter, bookingId, s
     )
   }
 
-  // Locataire attend que le propriétaire signe
   if (isRenter && !contract.owner_signed) {
     return (
       <div className="bg-yellow-50 rounded-xl p-6">
@@ -151,7 +144,6 @@ export default function ContractSign({ contract, isOwner, isRenter, bookingId, s
             onChange={e => setForm(prev => ({ ...prev, birth_date: e.target.value }))}
             className="w-full border rounded-lg p-3" />
         </div>
-
       </div>
 
       <div className="flex items-start gap-3">
