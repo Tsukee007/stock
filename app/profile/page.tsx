@@ -16,7 +16,7 @@ export default async function ProfilePage() {
   const { data: mySpaces } = await supabase
     .from('spaces')
     .select('id')
-    .eq('user_id', user.id)
+    .eq('owner_id', user.id)
     .limit(1)
 
   const isOwner = mySpaces && mySpaces.length > 0
