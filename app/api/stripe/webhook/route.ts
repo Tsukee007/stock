@@ -324,5 +324,54 @@ export async function POST(req: Request) {
     }
   }
 
+  if (event.type === 'customer.subscription.deleted' || 
+      (event.type === 'customer.subscription.updated' && (event.data.object as any).cancel_at_period_end === true)) {
+    const subscription = event.data.object as any
+    const subscriptionId = subscription.id
+
+    const { data: booking } = await supabase
+      .from('bookings')
+      .select('id, renter_id, space_id')
+      .eq('stripe_subscription_id', subscriptionId)
+      .single()
+
+    if (booking) {
+      await supabase.from('bookings').update({ status: 'ending' }).eq('id', booking.id)
+
+      const { data: spaceData } = await supabase
+        .from('spaces')
+        .select('owner_id, title')
+        .eq('id', booking.space_id)
+        .single()
+
+      await supabase.from('notifications').insert({
+        user_id: booking.renter_id,
+        type: 'subscription_cancelled',
+        title: 'Abonnement annule',
+        message: 'Votre abonnement a ete annule via Stripe. La location se terminera a la fin de la periode en cours.',
+        link: '/dashboard/bookings/' + booking.id
+      })
+
+      if (spaceData) {
+        await supabase.from('notifications').insert({
+          user_id: spaceData.owner_id,
+          type: 'subscription_cancelled',
+          title: 'Annulation locataire',
+          message: 'Le locataire a annule son abonnement Stripe pour ' + spaceData.title + '. La location passera en previs et se terminera a la fin de la periode en cours.',
+          link: '/dashboard'
+        })
+
+        const { data: ownerUser } = await supabase.auth.admin.getUserById(spaceData.owner_id)
+        if (ownerUser?.user?.email) {
+          await sendEmail({
+            to: ownerUser.user.email,
+            subject: 'Annulation abonnement — ' + spaceData.title,
+            html: '<div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto;"><h2 style="color: #2563eb;">Nestock</h2><p>Le locataire a annule son abonnement Stripe pour <strong>' + spaceData.title + '</strong>.</p><p>La location passera en statut <strong>Préavis</strong> et se terminera a la fin de la periode en cours.</p><p>Vous recevrez une notification quand la location sera officiellement terminee.</p></div>'
+          })
+        }
+      }
+    }
+  }
+
   return NextResponse.json({ received: true })
 }
