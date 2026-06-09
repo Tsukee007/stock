@@ -285,3 +285,12 @@ cat /workspaces/stock/nestock-context.md
 - Webhook Stripe : gestion annulation abonnement par locataire (customer.subscription.deleted / cancel_at_period_end)
 - Notification + email au propriétaire quand locataire annule sur Stripe
 - Booking passé en statut "ending" automatiquement lors d'une annulation Stripe
+
+### A faire - Process résiliation complet
+- Bouton "Donner mon préavis" dans dashboard locataire
+- Notification propriétaire avec bouton "Accusé de réception"
+- Si propriétaire ne valide pas sous 15j -> résiliation automatique (cron Vercel)
+- Email récapitulatif aux deux parties
+- FAQ et landing page : expliquer le process de résiliation
+- Webhook Stripe annulation abonnement : testé via SQL Supabase, fonctionne (statut ending + notification)
+- Stripe CLI non installable depuis Codespace (domaine bloqué)
