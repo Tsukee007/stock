@@ -41,7 +41,8 @@ export async function POST(
 
     await supabase.from('bookings').update({
       status: 'ending',
-      ending_date: endingDate.toISOString()
+      ending_date: endingDate.toISOString(),
+      notice_initiated_by: isRenter ? 'renter' : 'owner'
     }).eq('id', id)
 
     const otherUserId = isOwner ? booking.renter_id : spaceData.owner_id
@@ -66,7 +67,40 @@ export async function POST(
       await sendEmail({
         to: otherUser.user.email,
         subject: 'Préavis de résiliation - ' + spaceData.title,
-        html: '<div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto;"><h2 style="color: #2563eb;">Nestock</h2><p>' + otherRole + ' a initié la résiliation de la location pour <strong>' + spaceData.title + '</strong>.</p><p>La location prendra fin le <strong>' + endingDate.toLocaleDateString('fr-FR') + '</strong>.</p><a href="' + process.env.NEXT_PUBLIC_SITE_URL + '/dashboard/bookings/' + id + '" style="background: #2563eb; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block; margin-top: 16px;">Voir les détails</a></div>'
+        html: '<div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto;"><h2 style="color: #2563eb;">Nestock</h2><p>' + otherRole + ' a initié la résiliation de la location pour <strong>' + spaceData.title + '</strong>.</p><p>La location prendra fin le <strong>' + endingDate.toLocaleDateString('fr-FR') + '</strong>.</p><p>Veuillez accuser réception depuis votre dashboard.</p><a href="' + process.env.NEXT_PUBLIC_SITE_URL + '/dashboard" style="background: #2563eb; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block; margin-top: 16px;">Accuser réception</a></div>'
+      })
+    }
+
+    return NextResponse.json({ success: true })
+  }
+
+  if (status === 'acknowledge_notice') {
+    await supabase.from('bookings').update({
+      notice_acknowledged_at: new Date().toISOString()
+    }).eq('id', id)
+
+    const otherUserId = isOwner ? booking.renter_id : spaceData.owner_id
+
+    await supabase.from('notifications').insert({
+      user_id: otherUserId,
+      type: 'booking',
+      title: 'Préavis accusé de réception',
+      message: 'Le propriétaire a accusé réception du préavis pour ' + spaceData.title + '. La location se terminera le ' + new Date(booking.ending_date).toLocaleDateString('fr-FR'),
+      link: '/dashboard/bookings/' + id
+    })
+
+    await supabase.from('messages').insert({
+      booking_id: id,
+      sender_id: user.id,
+      content: 'Le propriétaire a bien accusé réception du préavis de résiliation.'
+    })
+
+    const { data: otherUser } = await adminClient.auth.admin.getUserById(otherUserId)
+    if (otherUser?.user?.email) {
+      await sendEmail({
+        to: otherUser.user.email,
+        subject: 'Préavis accusé de réception - ' + spaceData.title,
+        html: '<div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto;"><h2 style="color: #2563eb;">Nestock</h2><p>Le propriétaire a accusé réception de votre préavis pour <strong>' + spaceData.title + '</strong>.</p><p>La location se terminera le <strong>' + new Date(booking.ending_date).toLocaleDateString('fr-FR') + '</strong>.</p></div>'
       })
     }
 
