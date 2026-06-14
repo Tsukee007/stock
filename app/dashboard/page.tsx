@@ -14,20 +14,20 @@ export default async function DashboardPage() {
 
   const { data: spaces } = await supabase
     .from('spaces')
-    .select('*, bookings(id, status, renter_id, created_at)')
+    .select('*, bookings(id, status, renter_id, created_at, notice_initiated_by, notice_acknowledged_at, ending_date)')
     .eq('owner_id', user.id)
     .order('created_at', { ascending: false })
 
   const spacesWithStatus = spaces?.map(space => ({
     ...space,
-    hasActiveBooking: (space.bookings as any[])?.some(b => 
+    hasActiveBooking: (space.bookings as any[])?.some(b =>
       ['pending', 'awaiting_signature', 'confirmed', 'active', 'ending'].includes(b.status)
     ) ?? false
   })) ?? []
 
   const { data: bookings } = await supabase
     .from('bookings')
-    .select('*, spaces(id, title, city, price_month, owner_id), reviews(id, author_id), ending_date, start_date')
+    .select('*, spaces(id, title, city, price_month, owner_id), reviews(id, author_id), ending_date, start_date, notice_initiated_by, notice_acknowledged_at')
     .eq('renter_id', user.id)
     .order('created_at', { ascending: false })
 
@@ -71,8 +71,6 @@ export default async function DashboardPage() {
       .filter(b => b.status === 'ended')
       .map(b => ({ ...b, spaceTitle: space.title, spaceCity: space.city, spacePrice: space.price_month }))
   ) ?? []
-
-  const manageableBookings = [...confirmedBookings, ...activeBookingsList, ...endingBookingsList]
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -251,6 +249,20 @@ export default async function DashboardPage() {
                           ⏳ Fin dans {getDaysLeft(booking.ending_date)} jour{getDaysLeft(booking.ending_date) > 1 ? 's' : ''} — le {new Date(booking.ending_date).toLocaleDateString('fr-FR')}
                         </p>
                       )}
+                      {booking.notice_initiated_by === 'renter' && (
+                        <p className="text-xs text-gray-500 mt-1">Préavis initié par le locataire</p>
+                      )}
+                      {booking.notice_initiated_by === 'owner' && (
+                        <p className="text-xs text-gray-500 mt-1">Préavis initié par le propriétaire</p>
+                      )}
+                    </div>
+                    <div className="flex flex-col gap-2 items-end">
+                      {booking.notice_initiated_by === 'renter' && !booking.notice_acknowledged_at && (
+                        <BookingAction bookingId={booking.id} status="acknowledge_notice" label="✅ Accuser réception" color="green" />
+                      )}
+                      {booking.notice_acknowledged_at && (
+                        <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-lg">✅ Accusé le {new Date(booking.notice_acknowledged_at).toLocaleDateString('fr-FR')}</span>
+                      )}
                     </div>
                   </div>
                   <div className="flex gap-3 mt-2">
@@ -289,8 +301,6 @@ export default async function DashboardPage() {
             </div>
           </div>
         )}
-
-
 
         <div>
           <div className="flex items-center justify-between mb-4">
@@ -350,7 +360,7 @@ export default async function DashboardPage() {
                         Modifier
                       </a>
                       {!space.hasActiveBooking && (
-<DeleteSpaceButton  spaceId={space['id']} />
+                        <DeleteSpaceButton spaceId={space['id']} />
                       )}
                     </div>
                   </div>
@@ -412,6 +422,12 @@ export default async function DashboardPage() {
                           <p className="text-xs text-gray-400">
                             Le {new Date(booking.ending_date).toLocaleDateString('fr-FR')}
                           </p>
+                          {!booking.notice_acknowledged_at && (
+                            <p className="text-xs text-orange-500 mt-1">⏳ En attente d'accusé de réception</p>
+                          )}
+                          {booking.notice_acknowledged_at && (
+                            <p className="text-xs text-green-600 mt-1">✅ Accusé de réception reçu</p>
+                          )}
                         </div>
                       )}
                       <a href={'/messages?booking_id=' + booking.id}
