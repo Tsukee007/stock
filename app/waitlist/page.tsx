@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
+
 
 export default function WaitlistPage() {
   const [prenom, setPrenom] = useState('')
@@ -57,7 +57,7 @@ export default function WaitlistPage() {
       desc: 'Trouvez des espaces autour de vous avec les prix en temps reel sur une carte interactive.',
       mockup: (
         <div className="w-full rounded-xl overflow-hidden shadow-lg">
-          <Image src="/screenshot-carte.png" alt="Carte interactive Nestock" width={800} height={450} className="w-full h-auto object-cover" />
+          <img src="/screenshot-carte.png" alt="Carte interactive Nestock" className="w-full h-auto object-cover" />
         </div>
       )
     },
