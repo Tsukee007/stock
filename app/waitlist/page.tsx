@@ -57,7 +57,7 @@ export default function WaitlistPage() {
       desc: 'Trouvez des espaces autour de vous avec les prix en temps reel sur une carte interactive.',
       mockup: (
         <div className="w-full rounded-xl overflow-hidden shadow-lg">
-          <img src="/screenshot-carte.png" alt="Carte interactive Nestock" className="w-full h-auto object-cover" />
+          <img src="https://i.imgur.com/5Av8VUJ.png" alt="Carte interactive Nestock" className="w-full h-auto object-cover" />
         </div>
       )
     },
