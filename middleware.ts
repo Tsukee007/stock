@@ -3,20 +3,19 @@ import type { NextRequest } from 'next/server'
 
 const PUBLIC_PATHS = [
   '/waitlist',
+  '/admin-waitlist',
   '/api/waitlist',
+  '/api/admin-waitlist',
   '/_next',
   '/favicon.ico',
 ]
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
-
   const isPublic = PUBLIC_PATHS.some(path => pathname.startsWith(path))
-
   if (!isPublic) {
     return NextResponse.redirect(new URL('/waitlist', request.url))
   }
-
   return NextResponse.next()
 }
 
