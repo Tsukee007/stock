@@ -10,6 +10,7 @@ export default function WaitlistPage() {
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
+  const [activeFeature, setActiveFeature] = useState(0)
 
   async function handleSubmit() {
     setError('')
@@ -37,6 +38,185 @@ export default function WaitlistPage() {
     }
   }
 
+  const features = [
+    {
+      label: 'Carte interactive',
+      desc: 'Trouvez des espaces autour de vous avec les prix en temps reel sur une carte interactive.',
+      mockup: (
+        <div className="w-full h-64 bg-blue-50 rounded-xl overflow-hidden relative">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-100 to-green-50">
+            <div className="absolute top-4 left-4 right-4 bg-white rounded-lg shadow px-3 py-2 flex items-center gap-2">
+              <div className="w-4 h-4 bg-gray-200 rounded-full"></div>
+              <div className="h-2 bg-gray-200 rounded flex-1"></div>
+              <div className="w-16 h-6 bg-blue-600 rounded text-white text-xs flex items-center justify-center font-medium">Chercher</div>
+            </div>
+            <div className="absolute top-16 left-8 bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">45 €/mois</div>
+            <div className="absolute top-24 left-32 bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">60 €/mois</div>
+            <div className="absolute top-12 right-12 bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">35 €/mois</div>
+            <div className="absolute bottom-16 left-16 bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">50 €/mois</div>
+            <div className="absolute bottom-8 right-8 bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">40 €/mois</div>
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute top-20 left-0 right-0 h-px bg-gray-400"></div>
+              <div className="absolute top-32 left-0 right-0 h-px bg-gray-400"></div>
+              <div className="absolute top-44 left-0 right-0 h-px bg-gray-400"></div>
+              <div className="absolute left-20 top-0 bottom-0 w-px bg-gray-400"></div>
+              <div className="absolute left-40 top-0 bottom-0 w-px bg-gray-400"></div>
+              <div className="absolute right-20 top-0 bottom-0 w-px bg-gray-400"></div>
+            </div>
+          </div>
+        </div>
+      )
+    },
+    {
+      label: 'Messagerie',
+      desc: 'Echangez directement avec le proprietaire ou le locataire via la messagerie integree.',
+      mockup: (
+        <div className="w-full h-64 bg-gray-50 rounded-xl overflow-hidden p-4 flex flex-col gap-3">
+          <div className="flex items-center gap-3 pb-3 border-b border-gray-200">
+            <div className="w-8 h-8 bg-blue-200 rounded-full flex items-center justify-center text-xs font-bold text-blue-700">M</div>
+            <div>
+              <div className="text-sm font-semibold text-gray-800">Marie D.</div>
+              <div className="text-xs text-green-500">En ligne</div>
+            </div>
+          </div>
+          <div className="flex flex-col gap-2 flex-1">
+            <div className="flex justify-start">
+              <div className="bg-white border border-gray-200 rounded-2xl rounded-tl-sm px-3 py-2 text-xs text-gray-700 max-w-48 shadow-sm">
+                Bonjour, votre garage est toujours disponible ?
+              </div>
+            </div>
+            <div className="flex justify-end">
+              <div className="bg-blue-600 rounded-2xl rounded-tr-sm px-3 py-2 text-xs text-white max-w-48">
+                Oui, disponible des maintenant !
+              </div>
+            </div>
+            <div className="flex justify-start">
+              <div className="bg-white border border-gray-200 rounded-2xl rounded-tl-sm px-3 py-2 text-xs text-gray-700 max-w-48 shadow-sm">
+                Super, je suis interesse pour 3 mois.
+              </div>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <div className="flex-1 bg-white border border-gray-200 rounded-full px-3 py-2 text-xs text-gray-400">Votre message...</div>
+            <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+              <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      )
+    },
+    {
+      label: 'Dashboard',
+      desc: 'Gerez toutes vos locations, contrats et quittances depuis un tableau de bord clair.',
+      mockup: (
+        <div className="w-full h-64 bg-gray-50 rounded-xl overflow-hidden p-4">
+          <div className="text-sm font-semibold text-gray-800 mb-3">Mon tableau de bord</div>
+          <div className="grid grid-cols-3 gap-2 mb-3">
+            <div className="bg-white rounded-lg p-2 shadow-sm text-center">
+              <div className="text-lg font-bold text-blue-600">2</div>
+              <div className="text-xs text-gray-500">Locations</div>
+            </div>
+            <div className="bg-white rounded-lg p-2 shadow-sm text-center">
+              <div className="text-lg font-bold text-green-600">240€</div>
+              <div className="text-xs text-gray-500">Ce mois</div>
+            </div>
+            <div className="bg-white rounded-lg p-2 shadow-sm text-center">
+              <div className="text-lg font-bold text-purple-600">6</div>
+              <div className="text-xs text-gray-500">Quittances</div>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <div className="bg-white rounded-lg p-2 shadow-sm flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span className="text-xs text-gray-700">Garage - Lyon 6e</span>
+              </div>
+              <span className="text-xs font-medium text-green-600">Active</span>
+            </div>
+            <div className="bg-white rounded-lg p-2 shadow-sm flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span className="text-xs text-gray-700">Cave - Bordeaux</span>
+              </div>
+              <span className="text-xs font-medium text-green-600">Active</span>
+            </div>
+            <div className="bg-white rounded-lg p-2 shadow-sm flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
+                <span className="text-xs text-gray-700">Grenier - Paris 15e</span>
+              </div>
+              <span className="text-xs font-medium text-gray-400">Terminee</span>
+            </div>
+          </div>
+        </div>
+      )
+    },
+    {
+      label: 'Contrat & Signature',
+      desc: 'Signez votre contrat de location electroniquement en quelques secondes, sans imprimante.',
+      mockup: (
+        <div className="w-full h-64 bg-gray-50 rounded-xl overflow-hidden p-4 flex flex-col">
+          <div className="bg-white rounded-lg p-3 shadow-sm flex-1 flex flex-col gap-2">
+            <div className="flex items-center gap-2 mb-1">
+              <div className="w-6 h-6 bg-blue-100 rounded flex items-center justify-center">
+                <svg className="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <span className="text-xs font-semibold text-gray-800">Contrat de location NST-CTR-2026-00042</span>
+            </div>
+            <div className="h-2 bg-gray-100 rounded w-full"></div>
+            <div className="h-2 bg-gray-100 rounded w-4/5"></div>
+            <div className="h-2 bg-gray-100 rounded w-full"></div>
+            <div className="h-2 bg-gray-100 rounded w-3/5"></div>
+            <div className="mt-auto pt-2 border-t border-gray-100">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-4 h-4 bg-blue-600 rounded flex items-center justify-center">
+                  <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <span className="text-xs text-gray-600">J accepte les termes du contrat</span>
+              </div>
+              <div className="bg-blue-600 rounded-lg py-2 text-center text-xs text-white font-medium">Signer electroniquement</div>
+            </div>
+          </div>
+        </div>
+      )
+    },
+    {
+      label: 'Quittances auto',
+      desc: 'Chaque paiement genere automatiquement une quittance telechargeable et imprimable.',
+      mockup: (
+        <div className="w-full h-64 bg-gray-50 rounded-xl overflow-hidden p-4 flex flex-col gap-2">
+          <div className="text-xs font-semibold text-gray-600 mb-1">Quittances generees automatiquement</div>
+          {[
+            { ref: 'NST-FAC-2026-00018', date: 'Juin 2026', amount: '45,00 €' },
+            { ref: 'NST-FAC-2026-00011', date: 'Mai 2026', amount: '45,00 €' },
+            { ref: 'NST-FAC-2026-00005', date: 'Avril 2026', amount: '45,00 €' },
+          ].map((q, i) => (
+            <div key={i} className="bg-white rounded-lg p-3 shadow-sm flex items-center justify-between">
+              <div>
+                <div className="text-xs font-medium text-gray-800">{q.ref}</div>
+                <div className="text-xs text-gray-400">{q.date}</div>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-semibold text-gray-900">{q.amount}</span>
+                <div className="w-7 h-7 bg-blue-50 rounded-lg flex items-center justify-center">
+                  <svg className="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )
+    }
+  ]
+
   return (
     <div className="min-h-screen bg-white text-gray-900">
 
@@ -57,7 +237,7 @@ export default function WaitlistPage() {
             Bientot disponible
           </span>
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight mb-6">
-            Louez ou trouvez un espace de stockage<br className="hidden md:block" /> chez des particuliers
+            Louez ou trouvez un espace de stockage chez des particuliers
           </h1>
           <p className="text-lg text-gray-500 leading-relaxed mb-10 max-w-2xl mx-auto">
             Nestock connecte les proprietaires qui ont un garage, une cave ou un grenier inutilise avec les personnes qui cherchent un espace de stockage abordable et securise.
@@ -80,100 +260,183 @@ export default function WaitlistPage() {
             <div>
               <div className="text-blue-600 font-semibold text-sm uppercase tracking-wide mb-6">Vous avez un espace inutilise</div>
               <div className="space-y-8">
-                <div className="flex gap-4">
-                  <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">1</div>
-                  <div>
-                    <div className="font-semibold text-gray-900 mb-1">Publiez votre annonce</div>
-                    <div className="text-gray-500 text-sm leading-relaxed">Decrivez votre espace, ajoutez des photos, fixez votre prix. Moins de 5 minutes.</div>
+                {[
+                  { n: '1', title: 'Publiez votre annonce', desc: 'Decrivez votre espace, ajoutez des photos, fixez votre prix. Moins de 5 minutes.' },
+                  { n: '2', title: 'Recevez des demandes', desc: 'Les locataires vous contactent via la messagerie integree. Vous choisissez librement.' },
+                  { n: '3', title: 'Encaissez chaque mois', desc: 'Contrat electronique, paiement automatique, quittances generees. Rien a gerer.' },
+                ].map(s => (
+                  <div key={s.n} className="flex gap-4">
+                    <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">{s.n}</div>
+                    <div>
+                      <div className="font-semibold text-gray-900 mb-1">{s.title}</div>
+                      <div className="text-gray-500 text-sm leading-relaxed">{s.desc}</div>
+                    </div>
                   </div>
-                </div>
-                <div className="flex gap-4">
-                  <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">2</div>
-                  <div>
-                    <div className="font-semibold text-gray-900 mb-1">Recevez des demandes</div>
-                    <div className="text-gray-500 text-sm leading-relaxed">Les locataires vous contactent via la messagerie integree. Vous choisissez librement.</div>
-                  </div>
-                </div>
-                <div className="flex gap-4">
-                  <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">3</div>
-                  <div>
-                    <div className="font-semibold text-gray-900 mb-1">Encaissez chaque mois</div>
-                    <div className="text-gray-500 text-sm leading-relaxed">Contrat electronique, paiement automatique, quittances generees. Rien a gerer.</div>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
             <div>
-              <div className="text-blue-600 font-semibold text-sm uppercase tracking-wide mb-6">Vous cherchez un espace</div>
+              <div className="text-gray-700 font-semibold text-sm uppercase tracking-wide mb-6">Vous cherchez un espace</div>
               <div className="space-y-8">
-                <div className="flex gap-4">
-                  <div className="w-8 h-8 bg-gray-900 text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">1</div>
-                  <div>
-                    <div className="font-semibold text-gray-900 mb-1">Cherchez par ville</div>
-                    <div className="text-gray-500 text-sm leading-relaxed">Carte interactive avec les espaces disponibles et les prix en temps reel.</div>
+                {[
+                  { n: '1', title: 'Cherchez par ville', desc: 'Carte interactive avec les espaces disponibles et les prix en temps reel.' },
+                  { n: '2', title: 'Contactez le proprietaire', desc: 'Messagerie directe, visite, accord. Tout se passe sur la plateforme.' },
+                  { n: '3', title: 'Signez et stockez', desc: 'Contrat legal en ligne, paiement securise, resiliation avec 15 jours de preavis.' },
+                ].map(s => (
+                  <div key={s.n} className="flex gap-4">
+                    <div className="w-8 h-8 bg-gray-900 text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">{s.n}</div>
+                    <div>
+                      <div className="font-semibold text-gray-900 mb-1">{s.title}</div>
+                      <div className="text-gray-500 text-sm leading-relaxed">{s.desc}</div>
+                    </div>
                   </div>
-                </div>
-                <div className="flex gap-4">
-                  <div className="w-8 h-8 bg-gray-900 text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">2</div>
-                  <div>
-                    <div className="font-semibold text-gray-900 mb-1">Contactez le proprietaire</div>
-                    <div className="text-gray-500 text-sm leading-relaxed">Messagerie directe, visite, accord. Tout se passe sur la plateforme.</div>
-                  </div>
-                </div>
-                <div className="flex gap-4">
-                  <div className="w-8 h-8 bg-gray-900 text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">3</div>
-                  <div>
-                    <div className="font-semibold text-gray-900 mb-1">Signez et stockez</div>
-                    <div className="text-gray-500 text-sm leading-relaxed">Contrat legal en ligne, paiement securise, resiliation avec 15 jours de preavis.</div>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* AVANTAGES */}
+      {/* FONCTIONNALITES MOCKUPS */}
       <section className="py-24 px-6 bg-gray-50">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Pourquoi Nestock ?</h2>
-            <p className="text-gray-500 max-w-xl mx-auto">Tout ce dont vous avez besoin pour louer en toute serenite.</p>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Tout ce dont vous avez besoin</h2>
+            <p className="text-gray-500 max-w-xl mx-auto">Une plateforme complete, pensee pour etre simple et efficace.</p>
           </div>
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-white rounded-2xl p-8 shadow-sm">
-              <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mb-6">
-                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="grid md:grid-cols-2 gap-8 items-start">
+            <div className="space-y-3">
+              {features.map((f, i) => (
+                <button
+                  key={i}
+                  onClick={() => setActiveFeature(i)}
+                  className={`w-full text-left px-5 py-4 rounded-xl border transition-all ${activeFeature === i ? 'bg-white border-blue-200 shadow-md' : 'bg-white border-gray-100 hover:border-gray-200'}`}
+                >
+                  <div className={`font-semibold text-sm mb-1 ${activeFeature === i ? 'text-blue-600' : 'text-gray-800'}`}>{f.label}</div>
+                  <div className="text-xs text-gray-500 leading-relaxed">{f.desc}</div>
+                </button>
+              ))}
+            </div>
+            <div className="sticky top-24">
+              {features[activeFeature].mockup}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* AVANTAGES + STRIPE + TARIFS */}
+      <section className="py-24 px-6 bg-white">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Pourquoi Nestock ?</h2>
+            <p className="text-gray-500 max-w-xl mx-auto">Securite, transparence et simplicite au coeur de la plateforme.</p>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+            <div className="bg-gray-50 rounded-2xl p-6">
+              <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center mb-4">
+                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">100% securise</h3>
-              <p className="text-gray-500 text-sm leading-relaxed">Contrat electronique au format legal francais, paiement via Stripe, quittances automatiques.</p>
+              <h3 className="font-semibold text-gray-900 mb-2 text-sm">100% securise</h3>
+              <p className="text-gray-500 text-xs leading-relaxed">Contrat electronique legal, paiement securise, quittances automatiques.</p>
             </div>
-            <div className="bg-white rounded-2xl p-8 shadow-sm">
-              <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center mb-6">
-                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-gray-50 rounded-2xl p-6">
+              <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center mb-4">
+                <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">2x moins cher</h3>
-              <p className="text-gray-500 text-sm leading-relaxed">En moyenne deux fois moins cher qu un box de self-stockage classique pour la meme surface.</p>
+              <h3 className="font-semibold text-gray-900 mb-2 text-sm">2x moins cher</h3>
+              <p className="text-gray-500 text-xs leading-relaxed">En moyenne deux fois moins cher qu un box de self-stockage pour la meme surface.</p>
             </div>
-            <div className="bg-white rounded-2xl p-8 shadow-sm">
-              <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center mb-6">
-                <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-gray-50 rounded-2xl p-6">
+              <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center mb-4">
+                <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Simple et rapide</h3>
-              <p className="text-gray-500 text-sm leading-relaxed">Annonce en 5 minutes, contrat signe en ligne, tout gere depuis votre telephone.</p>
+              <h3 className="font-semibold text-gray-900 mb-2 text-sm">Simple et rapide</h3>
+              <p className="text-gray-500 text-xs leading-relaxed">Annonce en 5 minutes, contrat signe en ligne, tout gere depuis votre telephone.</p>
+            </div>
+            <div className="bg-gray-50 rounded-2xl p-6 border-2 border-indigo-100">
+              <div className="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center mb-4">
+                <svg className="w-6 h-4 text-indigo-600" viewBox="0 0 60 25" fill="currentColor">
+                  <path d="M59.64 14.28h-8.06c.19 1.93 1.6 2.55 3.2 2.55 1.64 0 2.96-.37 4.05-.95v3.32a8.33 8.33 0 0 1-4.56 1.1c-4.01 0-6.83-2.5-6.83-7.48 0-4.19 2.39-7.52 6.3-7.52 3.92 0 5.96 3.28 5.96 7.5 0 .4-.04 1.26-.06 1.48zm-5.92-5.62c-1.03 0-2.17.73-2.17 2.58h4.25c0-1.85-1.07-2.58-2.08-2.58zM40.95 20.3c-1.44 0-2.32-.6-2.9-1.04l-.02 4.63-4.12.87V6.27h3.76l.08 1.02a4.7 4.7 0 0 1 3.23-1.29c2.9 0 5.62 2.6 5.62 7.4 0 5.23-2.7 6.9-5.65 6.9zm-.95-9.99c-.93 0-1.48.35-1.96.8l.02 6.12c.45.4.98.7 1.94.7 1.49 0 2.48-1.61 2.48-3.79 0-2.13-1-3.83-2.48-3.83zM28.24 5.07c1.36 0 2.2-.88 2.2-2.03C30.44.97 29.6 0 28.24 0c-1.35 0-2.2.97-2.2 2.04 0 1.15.85 2.03 2.2 2.03zm2.07 15.22h-4.17V6.27h4.17v14.02zM21.77 7l-.27-1.44h-3.7v14.47h4.1v-9.86c.92-1.2 2.47-1 2.95-.84V6.27c-.5-.18-2.27-.44-3.08.73zM12.15 6.27l-.1.57c-.72-.8-2.07-1.07-3.43-1.07C5.15 5.77 3 8.3 3 11.03c0 3.2 2.01 4.86 4.62 4.86 1.28 0 2.43-.37 3.13-.98v.48c0 1.77-.96 2.73-3.02 2.73-1.48 0-2.87-.47-3.82-1.03l-.01 3.39c1.05.46 2.62.79 4.17.79 3.88 0 6.64-1.85 6.64-6.48V6.27h-2.56zm-2.98 7.3c-1.18 0-1.95-.77-1.95-2.07 0-1.27.77-2.07 1.95-2.07 1.17 0 1.92.8 1.92 2.07 0 1.3-.75 2.07-1.92 2.07z"/>
+                </svg>
+              </div>
+              <h3 className="font-semibold text-gray-900 mb-2 text-sm">Paiements Stripe</h3>
+              <p className="text-gray-500 text-xs leading-relaxed">Vos donnees bancaires ne transitent jamais par Nestock.</p>
+              <div className="mt-3 flex items-center gap-1">
+                <svg className="w-3 h-3 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                <span className="text-xs text-green-600 font-medium">Certifie PCI-DSS niveau 1</span>
+              </div>
+            </div>
+          </div>
+
+          {/* TRANSPARENCE TARIFAIRE */}
+          <div className="bg-gray-50 rounded-3xl p-8 md:p-12">
+            <div className="text-center mb-10">
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">Transparence totale sur les frais</h3>
+              <p className="text-gray-500 max-w-lg mx-auto text-sm leading-relaxed">
+                Chez Nestock, aucune surprise. Voici exactement comment se repartissent les charges sur chaque paiement.
+              </p>
+            </div>
+            <div className="max-w-2xl mx-auto">
+              <div className="bg-white rounded-2xl shadow-sm overflow-hidden mb-6">
+                <div className="bg-blue-600 px-6 py-4">
+                  <div className="text-white font-semibold">Exemple pour un loyer de 50 €/mois</div>
+                </div>
+                <div className="divide-y divide-gray-100">
+                  <div className="flex items-center justify-between px-6 py-4">
+                    <div>
+                      <div className="font-medium text-gray-900 text-sm">Loyer hors charges</div>
+                      <div className="text-xs text-gray-400">Prix fixe par le proprietaire</div>
+                    </div>
+                    <div className="font-semibold text-gray-900">50,00 €</div>
+                  </div>
+                  <div className="flex items-center justify-between px-6 py-4">
+                    <div>
+                      <div className="font-medium text-gray-900 text-sm">Commission Nestock</div>
+                      <div className="text-xs text-gray-400">10% — gestion de la plateforme, contrats, quittances</div>
+                    </div>
+                    <div className="font-semibold text-orange-500">+ 5,00 €</div>
+                  </div>
+                  <div className="flex items-center justify-between px-6 py-4">
+                    <div>
+                      <div className="font-medium text-gray-900 text-sm">Frais Stripe</div>
+                      <div className="text-xs text-gray-400">1,5% + 0,25€ — traitement du paiement securise</div>
+                    </div>
+                    <div className="font-semibold text-orange-500">+ 1,03 €</div>
+                  </div>
+                  <div className="flex items-center justify-between px-6 py-4 bg-blue-50">
+                    <div>
+                      <div className="font-semibold text-gray-900">Total TTC locataire</div>
+                      <div className="text-xs text-gray-400">Montant debite chaque mois</div>
+                    </div>
+                    <div className="font-bold text-blue-600 text-lg">56,03 €</div>
+                  </div>
+                  <div className="flex items-center justify-between px-6 py-4 bg-green-50">
+                    <div>
+                      <div className="font-semibold text-gray-900">Revenu net proprietaire</div>
+                      <div className="text-xs text-gray-400">Vire directement sur votre compte bancaire</div>
+                    </div>
+                    <div className="font-bold text-green-600 text-lg">50,00 €</div>
+                  </div>
+                </div>
+              </div>
+              <p className="text-center text-xs text-gray-400">
+                Les frais de commission et de traitement sont a la charge du locataire. Le proprietaire recoit 100% du loyer affiche.
+              </p>
             </div>
           </div>
         </div>
       </section>
 
       {/* ROADMAP */}
-      <section className="py-24 px-6 bg-white">
+      <section className="py-24 px-6 bg-gray-50">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Les phases de lancement</h2>
@@ -182,63 +445,31 @@ export default function WaitlistPage() {
           <div className="relative">
             <div className="absolute left-6 top-0 bottom-0 w-px bg-gray-200"></div>
             <div className="space-y-10">
-
-              <div className="flex gap-6 relative">
-                <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0 z-10 shadow-md">
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-                <div className="pt-2">
-                  <div className="flex items-center gap-3 mb-2">
-                    <span className="font-semibold text-gray-900">Phase 1 — Construction</span>
-                    <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">Termine</span>
+              {[
+                { n: null, icon: 'check', label: 'Phase 1 — Construction', badge: 'Termine', badgeColor: 'bg-blue-100 text-blue-700', color: 'bg-blue-600', desc: 'Developpement de la plateforme : authentification, annonces, carte interactive, messagerie, contrats electroniques, paiements Stripe.' },
+                { n: null, icon: 'dot', label: 'Phase 2 — Liste d attente', badge: 'En cours', badgeColor: 'bg-orange-100 text-orange-700', color: 'bg-blue-600', desc: 'Constitution d une communaute de premiers utilisateurs. Les inscrits auront un acces prioritaire et des offres exclusives au lancement.' },
+                { n: '3', icon: null, label: 'Phase 3 — Beta privee', badge: 'A venir', badgeColor: 'bg-gray-100 text-gray-500', color: 'bg-gray-200', desc: 'Ouverture a un groupe limite de proprietaires et locataires selectionnes parmi la liste d attente. Retours utilisateurs et ajustements.' },
+                { n: '4', icon: null, label: 'Phase 4 — Lancement public', badge: 'A venir', badgeColor: 'bg-gray-100 text-gray-500', color: 'bg-gray-200', desc: 'Ouverture de la plateforme au grand public. Disponible dans toute la France avec paiements en production et support complet.' },
+              ].map((phase, i) => (
+                <div key={i} className="flex gap-6 relative">
+                  <div className={`w-12 h-12 ${phase.color} rounded-full flex items-center justify-center flex-shrink-0 z-10 shadow-md`}>
+                    {phase.icon === 'check' && (
+                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                    {phase.icon === 'dot' && <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" /></svg>}
+                    {phase.n && <span className="text-gray-500 font-bold text-sm">{phase.n}</span>}
                   </div>
-                  <p className="text-gray-500 text-sm leading-relaxed">Developpement de la plateforme : authentification, annonces, carte interactive, messagerie, contrats electroniques, paiements Stripe.</p>
-                </div>
-              </div>
-
-              <div className="flex gap-6 relative">
-                <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0 z-10 shadow-md">
-                  <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="4" />
-                  </svg>
-                </div>
-                <div className="pt-2">
-                  <div className="flex items-center gap-3 mb-2">
-                    <span className="font-semibold text-gray-900">Phase 2 — Liste d attente</span>
-                    <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full font-medium">En cours</span>
+                  <div className="pt-2">
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className="font-semibold text-gray-900">{phase.label}</span>
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${phase.badgeColor}`}>{phase.badge}</span>
+                    </div>
+                    <p className="text-gray-500 text-sm leading-relaxed">{phase.desc}</p>
                   </div>
-                  <p className="text-gray-500 text-sm leading-relaxed">Constitution d une communaute de premiers utilisateurs. Les inscrits auront un acces prioritaire et des offres exclusives au lancement.</p>
                 </div>
-              </div>
-
-              <div className="flex gap-6 relative">
-                <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0 z-10">
-                  <span className="text-gray-500 font-bold text-sm">3</span>
-                </div>
-                <div className="pt-2">
-                  <div className="flex items-center gap-3 mb-2">
-                    <span className="font-semibold text-gray-900">Phase 3 — Beta privee</span>
-                    <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-medium">A venir</span>
-                  </div>
-                  <p className="text-gray-500 text-sm leading-relaxed">Ouverture a un groupe limite de proprietaires et locataires selectionnes parmi la liste d attente. Retours utilisateurs et ajustements.</p>
-                </div>
-              </div>
-
-              <div className="flex gap-6 relative">
-                <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0 z-10">
-                  <span className="text-gray-500 font-bold text-sm">4</span>
-                </div>
-                <div className="pt-2">
-                  <div className="flex items-center gap-3 mb-2">
-                    <span className="font-semibold text-gray-900">Phase 4 — Lancement public</span>
-                    <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-medium">A venir</span>
-                  </div>
-                  <p className="text-gray-500 text-sm leading-relaxed">Ouverture de la plateforme au grand public. Disponible dans toute la France avec paiements en production et support complet.</p>
-                </div>
-              </div>
-
+              ))}
             </div>
           </div>
         </div>
@@ -249,11 +480,8 @@ export default function WaitlistPage() {
         <div className="max-w-md mx-auto">
           <div className="text-center mb-10">
             <h2 className="text-3xl font-bold text-white mb-4">Rejoins la liste d attente</h2>
-            <p className="text-blue-100 leading-relaxed">
-              Sois notifie en priorite au lancement et profite des offres reservees aux premiers inscrits.
-            </p>
+            <p className="text-blue-100 leading-relaxed">Sois notifie en priorite au lancement et profite des offres reservees aux premiers inscrits.</p>
           </div>
-
           {success ? (
             <div className="bg-white rounded-2xl p-8 text-center">
               <div className="w-14 h-14 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -267,61 +495,23 @@ export default function WaitlistPage() {
           ) : (
             <div className="bg-white rounded-2xl p-8 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Prenom <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={prenom}
-                  onChange={e => setPrenom(e.target.value)}
-                  placeholder="Ton prenom"
-                  className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
+                <label className="block text-sm font-medium text-gray-700 mb-1">Prenom <span className="text-red-500">*</span></label>
+                <input type="text" value={prenom} onChange={e => setPrenom(e.target.value)} placeholder="Ton prenom" className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={e => setEmail(e.target.value)}
-                  placeholder="ton@email.fr"
-                  className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email <span className="text-red-500">*</span></label>
+                <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="ton@email.fr" className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
               </div>
               <div className="flex items-start gap-3 pt-1">
-                <input
-                  type="checkbox"
-                  id="rgpd"
-                  checked={consentRgpd}
-                  onChange={e => setConsentRgpd(e.target.checked)}
-                  className="mt-0.5 w-4 h-4 accent-blue-600 flex-shrink-0"
-                />
-                <label htmlFor="rgpd" className="text-sm text-gray-600 leading-relaxed">
-                  J accepte que Nestock conserve mes donnees pour me contacter au lancement. <span className="text-red-500">*</span>
-                </label>
+                <input type="checkbox" id="rgpd" checked={consentRgpd} onChange={e => setConsentRgpd(e.target.checked)} className="mt-0.5 w-4 h-4 accent-blue-600 flex-shrink-0" />
+                <label htmlFor="rgpd" className="text-sm text-gray-600 leading-relaxed">J accepte que Nestock conserve mes donnees pour me contacter au lancement. <span className="text-red-500">*</span></label>
               </div>
               <div className="flex items-start gap-3">
-                <input
-                  type="checkbox"
-                  id="consent_email"
-                  checked={consentEmail}
-                  onChange={e => setConsentEmail(e.target.checked)}
-                  className="mt-0.5 w-4 h-4 accent-blue-600 flex-shrink-0"
-                />
-                <label htmlFor="consent_email" className="text-sm text-gray-600 leading-relaxed">
-                  J accepte de recevoir des emails de Nestock. Desincription possible a tout moment.
-                </label>
+                <input type="checkbox" id="consent_email" checked={consentEmail} onChange={e => setConsentEmail(e.target.checked)} className="mt-0.5 w-4 h-4 accent-blue-600 flex-shrink-0" />
+                <label htmlFor="consent_email" className="text-sm text-gray-600 leading-relaxed">J accepte de recevoir des emails de Nestock. Desinscription possible a tout moment.</label>
               </div>
-              {error && (
-                <p className="text-sm text-red-600 bg-red-50 px-4 py-3 rounded-lg">{error}</p>
-              )}
-              <button
-                onClick={handleSubmit}
-                disabled={loading}
-                className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-medium py-3 rounded-lg transition-colors"
-              >
+              {error && <p className="text-sm text-red-600 bg-red-50 px-4 py-3 rounded-lg">{error}</p>}
+              <button onClick={handleSubmit} disabled={loading} className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-medium py-3 rounded-lg transition-colors">
                 {loading ? 'Inscription...' : "Je rejoins la liste d attente"}
               </button>
               <p className="text-xs text-gray-400 text-center">
@@ -334,7 +524,7 @@ export default function WaitlistPage() {
       </section>
 
       {/* FOOTER */}
-      <footer className="py-8 px-6 bg-gray-900 text-center">
+      <footer className="py-8 px-6 bg-gray-900">
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <span className="text-white font-bold text-lg">Nestock</span>
           <p className="text-gray-500 text-sm">2026 Nestock. Tous droits reserves.</p>
