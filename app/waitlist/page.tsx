@@ -1,36 +1,38 @@
-"use client"
+'use client'
 
-import { useState } from "react"
-import Link from "next/link"
+import { useState } from 'react'
+import Link from 'next/link'
 
 export default function WaitlistPage() {
-  const [prenom, setPrenom] = useState("")
-  const [email, setEmail] = useState("")
+  const [prenom, setPrenom] = useState('')
+  const [email, setEmail] = useState('')
   const [consentEmail, setConsentEmail] = useState(false)
   const [consentRgpd, setConsentRgpd] = useState(false)
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
-  const [error, setError] = useState("")
+  const [error, setError] = useState('')
 
   async function handleSubmit() {
-    setError("")
-      setError("Merci de remplir tous les champs obligatoires.")
+    setError('')
+    if (!prenom || !email || !consentRgpd) {
+      setError('Merci de remplir tous les champs obligatoires.')
       return
     }
     setLoading(true)
     try {
-      const res = await fetch("/api/waitlist", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const res = await fetch('/api/waitlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prenom, email, consent_email: consentEmail, consent_rgpd: consentRgpd })
       })
       const data = await res.json()
-        setError(data.error || "Une erreur est survenue.")
+      if (!res.ok) {
+        setError(data.error || 'Une erreur est survenue.')
       } else {
         setSuccess(true)
       }
     } catch {
-      setError("Une erreur est survenue, reessaie.")
+      setError('Une erreur est survenue, reessaie.')
     } finally {
       setLoading(false)
     }
@@ -45,6 +47,7 @@ export default function WaitlistPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
+          <h1 className="text-2xl font-semibold text-gray-900 mb-3">Tu es sur la liste !</h1>
           <p className="text-gray-500 mb-8">Merci {prenom}, on te contactera en priorite au lancement de Nestock.</p>
           <Link href="/" className="text-blue-600 hover:underline text-sm">Retour a accueil</Link>
         </div>
@@ -98,8 +101,8 @@ export default function WaitlistPage() {
               className="mt-0.5 w-4 h-4 accent-blue-600 flex-shrink-0"
             />
             <label htmlFor="rgpd" className="text-sm text-gray-600 leading-relaxed">
-              J accepte que Nestock conserve mon prenom et mon email pour me contacter lors du lancement.{" "}
-              <span className="text-red-500">*</span>{" "}
+              J accepte que Nestock conserve mon prenom et mon email pour me contacter lors du lancement.{' '}
+              <span className="text-red-500">*</span>{' '}
               <Link href="/confidentialite" className="text-blue-600 hover:underline">Politique de confidentialite</Link>
             </label>
           </div>
@@ -123,10 +126,10 @@ export default function WaitlistPage() {
             disabled={loading}
             className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-medium py-3 rounded-lg transition-colors mt-2"
           >
-            {loading ? "Inscription..." : "Je rejoins la liste d attente"}
+            {loading ? 'Inscription...' : "Je rejoins la liste d attente"}
           </button>
           <p className="text-xs text-gray-400 text-center">
-            Conformement au RGPD, tu peux demander la suppression de tes donnees a tout moment en ecrivant a{" "}
+            Conformement au RGPD, tu peux demander la suppression de tes donnees a tout moment en ecrivant a{' '}
             <a href="mailto:contact@nestock.pro" className="hover:underline">contact@nestock.pro</a>
           </p>
         </div>
