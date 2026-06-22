@@ -201,7 +201,7 @@ export default function WaitlistPage() {
       {/* NAV */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-100">
         <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
-          <span className="text-xl font-bold text-blue-600">Nestock</span>
+          <a href="#" className="text-xl font-bold text-blue-600">Nestock</a>
           <a href="#inscription" className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
             Rejoindre la liste
           </a>
