@@ -206,6 +206,9 @@ export default function WaitlistPage() {
             Rejoindre la liste
           </a>
         </div>
+        <div className="h-1 bg-gray-100 w-full">
+          <div className="h-full bg-blue-600 transition-all duration-150" style={{ width: `${scrollProgress}%` }}></div>
+        </div>
       </nav>
 
       {/* HERO */}
