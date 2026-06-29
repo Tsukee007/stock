@@ -40,7 +40,7 @@ export async function POST(req: Request) {
         )
       }
       throw error
-    }
+                                                                                   }
 
     const interetLabel = interet === 'louer' ? 'Louer un espace'
       : interet === 'proposer' ? 'Proposer un espace'
