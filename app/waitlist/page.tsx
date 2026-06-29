@@ -14,6 +14,24 @@ export default function WaitlistPage() {
   const [error, setError] = useState('')
   const [activeFeature, setActiveFeature] = useState(0)
   const [openFaq, setOpenFaq] = useState<number | null>(null)
+  const [source, setSource] = useState('')
+  const [scrollProgress, setScrollProgress] = useState(0)
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const utm = params.get('utm') || params.get('source') || 'direct'
+    setSource(utm)
+  }, [])
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const totalHeight = document.documentElement.scrollHeight - window.innerHeight
+      const progress = totalHeight > 0 ? (window.scrollY / totalHeight) * 100 : 0
+      setScrollProgress(Math.min(100, Math.max(0, progress)))
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   async function handleSubmit() {
     setError('')
