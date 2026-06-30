@@ -4,8 +4,10 @@ import type { NextRequest } from 'next/server'
 const PUBLIC_PATHS = [
   '/waitlist',
   '/admin-waitlist',
+  '/admin-calendar',
   '/api/waitlist',
   '/api/admin-waitlist',
+  '/api/admin-calendar',
   '/_next',
   '/favicon.ico',
 ]
