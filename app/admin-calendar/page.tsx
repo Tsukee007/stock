@@ -302,7 +302,7 @@ export default function AdminCalendar() {
                       <div key={field}>
                         <label className="block text-xs font-medium text-gray-600 mb-1 capitalize">{field}</label>
                         <input type="number" min="0"
-                          value={(selectedPost as Record<string, number | string>)[field] as number}
+                          value={(selectedPost as unknown as Record<string, number>)[field]}
                           onChange={e => setSelectedPost({ ...selectedPost, [field]: parseInt(e.target.value) || 0 })}
                           className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                       </div>
