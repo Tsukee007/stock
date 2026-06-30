@@ -9,7 +9,7 @@
 - Vercel (production)
 
 ## URLs et accès
-- Production : https://nestock.tsukee.fr
+- Production : https://nestock.pro
 - Backup : https://stock-kb8s.vercel.app
 - Repo GitHub : https://github.com/Tsukee007/stock
 - Codespace : "probable orbit"
@@ -17,7 +17,7 @@
 
 ## Workflow établi
 - Editer les fichiers via VS Code Codespace OU GitHub directement
-- Pour les gros fichiers : utiliser Python via terminal (heredoc)
+- Pour les gros fichiers : utiliser Python heredoc (python3 << 'PYEOF')
 - Eviter backticks dans JSX (space.id devient space['id'])
 - Les liens markdown corrompent le code JSX dans le terminal
 - Commandes git : git add . && git commit -m "message" && git push origin main
@@ -25,19 +25,27 @@
 - Variables env : .env.local (Codespace) + Vercel Environment Variables
 
 ## Base de données Supabase
-Tables : profiles, spaces, space_photos, bookings, messages, reviews, contracts, invoices, notifications
+Tables : profiles, spaces, space_photos, bookings, messages, reviews, contracts,
+invoices, notifications, waitlist, editorial_calendar
 
 ### Statuts bookings
 message_only, pending, awaiting_signature, confirmed, active, ending, ended, cancelled
 
-### Colonnes importantes
-- bookings : stripe_subscription_id, ending_date, start_date
-- profiles : full_name, phone, address, postal_code, city, stripe_account_id, stripe_onboarding_complete
-- contracts : reference (auto NST-CTR-YYYY-XXXXX), owner_signed, renter_signed, status
-- invoices : reference (auto NST-FAC-YYYY-XXXXX), amount, stripe_payment_id
+### Table waitlist
+- id, prenom, email, interet, source, consent_email, consent_rgpd, created_at
+- interet : louer / proposer / les_deux
+- source : tiktok / facebook / instagram / reddit / direct (tracking UTM)
+
+### Table editorial_calendar
+- id, date, reseau, angle, contenu, lien, statut, vues, likes, clics, commentaires, created_at
+- statut : a_publier / publie / en_cours / reporte
+- reseau : tiktok / facebook / instagram / reddit
 
 ## Fichiers clés
 - app/page.tsx : landing page + carte (connecté)
+- app/waitlist/page.tsx : landing page pre-lancement + formulaire waitlist
+- app/admin-waitlist/page.tsx : dashboard admin waitlist avec stats
+- app/admin-calendar/page.tsx : calendrier editorial avec stats par reseau
 - app/dashboard/page.tsx : dashboard principal
 - app/dashboard/bookings/[id]/page.tsx : détail location
 - app/dashboard/bookings/[id]/invoice/[invoiceId]/page.tsx : quittance
@@ -52,10 +60,14 @@ message_only, pending, awaiting_signature, confirmed, active, ending, ended, can
 - lib/utils.ts : statusLabels, statusColors, getDaysLeft
 - lib/mailer.ts : SMTP Hostinger
 - lib/notifications.ts : créer notifications
+- middleware.ts : redirection pre-lancement vers /waitlist
 
 ## Routes API
+- /api/waitlist : inscription waitlist + email confirmation + email admin
+- /api/admin-waitlist : dashboard stats waitlist (protege par mot de passe)
+- /api/admin-calendar : calendrier editorial CRUD (protege par mot de passe)
 - /api/bookings/create : créer réservation
-- /api/bookings/[id]/status : changer statut (pending/ending/ended)
+- /api/bookings/[id]/status : changer statut
 - /api/contracts/sign : signer contrat + Stripe checkout
 - /api/stripe/connect : onboarding Stripe Connect
 - /api/stripe/webhook : webhook paiements + quittances
@@ -63,20 +75,64 @@ message_only, pending, awaiting_signature, confirmed, active, ending, ended, can
 - /api/spaces/delete : supprimer annonce
 - /api/contact-form : formulaire contact
 
-## Composants UI
-- Navbar.tsx : responsive avec cloche notifications
-- NotificationBell.tsx : notifications temps réel Supabase
-- MapWithList.tsx : carte + liste responsive mobile
-- SpacesMap.tsx : carte Mapbox
-- SearchFilters.tsx : filtres recherche
-- PhotoUpload.tsx : upload photos (max 3, 2MB)
-- PhotoLightbox.tsx : lightbox photos
-- ContractSign.tsx : signature électronique
-- BookingAction.tsx : boutons changement statut
-- PriceSimulator.tsx : simulateur prix TTC
-- DeleteSpaceButton.tsx : suppression annonce
-- EditSpaceForm.tsx : formulaire modification annonce
-- PayButton.tsx : bouton paiement Stripe
+## Pages admin (protegees par mot de passe ADMIN_PASSWORD)
+- /admin-waitlist : stats inscrits, repartition, sources UTM, liste complete
+- /admin-calendar : calendrier editorial 2 mois, stats par reseau, suivi publications
+
+## Middleware pre-lancement
+Pages publiques accessibles :
+- /waitlist (landing page + formulaire)
+- /admin-waitlist (dashboard waitlist)
+- /admin-calendar (calendrier editorial)
+- /api/waitlist
+- /api/admin-waitlist
+- /api/admin-calendar
+Toutes les autres pages redirigent vers /waitlist
+
+## Marketing
+Dossier : /marketing dans le repo GitHub
+- marketing/urls.md : tous les liens UTM par reseau
+- marketing/accroches.md : accroches et slogans
+- marketing/calendrier-editorial.md : planning 2 mois
+- marketing/tiktok-posts/ : 10 images PNG 1080x1920 generees avec Pillow
+- marketing/scripts-video/post-starwars.md : script generique Star Wars
+- marketing/posts/presentation-nestock.md : posts TikTok et Facebook
+
+## Tracking UTM
+- TikTok : nestock.pro/waitlist?utm=tiktok
+- Facebook : nestock.pro/waitlist?utm=facebook
+- Instagram : nestock.pro/waitlist?utm=instagram
+- Reddit : nestock.pro/waitlist?utm=reddit
+- Direct : nestock.pro/waitlist (source = direct)
+
+## Reseaux sociaux
+- TikTok : @nestock (compte Pro, lien en bio avec UTM)
+- Facebook : page Nestock creee
+- Instagram : a creer
+- Reddit : posts sur r/france et r/immobilier
+
+## SMTP Hostinger
+- Host : smtp.hostinger.com
+- Port : 465
+- User : contact@nestock.pro
+
+## Variables Vercel
+- NEXT_PUBLIC_SUPABASE_URL
+- SUPABASE_SERVICE_ROLE_KEY
+- NEXT_PUBLIC_SUPABASE_ANON_KEY
+- SMTP_USER
+- SMTP_PASS
+- ADMIN_PASSWORD
+- NEXT_PUBLIC_SITE_URL=https://nestock.pro
+- STRIPE_SECRET_KEY (mode test)
+- NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY (mode test)
+- STRIPE_WEBHOOK_SECRET
+- NEXT_PUBLIC_MAPBOX_TOKEN
+
+## Stripe
+- Mode test actuellement (clés pk_test_ / sk_test_)
+- Webhook : https://nestock.pro/api/stripe/webhook
+- API version : 2026-02-25.clover
 
 ## Fonctionnalités terminées
 - Auth (login/register/reset password)
@@ -86,211 +142,51 @@ message_only, pending, awaiting_signature, confirmed, active, ending, ended, can
 - Modification annonce avec photos
 - Page détail annonce avec lightbox photos
 - Messagerie temps réel Supabase Realtime
-- Emails SMTP Hostinger (messages, contrats, quittances)
+- Emails SMTP Hostinger
 - Dashboard propriétaire et locataire
 - Flux réservation complet
-- Contrat électronique avec signature (case + nom + infos)
+- Contrat électronique avec signature
 - Stripe Connect onboarding propriétaire
 - Stripe Subscriptions paiement mensuel récurrent
 - Webhook Stripe : activation location + quittances
-- Quittances automatiques avec toutes les infos
-- Page détail location (dates, parties, contrat, quittances)
-- Page visualisation quittance avec impression
-- Notifications temps réel (cloche + badge rouge)
+- Quittances automatiques
+- Notifications temps réel
 - Système d'avis étoiles
-- Stats propriétaire (revenus + historique)
-- Préavis résiliation 15j avec compteur
-- Suppression annonce (protégée si réservation active)
-- Landing page claire et sobre
-- Pages À propos et Contact
-- Responsive mobile (navbar hamburger, toggle liste/carte)
-
-## SMTP Hostinger
-- Host : smtp.hostinger.com
-- Port : 465
-- User : contact@tsukee.fr
-
-## Stripe
-- Mode test actuellement (clés pk_test_ / sk_test_)
-- Webhook : https://nestock.tsukee.fr/api/stripe/webhook
-- API version : 2026-02-25.clover
+- Stats propriétaire
+- Préavis résiliation 15j
+- Suppression annonce protégée
+- Landing page waitlist pre-lancement complète
+- Middleware de redirection pre-lancement
+- Dashboard admin waitlist avec stats et tracking UTM
+- Dashboard admin calendrier editorial
+- 10 images TikTok generees avec Pillow
+- Calendrier editorial 2 mois tous reseaux
 
 ## Prochaines étapes
-1. Corrections landing page
-2. Vue propriétaire identique locataire dans dashboard
-3. Stripe en production (clés live)
-4. CGU / Mentions légales / Politique confidentialité
-5. Amélioration UI/UX générale
+1. Passer Stripe en production (clés live)
+2. Retirer le middleware au lancement
+3. Vue propriétaire identique locataire dans dashboard
+4. CGU / Mentions légales complètes
+5. Amelioration UI/UX generale
 
 ## Journal des modifications
-<!-- Ajouter ici chaque nouvelle fonctionnalité ou correction -->
 
-### Mai 2026
-- Landing page sobre (fond blanc, titres gris, boutons bleus)
-- Quittances automatiques après paiement Stripe
-- Préavis résiliation 15j avec compteur
-- Page détail location complète
-- Bouton terminer pour locataire ET propriétaire
-- Inscription avec adresse, téléphone, ville
-- Nouveau contrat format légal français
-- Stripe Connect onboarding propriétaire
-- Simulateur de prix transparent
-- Suppression annonce avec protection
-- Notifications temps réel (cloche + badge)
-- Flux réservation complet avec contrat
-- Messagerie responsive mobile
-- Navbar responsive avec hamburger
-
-
-## Comment mettre à jour ce fichier
-
-Ajouter une modification :
-echo "- [DATE] : description" >> /workspaces/stock/nestock-context.md
-
-Committer les changements :
-git add nestock-context.md && git commit -m "docs: mise a jour contexte" && git push origin main
-
-Afficher le contenu pour une nouvelle conversation Claude :
-cat /workspaces/stock/nestock-context.md
-
-
-### Corrections en attente - Mai 2026
-- Prix incohérent : annonce 7€, contrat 6€, Stripe 6.60€ -> unifier partout
-- Contrat : supprimer tel/email dans le formulaire de signature (déjà en en-tête)
-- Contrat : afficher prix TTC + détail des charges (Nestock 10% + Stripe)
-- Contrat : statut "en attente paiement" alors que paiement reçu -> bug webhook
-- Dashboard : renommer bouton "Factures" en "Quittances"
-- Page détail location : quittances ne s'affichent pas
-- Créer pages CGU et Confidentialité
-- Footer présent sur toutes les pages de l'application
-- 07/05/2026 : Prix TTC unifie, CGU/Confidentialite, footer about/contact, table invoices creee, statut contrat corrige
-
-### Corrections prioritaires - Mai 2026
-- Prix incohérent : 6.95 sur annonce vs 7 sur réservation -> utiliser price_ttc partout avec 2 décimales
-- Annonce active ne peut pas être réservée, annonce en préavis réservable après fin préavis
-- Après onboarding Stripe -> rediriger vers page détail annonce (pas nouvelle annonce)
-- Si compte Stripe existe déjà -> utiliser le compte existant (ne pas recréer)
-- Page profil à créer avec infos perso + infos Stripe
-- Infos bailleur/locataire obligatoires dans contrat, sinon rediriger vers page profil
-- Montants incohérents : contrat 46.03, quittance 45.10, carte 45 -> unifier avec price_ttc 2 décimales
-- Revenus dashboard incorrects : 41+6=47 mais affiche 45
-
-### Corrections effectuées - 08/05/2026
-- Prix TTC unifié partout avec 2 décimales (price_ttc)
-- Annonce active bloquée à la réservation
-- Annonce en préavis : affiche date de disponibilité
-- Redirection après onboarding Stripe vers page annonce
-- Quittances visibles dans page détail location
-- Bouton imprimer quittance (PrintButton composant client)
-- Pages CGU et Confidentialité créées
-- Footer sur pages About et Contact
-- Revenus dashboard corrigés
-- Statut contrat "Location active" après paiement
-
-### A faire ce soir
-- Page profil (infos perso + compte Stripe)
-- Infos bailleur/locataire obligatoires dans contrat
-- Tester redirection Stripe après onboarding
-- Vue propriétaire identique locataire dans dashboard
-
-### Corrections effectuées - 09/05/2026
-- Page profil créée avec infos perso + modification email + statut Stripe
-- Lien profil dans navbar (clic sur email)
-- Champs profil obligatoires (nom, tel, adresse, CP, ville)
-- Infos bailleur/locataire dans contrat (email profil + email signature)
-- Alerte profil incomplet avant signature contrat
-- Bouton signature désactivé si profil incomplet
-- Annonce active bloquée à la réservation
-- Annonce en préavis : date de disponibilité affichée
-- Redirection après onboarding Stripe vers page annonce
-- Prix TTC uniformes avec 2 décimales partout
-- Revenus dashboard corrigés
-
-### A faire
-- Tester redirection Stripe après onboarding
-- Vue propriétaire identique locataire dans dashboard
-- Stripe Connect avec transferts automatiques vers propriétaire
-- Stripe en production (clés live)
-
-### En cours - 09/05/2026
-- Stripe Connect transferts automatiques vers propriétaire
-- Session Stripe avec application_fee_percent 10% + transfer_data vers stripe_account_id propriétaire
-- price_ttc utilisé pour le montant de la session Stripe
-- ownerProfile récupéré dans contracts/sign/route.ts pour le stripe_account_id
-
-### Corrections effectuées - 09/05/2026 (suite)
-- Badge statut "En location" / "A louer" sur carte, liste et page détail annonce
-- Nom propriétaire dans liste annonces
-- Carte remontée en 2ème section landing page
-- Message d'erreur clair pour réservation en doublon
-- Stripe Connect transferts automatiques configurés dans contracts/sign/route.ts
-
-### Corrections effectuées - 10/05/2026
-- Dashboard restructuré par sections de statut
-- Répartition prix TTC dans page détail annonce
-- Nom de l'annonce dans en-tête contrat
-- Badge "En location" / "A louer" sur liste, carte et page détail
-- Nom propriétaire dans liste annonces
-- Carte remontée en 2ème section landing page
-
-### Migration domaine - 10/05/2026
-- Nouveau domaine : nestock.pro (anciennement nestock.tsukee.fr)
-- Vercel : domaine ajouté
-- Supabase : URLs mises à jour
-- Stripe : webhook mis à jour vers nestock.pro
-- Email : contact@nestock.pro créé sur Hostinger
-- Variables Vercel mises à jour
-- Code : toutes les références nestock.tsukee.fr remplacées
-- Pages forgot-password et reset-password existantes et fonctionnelles
-
-### Bugs à corriger - 11/05/2026
-- Page annonce : masquer bouton réservation pour le propriétaire
-- Page réservation : rediriger après envoi de la demande
-- Contrat : afficher adresse du local
-- Contrat propriétaire : rediriger après signature
-- Dashboard : statuts incohérents entre proprio et locataire
-- Navbar : accès profil et Stripe plus visible
-- Stripe Connect : ne pas proposer aux locataires
-
-### Bugs prioritaires - 11/05/2026
-- Page annonce : masquer bouton réservation pour le propriétaire de l'annonce
-- Page réservation : rediriger vers messages après envoi de la demande (page reste figée)
-- Contrat : afficher adresse complète du local dans article 1
-- Contrat propriétaire : rediriger vers dashboard après signature
-- Dashboard : statuts incohérents proprio vs locataire
-- Navbar : accès profil et Stripe plus visible (pas seulement via email)
-- Stripe Connect : ne pas proposer aux locataires, uniquement aux propriétaires
-- Lien reset password invalide (Supabase redirect URLs à configurer)
-
-### Workflow GitHub Codespace
-- Codespace : "probable orbit"
-- Toujours utiliser Python pour éditer les fichiers complexes
-- Eviter backticks dans JSX -> utiliser space['id']
-- Git : git add . && git commit -m "message" && git push origin main
-- Si rejet : git pull origin main --rebase && git push origin main
-- Pour afficher le contexte : cat /workspaces/stock/nestock-context.md
-
-### Corrections effectuées - 09/06/2026
-- Bouton réservation masqué pour le propriétaire sur page annonce
-- Redirection vers messages après envoi demande de réservation
-- Stripe Connect uniquement affiché pour les propriétaires (page profil)
-- Redirection vers dashboard après signature propriétaire dans contrat
-- Navbar : lien profil visible en desktop (bouton) et mobile (barre du bas + menu hamburger)
-
-### Corrections effectuées - 09/06/2026 (suite)
-- Route API /api/stripe/portal créée pour accès portail paiement locataire
-- Lien dashboard Stripe pour propriétaire connecté dans page profil
-- Lien portail paiement Stripe pour locataire actif dans page profil
-- NEXT_PUBLIC_SITE_URL mis à jour vers https://nestock.pro dans Vercel
-- Webhook Stripe : gestion annulation abonnement par locataire (customer.subscription.deleted / cancel_at_period_end)
-- Notification + email au propriétaire quand locataire annule sur Stripe
-- Booking passé en statut "ending" automatiquement lors d'une annulation Stripe
-
-### A faire - Process résiliation complet
-- Bouton "Donner mon préavis" dans dashboard locataire
-- Notification propriétaire avec bouton "Accusé de réception"
-- Si propriétaire ne valide pas sous 15j -> résiliation automatique (cron Vercel)
-- Email récapitulatif aux deux parties
-- FAQ et landing page : expliquer le process de résiliation
-- Webhook Stripe annulation abonnement : testé via SQL Supabase, fonctionne (statut ending + notification)
-- Stripe CLI non installable depuis Codespace (domaine bloqué)
+### Juin 2026 — Phase marketing et pre-lancement
+- Page waitlist complete avec landing page, FAQ, A propos, transparence tarifaire
+- Mockups CSS des fonctionnalites (carte, messagerie, dashboard, contrat, quittances)
+- Photo reelle de la carte integree via imgur
+- Formulaire waitlist RGPD avec prenom, email, interet, consentements
+- Tracking UTM par source (tiktok, facebook, instagram, reddit, direct)
+- Emails automatiques : confirmation inscrit + notification admin
+- Middleware pre-lancement : toutes pages redirigent vers /waitlist
+- Dashboard admin /admin-waitlist : stats, repartition, sources, liste inscrits
+- Dashboard admin /admin-calendar : calendrier editorial 2 mois
+- Calendrier editorial avec 37 posts sur 4 reseaux
+- Suivi publications : statut, vues, likes, clics, commentaires
+- Stats par reseau avec taux de clic
+- 10 images TikTok 1080x1920 generees avec Pillow Python
+- Dossier marketing organise dans GitHub
+- Scripts videos : generique Star Wars, 5 scripts screen recording
+- Posts rediges pour TikTok, Facebook, Instagram, Reddit
+- Barre de progression scroll dans navbar waitlist
+- Logo Nestock cliquable vers le haut de page
