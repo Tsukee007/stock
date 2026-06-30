@@ -43,21 +43,35 @@ export default function AdminCalendar() {
   const [selectedPost, setSelectedPost] = useState<Post | null>(null)
   const [seeding, setSeeding] = useState(false)
 
-  async function login() {
+  useEffect(() => {
+    const saved = localStorage.getItem('nestock_admin_pwd')
+    if (saved) tryLogin(saved)
+  }, [])
+
+  async function tryLogin(pwd: string) {
     setLoading(true)
     setError('')
     try {
       const res = await fetch('/api/admin-calendar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password, action: 'get' })
+        body: JSON.stringify({ password: pwd, action: 'get' })
       })
       const json = await res.json()
-      if (!res.ok) { setError(json.error); return }
+      if (!res.ok) {
+        localStorage.removeItem('nestock_admin_pwd')
+        setError(json.error)
+        return
+      }
+      localStorage.setItem('nestock_admin_pwd', pwd)
       setPosts(json.data || [])
       setAuth(true)
     } catch { setError('Erreur serveur') }
     finally { setLoading(false) }
+  }
+
+  async function login() {
+    tryLogin(password)
   }
 
   async function seedData() {
@@ -142,8 +156,7 @@ export default function AdminCalendar() {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <span className="text-xl font-bold text-blue-600">Nestock</span>
-            <p className="text-gray-500 text-sm">Calendrier Editorial</p>
+            <span className="text-xl font-bold text-blue-600">Nestock Admin</span>
           </div>
           <div className="flex gap-3">
             {posts.length === 0 && (
@@ -152,9 +165,11 @@ export default function AdminCalendar() {
                 {seeding ? 'Chargement...' : 'Initialiser le calendrier'}
               </button>
             )}
-            <a href="/admin-waitlist" className="text-sm text-gray-500 hover:text-gray-700 border border-gray-200 px-4 py-2 rounded-lg">
-              Waitlist
-            </a>
+            <a href="/admin-waitlist" className="text-sm text-gray-500 hover:text-gray-700 border border-gray-200 px-4 py-2 rounded-lg">Waitlist</a>
+            <span className="text-sm bg-blue-50 text-blue-600 border border-blue-200 px-4 py-2 rounded-lg font-medium">Calendrier</span>
+            <button onClick={() => { localStorage.removeItem('nestock_admin_pwd'); setAuth(false) }} className="text-sm text-gray-500 hover:text-gray-700 border border-gray-200 px-4 py-2 rounded-lg">
+              Deconnexion
+            </button>
           </div>
         </div>
 

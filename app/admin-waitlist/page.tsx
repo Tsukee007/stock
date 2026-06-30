@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 interface Inscrit {
   id: string
@@ -18,26 +18,35 @@ export default function AdminWaitlist() {
   const [error, setError] = useState('')
   const [data, setData] = useState<Inscrit[] | null>(null)
 
-  async function handleLogin() {
-    setError('')
+  useEffect(() => {
+    const saved = localStorage.getItem('nestock_admin_pwd')
+    if (saved) tryLogin(saved)
+  }, [])
+
+  async function tryLogin(pwd: string) {
     setLoading(true)
+    setError('')
     try {
       const res = await fetch('/api/admin-waitlist', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password })
+        body: JSON.stringify({ password: pwd })
       })
       const json = await res.json()
       if (!res.ok) {
+        localStorage.removeItem('nestock_admin_pwd')
         setError(json.error || 'Erreur')
       } else {
+        localStorage.setItem('nestock_admin_pwd', pwd)
         setData(json.data)
       }
-    } catch {
-      setError('Erreur serveur')
-    } finally {
-      setLoading(false)
-    }
+    } catch { setError('Erreur serveur') }
+    finally { setLoading(false) }
+  }
+
+  async function handleLogin() {
+    setError('')
+    tryLogin(password)
   }
 
   if (!data) {
