@@ -8,6 +8,7 @@ const PUBLIC_PATHS = [
   '/api/waitlist',
   '/api/admin-waitlist',
   '/api/admin-calendar',
+  '/api/stripe/webhook',
   '/_next',
   '/favicon.ico',
 ]
