@@ -58,19 +58,19 @@ message_only, pending, awaiting_signature, confirmed, active, ending, ended, can
 - app/stripe/connect/page.tsx : onboarding Stripe
 - app/(auth)/register/page.tsx : inscription avec adresse
 - lib/utils.ts : statusLabels, statusColors, getDaysLeft
-- lib/mailer.ts : SMTP Hostinger
+- lib/mailer.ts : SMTP Hostinger (fonction sendEmail générique)
 - lib/notifications.ts : créer notifications
 - middleware.ts : redirection pre-lancement vers /waitlist
 
 ## Routes API
-- /api/waitlist : inscription waitlist + email confirmation + email admin
+- /api/waitlist : inscription waitlist + email confirmation (phases lancement + lien parrainage) + email notification admin
 - /api/admin-waitlist : dashboard stats waitlist (protege par mot de passe)
 - /api/admin-calendar : calendrier editorial CRUD (protege par mot de passe)
 - /api/bookings/create : créer réservation
 - /api/bookings/[id]/status : changer statut
 - /api/contracts/sign : signer contrat + Stripe checkout
 - /api/stripe/connect : onboarding Stripe Connect
-- /api/stripe/webhook : webhook paiements + quittances
+- /api/stripe/webhook : webhook paiements + quittances (exclu du middleware pre-lancement, cf. bug corrigé le 20/07)
 - /api/messages/notify : notifier nouveau message
 - /api/spaces/delete : supprimer annonce
 - /api/contact-form : formulaire contact
@@ -80,14 +80,19 @@ message_only, pending, awaiting_signature, confirmed, active, ending, ended, can
 - /admin-calendar : calendrier editorial 2 mois, stats par reseau, suivi publications
 
 ## Middleware pre-lancement
-Pages publiques accessibles :
+Pages publiques accessibles (PUBLIC_PATHS dans middleware.ts) :
 - /waitlist (landing page + formulaire)
 - /admin-waitlist (dashboard waitlist)
 - /admin-calendar (calendrier editorial)
 - /api/waitlist
 - /api/admin-waitlist
 - /api/admin-calendar
+- /api/stripe/webhook (ajouté le 20/07/2026, cf. bug ci-dessous)
+- /_next
+- /favicon.ico
 Toutes les autres pages redirigent vers /waitlist
+
+⚠️ Point de vigilance : toute nouvelle route API destinée à un service externe (webhook, callback...) doit être ajoutée à PUBLIC_PATHS avant le lancement, sinon elle est redirigée en 307 vers /waitlist — ce que la plupart des services externes (Stripe compris) ne suivent pas, cassant silencieusement l'intégration.
 
 ## Marketing
 Dossier : /marketing dans le repo GitHub
@@ -104,6 +109,7 @@ Dossier : /marketing dans le repo GitHub
 - Instagram : nestock.pro/waitlist?utm=instagram
 - Reddit : nestock.pro/waitlist?utm=reddit
 - Direct : nestock.pro/waitlist (source = direct)
+- Parrainage (nouveau 20/07) : nestock.pro/waitlist?utm_source=referral&utm_medium=email — inclus dans l'email de confirmation waitlist pour permettre aux inscrits de transférer le lien
 
 ## Reseaux sociaux
 - TikTok : @nestock (compte Pro, lien en bio avec UTM)
@@ -131,8 +137,18 @@ Dossier : /marketing dans le repo GitHub
 
 ## Stripe
 - Mode test actuellement (clés pk_test_ / sk_test_)
-- Webhook : https://nestock.pro/api/stripe/webhook
-- API version : 2026-02-25.clover
+- Webhook : https://www.nestock.pro/api/stripe/webhook (www obligatoire — Stripe ne suit pas les redirections)
+- API version observée : 2026-03-25.dahlia
+
+### Points d'attention Stripe (appris à la dure)
+- Stripe ne suit jamais les redirections HTTP (307/308) sur les webhooks : ni les divergences www/non-www, ni les redirections imposées par un middleware applicatif
+- Bug corrigé le 20/07/2026 : le middleware pre-lancement redirigeait /api/stripe/webhook vers /waitlist en 307, faisant échouer silencieusement tous les webhooks Stripe (invoice.paid notamment). Vérifié résolu via `curl -I https://www.nestock.pro/api/stripe/webhook` (405 au lieu de 307) et renvoi manuel réussi en mode test
+- À revalider systématiquement lors du passage en mode live : reconfigurer et retester l'endpoint webhook live indépendamment du mode test
+
+## RGPD / Emails
+- Emails transactionnels (confirmation waitlist, contrats, quittances, messages) : pas de consentement explicite requis, relèvent de l'intérêt légitime / de l'exécution d'une action demandée par l'utilisateur
+- Emails marketing (newsletters, offres de lancement) : nécessitent une case de consentement explicite séparée type "J'accepte de recevoir des emails de Nestock. Désinscription possible à tout moment" — pas encore ajoutée, à décider selon besoin futur
+- Lien de désinscription et mention RGPD obligatoires sur tout email et tout formulaire de collecte
 
 ## Fonctionnalités terminées
 - Auth (login/register/reset password)
@@ -161,15 +177,25 @@ Dossier : /marketing dans le repo GitHub
 - Dashboard admin calendrier editorial
 - 10 images TikTok generees avec Pillow
 - Calendrier editorial 2 mois tous reseaux
+- Email de confirmation waitlist enrichi : phases de lancement + lien de parrainage UTM (20/07)
+- Bug webhook Stripe / middleware corrigé (20/07)
 
 ## Prochaines étapes
-1. Passer Stripe en production (clés live)
+1. Passer Stripe en production (clés live) — revalider le webhook après bascule
 2. Retirer le middleware au lancement
 3. Vue propriétaire identique locataire dans dashboard
 4. CGU / Mentions légales complètes
 5. Amelioration UI/UX generale
+6. Decider ajout case consentement marketing sur formulaire waitlist
+7. Cron job résiliation automatique 15j
 
 ## Journal des modifications
+
+### 20/07/2026
+- Email de confirmation waitlist enrichi : bloc "Les prochaines étapes" (3 phases : liste d'attente en cours / version bêta / lancement officiel) + bloc "Fais connaître Nestock" avec lien de parrainage générique trackable en UTM (utm_source=referral&utm_medium=email), directement dans le template HTML existant de app/api/waitlist/route.ts
+- Confirmation RGPD : email de confirmation waitlist = transactionnel, pas de case consentement marketing requise pour celui-ci ; case consentement marketing reste à ajouter si newsletters/offres prévues
+- Bug webhook Stripe corrigé : le middleware pre-lancement redirigeait /api/stripe/webhook en 307 vers /waitlist (Stripe ne suit pas les redirections) -> tous les webhooks échouaient silencieusement (ex. invoice.paid). Fix : ajout de '/api/stripe/webhook' dans PUBLIC_PATHS du middleware.ts. Vérifié via curl -I (405 au lieu de 307, plus de redirection) et renvoi manuel réussi en mode test
+- Point de vigilance noté pour le passage Stripe en mode live : revérifier ce même type de problème (middleware + redirections non suivies)
 
 ### Juin 2026 — Phase marketing et pre-lancement
 - Page waitlist complete avec landing page, FAQ, A propos, transparence tarifaire
@@ -190,3 +216,20 @@ Dossier : /marketing dans le repo GitHub
 - Posts rediges pour TikTok, Facebook, Instagram, Reddit
 - Barre de progression scroll dans navbar waitlist
 - Logo Nestock cliquable vers le haut de page
+
+## Comment mettre à jour ce fichier
+
+Ajouter une modification :
+```bash
+echo "- [DATE] : description" >> /workspaces/stock/nestock-context.md
+```
+
+Committer les changements :
+```bash
+git add nestock-context.md && git commit -m "docs: mise a jour contexte" && git push origin main
+```
+
+Afficher le contenu pour une nouvelle conversation Claude :
+```bash
+cat /workspaces/stock/nestock-context.md
+```
