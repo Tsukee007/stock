@@ -68,6 +68,35 @@ export async function POST(req: Request) {
               <p style="margin: 0; color: #374151; font-size: 14px;"><strong>Ton profil :</strong></p>
               <p style="margin: 8px 0 0; color: #6b7280; font-size: 14px;">Interet : ${interetLabel}</p>
             </div>
+
+            <div style="margin-bottom: 24px;">
+              <p style="color: #374151; font-size: 14px; font-weight: 600; margin-bottom: 12px;">Les prochaines etapes :</p>
+              <p style="color: #6b7280; font-size: 14px; margin-bottom: 8px;">
+                <strong>Etape 1 — Liste d attente</strong> (en cours)<br/>
+                On construit la communaute avant le lancement.
+              </p>
+              <p style="color: #6b7280; font-size: 14px; margin-bottom: 8px;">
+                <strong>Etape 2 — Version beta</strong><br/>
+                Un acces anticipe sera ouvert a une partie de la liste d attente pour tester la plateforme avant tout le monde.
+              </p>
+              <p style="color: #6b7280; font-size: 14px; margin-bottom: 0;">
+                <strong>Etape 3 — Lancement officiel</strong><br/>
+                Ouverture complete de la marketplace : depot d annonces, reservations, paiements securises.
+              </p>
+            </div>
+
+            <div style="background: #eff6ff; border-radius: 12px; padding: 16px; margin-bottom: 24px;">
+              <p style="margin: 0 0 8px; color: #374151; font-size: 14px; font-weight: 600;">Fais connaitre Nestock</p>
+              <p style="margin: 0 0 8px; color: #6b7280; font-size: 14px;">
+                Tu connais quelqu un qui a un espace inutilise, ou qui cherche un espace de stockage pas cher ?
+              </p>
+              <p style="margin: 0;">
+                <a href="https://nestock.pro/waitlist?utm_source=referral&utm_medium=email" style="color: #2563eb; font-size: 14px;">
+                  https://nestock.pro/waitlist?utm_source=referral&utm_medium=email
+                </a>
+              </p>
+            </div>
+
             <p style="color: #9ca3af; font-size: 12px; line-height: 1.6;">
               Conformement au RGPD, tu peux demander la suppression de tes donnees a tout moment en repondant a cet email.
             </p>
