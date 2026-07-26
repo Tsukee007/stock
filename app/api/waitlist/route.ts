@@ -125,8 +125,9 @@ export async function POST(req: Request) {
           </div>
         `
       })
-    } catch (mailErr) {
-      console.error('Mail error (non bloquant):', mailErr)
+    } catch (mailErr: unknown) {
+      const errMsg = mailErr instanceof Error ? mailErr.message : String(mailErr)
+      console.error('Mail error:', errMsg)
     }
 
     return NextResponse.json({ success: true })
