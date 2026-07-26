@@ -50,7 +50,7 @@ export default function WaitlistPage() {
       if (!res.ok) {
         setError(data.error || 'Une erreur est survenue.')
       } else {
-        window.location.href = 'https://www.nestock.pro/waitlist?inscrit=1'
+        setSuccess(true)
       }
     } catch {
       setError('Une erreur est survenue, reessaie.')
