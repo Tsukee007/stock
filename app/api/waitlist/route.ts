@@ -48,6 +48,8 @@ export async function POST(req: Request) {
       : 'Les deux'
 
     try {
+      console.log('SMTP_USER:', process.env.SMTP_USER)
+      console.log('SMTP_PASS defini:', !!process.env.SMTP_PASS)
       await transporter.sendMail({
         from: '"Nestock" <contact@nestock.pro>',
         to: email,
