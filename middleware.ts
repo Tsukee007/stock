@@ -13,7 +13,15 @@ const PUBLIC_PATHS = [
   '/favicon.ico',
 ]
 
+// Waitlist desactivee : inscription directe ouverte.
+// Repasser a true pour reactiver le blocage pre-lancement si besoin.
+const WAITLIST_ACTIVE = false
+
 export function middleware(request: NextRequest) {
+  if (!WAITLIST_ACTIVE) {
+    return NextResponse.next()
+  }
+
   const { pathname } = request.nextUrl
   const isPublic = PUBLIC_PATHS.some(path => pathname.startsWith(path))
   if (!isPublic) {
