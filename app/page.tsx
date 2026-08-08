@@ -176,7 +176,48 @@ export default async function Home({
           </div>
         </div>
       </section>
-
+{/* Vision & Valeurs */}
+      <section className="py-20 px-4 bg-blue-600">
+        <div className="max-w-4xl mx-auto text-center">
+          <div className="inline-block bg-blue-500 text-blue-50 text-sm px-4 py-1.5 rounded-full font-medium mb-6">
+            Notre vision
+          </div>
+          <p className="text-2xl md:text-3xl font-bold text-white leading-snug mb-16 max-w-2xl mx-auto">
+            Il existe déjà assez d'espace en France, il suffit de mieux le partager.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-left">
+            <div>
+              <div className="text-3xl mb-3">📍</div>
+              <h3 className="font-bold text-white mb-2">Proximité</h3>
+              <p className="text-blue-100 text-sm leading-relaxed">
+                Des solutions de stockage à deux pas de chez vous, portées par des particuliers de votre quartier.
+              </p>
+            </div>
+            <div>
+              <div className="text-3xl mb-3">🤝</div>
+              <h3 className="font-bold text-white mb-2">Confiance</h3>
+              <p className="text-blue-100 text-sm leading-relaxed">
+                Contrats, paiements et suivi gérés de bout en bout, pour louer et proposer un espace en toute sérénité.
+              </p>
+            </div>
+            <div>
+              <div className="text-3xl mb-3">💶</div>
+              <h3 className="font-bold text-white mb-2">Accessibilité</h3>
+              <p className="text-blue-100 text-sm leading-relaxed">
+                Un stockage jusqu'à deux fois moins cher qu'un box traditionnel.
+              </p>
+            </div>
+            <div>
+              <div className="text-3xl mb-3">🌍</div>
+              <h3 className="font-bold text-white mb-2">Impact local</h3>
+              <p className="text-blue-100 text-sm leading-relaxed">
+                Valoriser les espaces inutilisés plutôt que d'en construire de nouveaux.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+</parameter>
       {/* Pour les proprietaires */}
       <section className="py-20 px-4 bg-gray-50 border-t border-gray-100">
         <div className="max-w-5xl mx-auto">
