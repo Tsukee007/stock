@@ -88,7 +88,7 @@ export default async function Home({
             pour des locations simples, securisees et avec contrat electronique.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4 pt-2">
-            <a href="/register" className="bg-blue-600 text-white font-bold px-8 py-4 rounded-xl hover:bg-blue-700 transition text-lg shadow-sm">
+            <a href="/register" className="bg-blue-600 text-white font-bold px-8 py-4 rounded-xl hover:bg-blue-700 transition text-lg shadow-sm" style={{ color: '#ffffff' }}>
               Trouver un espace
             </a>
             <a href="/register" className="border border-gray-200 text-gray-700 font-bold px-8 py-4 rounded-xl hover:bg-gray-50 transition text-lg">
@@ -112,7 +112,7 @@ export default async function Home({
           </div>
           <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-gray-50 to-transparent pointer-events-none" />
           <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10">
-            <a href="/register" className="bg-blue-600 text-white font-bold px-8 py-3 rounded-xl shadow-md hover:bg-blue-700 transition whitespace-nowrap text-lg">
+            <a href="/register" className="bg-blue-600 text-white font-bold px-8 py-3 rounded-xl shadow-md hover:bg-blue-700 transition whitespace-nowrap text-lg" style={{ color: '#ffffff' }}>
               S'inscrire gratuitement pour reserver
             </a>
           </div>
@@ -180,37 +180,37 @@ export default async function Home({
       {/* Vision & Valeurs */}
       <section className="py-20 px-4 bg-blue-600">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-block bg-blue-500 text-blue-50 text-sm px-4 py-1.5 rounded-full font-medium mb-6">
+          <div className="inline-block bg-blue-500 text-white text-sm px-4 py-1.5 rounded-full font-medium mb-6" style={{ color: '#ffffff' }}>
             Notre vision
           </div>
-          <p className="text-2xl md:text-3xl font-bold text-white leading-snug mb-16 max-w-2xl mx-auto">
+          <p className="text-2xl md:text-3xl font-bold text-white leading-snug mb-16 max-w-2xl mx-auto" style={{ color: '#ffffff' }}>
             Il existe déjà assez d'espace en France, il suffit de mieux le partager.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-left">
             <div>
               <div className="text-3xl mb-3">📍</div>
-              <h3 className="font-bold text-white mb-2">Proximité</h3>
+              <h3 className="font-bold text-white mb-2" style={{ color: '#ffffff' }}>Proximité</h3>
               <p className="text-blue-100 text-sm leading-relaxed">
                 Des solutions de stockage à deux pas de chez vous, portées par des particuliers de votre quartier.
               </p>
             </div>
             <div>
               <div className="text-3xl mb-3">🤝</div>
-              <h3 className="font-bold text-white mb-2">Confiance</h3>
+              <h3 className="font-bold text-white mb-2" style={{ color: '#ffffff' }}>Confiance</h3>
               <p className="text-blue-100 text-sm leading-relaxed">
                 Contrats, paiements et suivi gérés de bout en bout, pour louer et proposer un espace en toute sérénité.
               </p>
             </div>
             <div>
               <div className="text-3xl mb-3">💶</div>
-              <h3 className="font-bold text-white mb-2">Accessibilité</h3>
+              <h3 className="font-bold text-white mb-2" style={{ color: '#ffffff' }}>Accessibilité</h3>
               <p className="text-blue-100 text-sm leading-relaxed">
                 Un stockage jusqu'à deux fois moins cher qu'un box traditionnel.
               </p>
             </div>
             <div>
               <div className="text-3xl mb-3">🌍</div>
-              <h3 className="font-bold text-white mb-2">Impact local</h3>
+              <h3 className="font-bold text-white mb-2" style={{ color: '#ffffff' }}>Impact local</h3>
               <p className="text-blue-100 text-sm leading-relaxed">
                 Valoriser les espaces inutilisés plutôt que d'en construire de nouveaux.
               </p>
@@ -236,7 +236,7 @@ export default async function Home({
                 <p>✓ Virements directs sur votre IBAN</p>
                 <p>✓ Vous fixez votre prix, vous gardez tout</p>
               </div>
-              <a href="/register" className="inline-block bg-blue-600 text-white font-bold px-8 py-3 rounded-xl hover:bg-blue-700 transition">
+              <a href="/register" className="inline-block bg-blue-600 text-white font-bold px-8 py-3 rounded-xl hover:bg-blue-700 transition" style={{ color: '#ffffff' }}>
                 Deposer mon annonce gratuitement
               </a>
             </div>
@@ -349,7 +349,7 @@ export default async function Home({
           <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900">Pret a commencer ?</h2>
           <p className="text-gray-500 text-lg">Rejoignez Nestock gratuitement et trouvez votre espace de stockage ideal.</p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <a href="/register" className="bg-blue-600 text-white font-bold px-8 py-4 rounded-xl hover:bg-blue-700 transition text-lg shadow-sm">
+            <a href="/register" className="bg-blue-600 text-white font-bold px-8 py-4 rounded-xl hover:bg-blue-700 transition text-lg shadow-sm" style={{ color: '#ffffff' }}>
               Creer un compte gratuit
             </a>
             <a href="/login" className="border border-gray-200 text-gray-700 font-bold px-8 py-4 rounded-xl hover:bg-gray-100 transition text-lg">
