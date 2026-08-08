@@ -3,6 +3,7 @@ import { Geist } from 'next/font/google'
 import './globals.css'
 import { createClient } from '@/lib/supabase/server'
 import Navbar from '@/components/ui/Navbar'
+import AnnouncementBanner from '@/components/AnnouncementBanner'
 
 const geist = Geist({ subsets: ['latin'] })
 
@@ -22,6 +23,7 @@ export default async function RootLayout({
   return (
     <html lang="fr">
       <body className={geist.className}>
+        <AnnouncementBanner />
         <Navbar user={user ? { email: user.email ?? '', id: user.id } : null} />
         <div className="pb-16 md:pb-0">
           {children}
