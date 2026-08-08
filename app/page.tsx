@@ -176,7 +176,8 @@ export default async function Home({
           </div>
         </div>
       </section>
-{/* Vision & Valeurs */}
+
+      {/* Vision & Valeurs */}
       <section className="py-20 px-4 bg-blue-600">
         <div className="max-w-4xl mx-auto text-center">
           <div className="inline-block bg-blue-500 text-blue-50 text-sm px-4 py-1.5 rounded-full font-medium mb-6">
@@ -217,7 +218,7 @@ export default async function Home({
           </div>
         </div>
       </section>
-</parameter>
+
       {/* Pour les proprietaires */}
       <section className="py-20 px-4 bg-gray-50 border-t border-gray-100">
         <div className="max-w-5xl mx-auto">
