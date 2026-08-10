@@ -351,7 +351,7 @@ export default async function Home({
         <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-sm">
           <div className="col-span-2 md:col-span-1 space-y-3">
             <p className="text-gray-900 font-bold text-lg">Nestock</p>
-            <p className="text-xs text-gray-400">La marketplace francaise du stockage entre particuliers.</p>
+            <p className="text-xs text-gray-400">L'Airbnb du stockage entre particuliers.</p>
             <p className="text-xs text-gray-400">contact@nestock.pro</p>
           </div>
           <div className="space-y-2">
