@@ -306,7 +306,7 @@ export default async function Home({
               <span className="text-3xl">💳</span>
               <div>
                 <h3 className="font-bold text-gray-900">Paiements securises</h3>
-                <p className="text-gray-500 text-sm mt-1">Paiements automatiques via Stripe, certifie PCI-DSS. Proprietaire paye sur son IBAN chaque mois.</p>
+                <p className="text-gray-500 text-sm mt-1">Paiements automatiques traites par Stripe (certifie PCI-DSS niveau 1). Proprietaire paye sur son IBAN chaque mois.</p>
               </div>
             </div>
             <div className="flex gap-4 p-5 rounded-xl border border-gray-100 hover:bg-gray-50 transition">
