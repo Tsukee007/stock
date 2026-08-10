@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import SearchFilters from '@/components/map/SearchFilters'
 import MapWithList from '@/components/map/MapWithList'
+import FAQSection from '@/components/FAQSection'
 
 type SearchParams = {
   city?: string
@@ -307,41 +308,7 @@ export default async function Home({
       </section>
 
       {/* FAQ */}
-      <section className="py-20 px-4 bg-white">
-        <div className="max-w-3xl mx-auto">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">Questions frequentes</h2>
-          <div className="space-y-3">
-            <details className="rounded-xl p-5 cursor-pointer border border-gray-100 hover:border-gray-200 transition">
-              <summary className="font-semibold text-gray-900 list-none flex justify-between items-center">
-                Est-ce que Nestock est gratuit ?
-                <span className="text-gray-400 text-xl">+</span>
-              </summary>
-              <p className="text-gray-500 text-sm mt-3">L'inscription est entierement gratuite. Nestock prend une commission de 10% uniquement sur les transactions realisees.</p>
-            </details>
-            <details className="rounded-xl p-5 cursor-pointer border border-gray-100 hover:border-gray-200 transition">
-              <summary className="font-semibold text-gray-900 list-none flex justify-between items-center">
-                Le contrat est-il legalement valide ?
-                <span className="text-gray-400 text-xl">+</span>
-              </summary>
-              <p className="text-gray-500 text-sm mt-3">Oui. Les contrats signes sur Nestock ont la meme valeur juridique qu'une signature manuscrite, conformement a l'article 1366 du Code civil francais.</p>
-            </details>
-            <details className="rounded-xl p-5 cursor-pointer border border-gray-100 hover:border-gray-200 transition">
-              <summary className="font-semibold text-gray-900 list-none flex justify-between items-center">
-                Comment je recois mon argent en tant que proprietaire ?
-                <span className="text-gray-400 text-xl">+</span>
-              </summary>
-              <p className="text-gray-500 text-sm mt-3">Via Stripe Connect, vos loyers sont vires automatiquement sur votre IBAN chaque mois, sans intermediaire.</p>
-            </details>
-            <details className="rounded-xl p-5 cursor-pointer border border-gray-100 hover:border-gray-200 transition">
-              <summary className="font-semibold text-gray-900 list-none flex justify-between items-center">
-                Puis-je resilier a tout moment ?
-                <span className="text-gray-400 text-xl">+</span>
-              </summary>
-              <p className="text-gray-500 text-sm mt-3">Oui, proprietaire et locataire peuvent resilier avec un preavis de 15 jours via la messagerie Nestock.</p>
-            </details>
-          </div>
-        </div>
-      </section>
+      <FAQSection />
 
       {/* CTA final */}
       <section className="bg-gray-50 border-t border-gray-100 py-20 px-4 text-center">
