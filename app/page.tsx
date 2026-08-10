@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import SearchFilters from '@/components/map/SearchFilters'
 import MapWithList from '@/components/map/MapWithList'
 import FAQSection from '@/components/FAQSection'
+import FeatureShowcase from '@/components/FeatureShowcase'
 
 type SearchParams = {
   city?: string
@@ -219,6 +220,9 @@ export default async function Home({
           </div>
         </div>
       </section>
+
+      {/* Fonctionnalites */}
+      <FeatureShowcase />
 
       {/* Pour les proprietaires */}
       <section className="py-20 px-4 bg-gray-50 border-t border-gray-100">
