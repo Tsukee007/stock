@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { usePathname } from 'next/navigation'
 import NotificationBell from '@/components/ui/NotificationBell'
+import Logo from '@/components/Logo'
 
 type Props = {
   user: { email: string; id: string } | null
@@ -35,8 +36,8 @@ export default function Navbar({ user }: Props) {
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
 
           {/* Logo */}
-          <a href="/" className="text-xl font-bold text-blue-600 flex items-center gap-2">
-            🗄️ Nestock
+          <a href="/" className="flex items-center">
+            <Logo size={36} />
           </a>
 
           {/* Desktop nav */}
@@ -73,7 +74,7 @@ export default function Navbar({ user }: Props) {
             ) : (
               <>
                 <a href="/login" className="text-sm text-gray-600 hover:text-blue-600">Connexion</a>
-                <a href="/register" className="text-sm bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700">
+                <a href="/register" className="text-sm bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700" style={{ color: '#ffffff' }}>
                   S'inscrire
                 </a>
               </>
@@ -127,7 +128,7 @@ export default function Navbar({ user }: Props) {
                   <a href="/login" className="flex-1 text-center text-sm border border-blue-600 text-blue-600 py-2 rounded-lg">
                     Connexion
                   </a>
-                  <a href="/register" className="flex-1 text-center text-sm bg-blue-600 text-white py-2 rounded-lg">
+                  <a href="/register" className="flex-1 text-center text-sm bg-blue-600 text-white py-2 rounded-lg" style={{ color: '#ffffff' }}>
                     S'inscrire
                   </a>
                 </div>
