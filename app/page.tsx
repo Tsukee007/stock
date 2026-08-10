@@ -1,457 +1,380 @@
 import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
-import BookingAction from '@/components/ui/BookingAction'
-import ReviewForm from '@/components/ui/ReviewForm'
-import PayButton from '@/components/ui/PayButton'
-import { statusLabels, statusColors, getDaysLeft } from '@/lib/utils'
-import DeleteSpaceButton from '@/components/ui/DeleteSpaceButton'
+import SearchFilters from '@/components/map/SearchFilters'
+import MapWithList from '@/components/map/MapWithList'
+import FAQSection from '@/components/FAQSection'
+import FeatureShowcase from '@/components/FeatureShowcase'
 
-export default async function DashboardPage() {
+type SearchParams = {
+  city?: string
+  type?: string
+  minPrice?: string
+  maxPrice?: string
+  minSurface?: string
+  radius?: string
+  lat?: string
+  lng?: string
+}
+
+function getDistanceKm(lat1: number, lng1: number, lat2: number, lng2: number) {
+  const R = 6371
+  const dLat = (lat2 - lat1) * Math.PI / 180
+  const dLng = (lng2 - lng1) * Math.PI / 180
+  const a = Math.sin(dLat/2) ** 2 +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLng/2) ** 2
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+}
+
+export default async function Home({
+  searchParams
+}: {
+  searchParams: Promise<SearchParams>
+}) {
+  const filters = await searchParams
   const supabase = await createClient()
-
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
 
-  const { data: spaces } = await supabase
+  let query = supabase
     .from('spaces')
-    .select('*, bookings(id, status, renter_id, created_at, notice_initiated_by, notice_acknowledged_at, ending_date)')
-    .eq('owner_id', user.id)
-    .order('created_at', { ascending: false })
+    .select('id, title, city, lat, lng, price_month, type, surface_m2, address, price_ttc, bookings(status), profiles(full_name)')
+    .eq('is_active', true)
 
-  const spacesWithStatus = spaces?.map(space => ({
-    ...space,
-    hasActiveBooking: (space.bookings as any[])?.some(b =>
-      ['pending', 'awaiting_signature', 'confirmed', 'active', 'ending'].includes(b.status)
-    ) ?? false
-  })) ?? []
+  if (filters.city && !filters.lat) query = query.ilike('city', `%${filters.city}%`)
+  if (filters.type) query = query.eq('type', filters.type)
+  if (filters.minPrice) query = query.gte('price_month', parseFloat(filters.minPrice))
+  if (filters.maxPrice) query = query.lte('price_month', parseFloat(filters.maxPrice))
+  if (filters.minSurface) query = query.gte('surface_m2', parseFloat(filters.minSurface))
 
-  const { data: bookings } = await supabase
-    .from('bookings')
-    .select('*, spaces(id, title, city, price_month, owner_id), reviews(id, author_id), ending_date, start_date, notice_initiated_by, notice_acknowledged_at')
-    .eq('renter_id', user.id)
-    .order('created_at', { ascending: false })
+  let { data: rawSpaces } = await query
+  let spaces = rawSpaces?.map(s => ({
+    ...s,
+    is_booked: (s.bookings as any[])?.some((b: any) => ['active', 'confirmed', 'awaiting_signature'].includes(b.status)) ?? false,
+    profiles: Array.isArray(s.profiles) ? s.profiles[0] : s.profiles
+  }))
 
-  const totalRevenue = spaces?.reduce((acc, space) => {
-    const activeBookings = (space.bookings as any[])?.filter(b => b.status === 'active').length ?? 0
-    return acc + (activeBookings * space.price_month)
-  }, 0) ?? 0
+  if (spaces && filters.lat && filters.lng && filters.radius) {
+    const lat = parseFloat(filters.lat)
+    const lng = parseFloat(filters.lng)
+    const radius = parseFloat(filters.radius)
+    spaces = spaces.filter(s =>
+      s.lat && s.lng && getDistanceKm(lat, lng, s.lat, s.lng) <= radius
+    )
+  }
 
-  const pendingBookings = spaces?.flatMap(space =>
-    ((space.bookings as any[]) ?? [])
-      .filter(b => b.status === 'pending')
-      .map(b => ({ ...b, spaceTitle: space.title, spaceId: space.id }))
-  ) ?? []
-
-  const awaitingSignatureBookings = spaces?.flatMap(space =>
-    ((space.bookings as any[]) ?? [])
-      .filter(b => b.status === 'awaiting_signature')
-      .map(b => ({ ...b, spaceTitle: space.title, spaceId: space.id }))
-  ) ?? []
-
-  const confirmedBookings = spaces?.flatMap(space =>
-    ((space.bookings as any[]) ?? [])
-      .filter(b => b.status === 'confirmed')
-      .map(b => ({ ...b, spaceTitle: space.title, spaceCity: space.city, spacePrice: space.price_month }))
-  ) ?? []
-
-  const activeBookingsList = spaces?.flatMap(space =>
-    ((space.bookings as any[]) ?? [])
-      .filter(b => b.status === 'active')
-      .map(b => ({ ...b, spaceTitle: space.title, spaceCity: space.city, spacePrice: space.price_month }))
-  ) ?? []
-
-  const endingBookingsList = spaces?.flatMap(space =>
-    ((space.bookings as any[]) ?? [])
-      .filter(b => b.status === 'ending')
-      .map(b => ({ ...b, spaceTitle: space.title, spaceCity: space.city, spacePrice: space.price_month }))
-  ) ?? []
-
-  const endedBookingsList = spaces?.flatMap(space =>
-    ((space.bookings as any[]) ?? [])
-      .filter(b => b.status === 'ended')
-      .map(b => ({ ...b, spaceTitle: space.title, spaceCity: space.city, spacePrice: space.price_month }))
-  ) ?? []
+  if (user) {
+    return (
+      <main className="relative flex flex-col" style={{ height: 'calc(100vh - 64px)' }}>
+        <SearchFilters initialFilters={filters} />
+        <div className="flex-1 pt-16 md:pt-16">
+          <MapWithList spaces={spaces ?? []} />
+        </div>
+      </main>
+    )
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto p-6 space-y-8">
+    <main className="bg-white">
 
-        <div>
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-800">Tableau de bord</h1>
-              <p className="text-gray-500 text-sm mt-1">{user.email}</p>
+      {/* Hero */}
+      <section className="bg-white py-16 md:py-24 px-4 border-b border-gray-100 overflow-hidden">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+          <div className="space-y-8 text-center md:text-left">
+            <div className="inline-block text-sm px-4 py-2 rounded-full font-semibold" style={{ background: '#FAECE7', color: '#712B13' }}>
+              L'Airbnb du stockage entre particuliers
             </div>
-            <div className="flex gap-2">
-              <a href="/dashboard/invoices"
-                className="text-sm bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
-                🧾 Quittances
-              </a>
-              <a href="/dashboard/stats"
-                className="text-sm bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">
-                📊 Mes stats
-              </a>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-3 gap-4">
-          <div className="bg-white rounded-xl shadow-sm p-4 text-center">
-            <p className="text-3xl font-bold text-blue-600">{spaces?.length ?? 0}</p>
-            <p className="text-gray-500 text-sm mt-1">Annonces</p>
-          </div>
-          <div className="bg-white rounded-xl shadow-sm p-4 text-center">
-            <p className="text-3xl font-bold text-green-600">{bookings?.length ?? 0}</p>
-            <p className="text-gray-500 text-sm mt-1">Locations</p>
-          </div>
-          <div className="bg-white rounded-xl shadow-sm p-4 text-center">
-            <p className="text-3xl font-bold text-purple-600">{totalRevenue.toFixed(0)}€</p>
-            <p className="text-gray-500 text-sm mt-1">Revenus/mois</p>
-          </div>
-        </div>
-
-        {/* Demandes de réservation */}
-        {pendingBookings.length > 0 && (
-          <div>
-            <h2 className="text-lg font-bold text-gray-700 mb-3 flex items-center gap-2">
-              📩 Demandes de réservation
-              <span className="bg-yellow-400 text-white text-xs px-2 py-0.5 rounded-full">{pendingBookings.length}</span>
-            </h2>
-            <div className="space-y-3">
-              {pendingBookings.map(booking => (
-                <div key={booking.id} className="bg-white rounded-xl shadow-sm p-4 border-l-4 border-yellow-400">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h3 className="font-semibold">{booking.spaceTitle}</h3>
-                      <p className="text-gray-500 text-xs mt-1">Reçue le {new Date(booking.created_at).toLocaleDateString('fr-FR')}</p>
-                    </div>
-                    <div className="flex gap-2">
-                      <a href={'/contracts/' + booking.id} className="text-xs bg-green-100 text-green-700 hover:bg-green-200 px-3 py-1.5 rounded-lg font-medium">
-                        Accepter et signer
-                      </a>
-                      <BookingAction bookingId={booking.id} status="cancelled" label="Refuser" color="red" />
-                    </div>
-                  </div>
-                  <div className="flex gap-3 mt-2">
-                    <a href={'/messages?booking_id=' + booking['id']} className="text-xs text-blue-600 hover:underline">Messages</a>
-                    <a href={'/contracts/' + booking['id']} className="text-xs text-purple-600 hover:underline">📄 Contrat</a>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* En attente de signature locataire */}
-        {awaitingSignatureBookings.length > 0 && (
-          <div>
-            <h2 className="text-lg font-bold text-gray-700 mb-3 flex items-center gap-2">
-              ✍️ En attente de signature locataire
-              <span className="bg-orange-400 text-white text-xs px-2 py-0.5 rounded-full">{awaitingSignatureBookings.length}</span>
-            </h2>
-            <div className="space-y-3">
-              {awaitingSignatureBookings.map(booking => (
-                <div key={booking.id} className="bg-white rounded-xl shadow-sm p-4 border-l-4 border-orange-400">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h3 className="font-semibold">{booking.spaceTitle}</h3>
-                      <p className="text-gray-500 text-xs mt-1">Demande du {new Date(booking.created_at).toLocaleDateString('fr-FR')}</p>
-                    </div>
-                    <span className="text-xs bg-orange-100 text-orange-700 px-3 py-1.5 rounded-lg font-medium">⏳ En attente</span>
-                  </div>
-                  <div className="flex gap-3 mt-2">
-                    <a href={'/messages?booking_id=' + booking['id']} className="text-xs text-blue-600 hover:underline">Messages</a>
-                    <a href={'/contracts/' + booking['id']} className="text-xs text-purple-600 hover:underline">📄 Contrat</a>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* En attente de paiement */}
-        {confirmedBookings.length > 0 && (
-          <div>
-            <h2 className="text-lg font-bold text-gray-700 mb-3 flex items-center gap-2">
-              💳 En attente de paiement
-              <span className="bg-blue-400 text-white text-xs px-2 py-0.5 rounded-full">{confirmedBookings.length}</span>
-            </h2>
-            <div className="space-y-3">
-              {confirmedBookings.map(booking => (
-                <div key={booking.id} className="bg-white rounded-xl shadow-sm p-4 border-l-4 border-blue-400">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <a href={'/dashboard/bookings/' + booking.id} className="hover:underline">
-                        <h3 className="font-semibold">{booking.spaceTitle}</h3>
-                      </a>
-                      <p className="text-gray-500 text-xs mt-1">Contrat signé — en attente du premier paiement</p>
-                    </div>
-                    <span className="text-xs bg-blue-100 text-blue-700 px-3 py-1.5 rounded-lg font-medium">💳 Paiement</span>
-                  </div>
-                  <div className="flex gap-3 mt-2">
-                    <a href={'/messages?booking_id=' + booking['id']} className="text-xs text-blue-600 hover:underline">Messages</a>
-                    <a href={'/contracts/' + booking['id']} className="text-xs text-purple-600 hover:underline">📄 Contrat</a>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Locations actives */}
-        {activeBookingsList.length > 0 && (
-          <div>
-            <h2 className="text-lg font-bold text-gray-700 mb-3 flex items-center gap-2">
-              ✅ Locations actives
-              <span className="bg-green-500 text-white text-xs px-2 py-0.5 rounded-full">{activeBookingsList.length}</span>
-            </h2>
-            <div className="space-y-3">
-              {activeBookingsList.map(booking => (
-                <div key={booking.id} className="bg-white rounded-xl shadow-sm p-4 border-l-4 border-green-500">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <a href={'/dashboard/bookings/' + booking.id} className="hover:underline">
-                        <h3 className="font-semibold">{booking.spaceTitle}</h3>
-                      </a>
-                      <p className="text-gray-600 text-sm">{booking.spaceCity} · {booking.spacePrice}€/mois</p>
-                      <p className="text-gray-500 text-xs mt-0.5">Depuis le {new Date(booking.start_date).toLocaleDateString('fr-FR')}</p>
-                    </div>
-                    <BookingAction bookingId={booking.id} status="ending" label="Résilier (15j)" color="gray" />
-                  </div>
-                  <div className="flex gap-3 mt-2">
-                    <a href={'/messages?booking_id=' + booking['id']} className="text-xs text-blue-600 hover:underline">Messages</a>
-                    <a href={'/contracts/' + booking['id']} className="text-xs text-purple-600 hover:underline">📄 Contrat</a>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Préavis en cours */}
-        {endingBookingsList.length > 0 && (
-          <div>
-            <h2 className="text-lg font-bold text-gray-700 mb-3 flex items-center gap-2">
-              ⏳ Préavis en cours
-              <span className="bg-orange-500 text-white text-xs px-2 py-0.5 rounded-full">{endingBookingsList.length}</span>
-            </h2>
-            <div className="space-y-3">
-              {endingBookingsList.map(booking => (
-                <div key={booking.id} className="bg-white rounded-xl shadow-sm p-4 border-l-4 border-orange-500">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <a href={'/dashboard/bookings/' + booking.id} className="hover:underline">
-                        <h3 className="font-semibold">{booking.spaceTitle}</h3>
-                      </a>
-                      <p className="text-gray-600 text-sm">{booking.spaceCity} · {booking.spacePrice}€/mois</p>
-                      {booking.ending_date && (
-                        <p className="text-orange-600 text-xs mt-0.5 font-semibold">
-                          ⏳ Fin dans {getDaysLeft(booking.ending_date)} jour{getDaysLeft(booking.ending_date) > 1 ? 's' : ''} — le {new Date(booking.ending_date).toLocaleDateString('fr-FR')}
-                        </p>
-                      )}
-                      {booking.notice_initiated_by === 'renter' && (
-                        <p className="text-xs text-gray-500 mt-1">Préavis initié par le locataire</p>
-                      )}
-                      {booking.notice_initiated_by === 'owner' && (
-                        <p className="text-xs text-gray-500 mt-1">Préavis initié par le propriétaire</p>
-                      )}
-                    </div>
-                    <div className="flex flex-col gap-2 items-end">
-                      {booking.notice_initiated_by === 'renter' && !booking.notice_acknowledged_at && (
-                        <BookingAction bookingId={booking.id} status="acknowledge_notice" label="✅ Accuser réception" color="green" />
-                      )}
-                      {booking.notice_acknowledged_at && (
-                        <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-lg">✅ Accusé le {new Date(booking.notice_acknowledged_at).toLocaleDateString('fr-FR')}</span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex gap-3 mt-2">
-                    <a href={'/messages?booking_id=' + booking['id']} className="text-xs text-blue-600 hover:underline">Messages</a>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Locations terminées */}
-        {endedBookingsList.length > 0 && (
-          <div>
-            <h2 className="text-lg font-bold text-gray-700 mb-3 flex items-center gap-2">
-              🏁 Locations terminées
-              <span className="bg-gray-400 text-white text-xs px-2 py-0.5 rounded-full">{endedBookingsList.length}</span>
-            </h2>
-            <div className="space-y-3">
-              {endedBookingsList.map(booking => (
-                <div key={booking.id} className="bg-white rounded-xl shadow-sm p-4 border-l-4 border-gray-300">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <a href={'/dashboard/bookings/' + booking.id} className="hover:underline">
-                        <h3 className="font-semibold">{booking.spaceTitle}</h3>
-                      </a>
-                      <p className="text-gray-600 text-sm">{booking.spaceCity} · {booking.spacePrice}€/mois</p>
-                    </div>
-                    <span className="text-xs bg-gray-100 text-gray-500 px-3 py-1.5 rounded-lg">Terminée</span>
-                  </div>
-                  <div className="flex gap-3 mt-2">
-                    <a href={'/messages?booking_id=' + booking['id']} className="text-xs text-blue-600 hover:underline">Messages</a>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold text-gray-700">Mes annonces</h2>
-            <a href="/spaces/new"
-              className="text-sm bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700">
-              + Nouvelle annonce
-            </a>
-          </div>
-
-          {spacesWithStatus.length === 0 && (
-            <div className="bg-white rounded-xl p-8 text-center text-gray-600">
-              <p className="text-4xl mb-3">🗄️</p>
-              <p>Aucune annonce pour le moment</p>
-              <a href="/spaces/new" className="text-blue-600 text-sm mt-2 inline-block">
-                Déposer ma première annonce
-              </a>
-            </div>
-          )}
-
-          <div className="space-y-3">
-            {spacesWithStatus.map(space => {
-              const activeCount = (space.bookings as any[])?.filter(b => b.status === 'active').length ?? 0
-              const pendingCount = (space.bookings as any[])?.filter(b => b.status === 'pending').length ?? 0
-
-              return (
-                <div key={space.id} className="bg-white rounded-xl shadow-sm p-4">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h3 className="font-semibold">{space.title}</h3>
-                      <p className="text-gray-600 text-sm">
-                        {space.city} · {space.surface_m2}m2 · {space.price_month}€/mois
-                      </p>
-                      <div className="flex gap-2 mt-2">
-                        {activeCount > 0 && (
-                          <span className="text-xs bg-green-100 text-green-600 px-2 py-0.5 rounded-full">
-                            {activeCount} actif
-                          </span>
-                        )}
-                        {pendingCount > 0 && (
-                          <span className="text-xs bg-yellow-100 text-yellow-600 px-2 py-0.5 rounded-full">
-                            {pendingCount} en attente
-                          </span>
-                        )}
-                        <span className={`text-xs px-2 py-0.5 rounded-full ${
-                          space.is_active ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-500'
-                        }`}>
-                          {space.is_active ? 'Visible' : 'Masquée'}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex gap-2 items-center flex-wrap">
-                      <a href={'/spaces/' + space['id']} className="text-sm text-blue-600 hover:underline">
-                        Voir
-                      </a>
-                      <a href={'/spaces/' + space['id'] + '/edit'} className="text-sm text-orange-500 hover:underline">
-                        Modifier
-                      </a>
-                      {!space.hasActiveBooking && (
-                        <DeleteSpaceButton spaceId={space['id']} />
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-
-        <div>
-          <h2 className="text-lg font-bold text-gray-700 mb-4">Mes locations</h2>
-
-          {bookings?.length === 0 && (
-            <div className="bg-white rounded-xl p-8 text-center text-gray-600">
-              <p className="text-4xl mb-3">🔑</p>
-              <p>Aucune location en cours</p>
-              <a href="/" className="text-blue-600 text-sm mt-2 inline-block">
+            <h1 className="text-4xl md:text-5xl font-extrabold leading-tight text-gray-900">
+              Le garage de votre voisin vaut mieux qu'un box en zone industrielle
+            </h1>
+            <p className="text-lg text-gray-500 max-w-xl mx-auto md:mx-0">
+              Nestock connecte les particuliers qui ont de la place et ceux qui en cherchent.
+              Moins cher qu'un self-stockage, à quelques minutes de chez vous, avec contrat et paiement sécurisés.
+            </p>
+            <div className="flex flex-col sm:flex-row justify-center md:justify-start gap-4 pt-2">
+              <a href="/register" className="bg-blue-600 text-white font-bold px-8 py-4 rounded-xl hover:bg-blue-700 transition text-lg shadow-sm" style={{ color: '#ffffff' }}>
                 Trouver un espace
               </a>
+              <a href="/register" className="border border-gray-200 text-gray-700 font-bold px-8 py-4 rounded-xl hover:bg-gray-50 transition text-lg">
+                Louer mon espace
+              </a>
             </div>
-          )}
+            <p className="text-gray-400 text-sm">Inscription gratuite - Aucun frais caché - Contrat inclus</p>
+          </div>
 
-          <div className="space-y-3">
-            {bookings?.map(booking => {
-              const space = booking.spaces as any
-              const hasReviewed = (booking.reviews as any[])?.some(r => r.author_id === user.id)
-
-              return (
-                <div key={booking.id} className="bg-white rounded-xl shadow-sm p-4 space-y-3">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <a href={'/dashboard/bookings/' + booking.id} className="hover:underline">
-                        <h3 className="font-semibold">{space?.title}</h3>
-                      </a>
-                      <p className="text-gray-600 text-sm">
-                        {space?.city} · {space?.price_month}€/mois
-                      </p>
-                      <p className="text-gray-600 text-xs mt-1">
-                        Depuis le {new Date(booking.start_date).toLocaleDateString('fr-FR')}
-                      </p>
-                    </div>
-                    <div className="flex flex-col items-end gap-2">
-                      <span className={`text-xs px-2 py-0.5 rounded-full ${
-                        statusColors[booking.status] ?? 'bg-gray-100 text-gray-500'
-                      }`}>
-                        {statusLabels[booking.status] ?? booking.status}
-                      </span>
-                      {booking.status === 'confirmed' && (
-                        <PayButton bookingId={booking.id} />
-                      )}
-                      {booking.status === 'active' && (
-                        <BookingAction bookingId={booking.id} status="ending" label="Résilier (préavis 15j)" color="gray" />
-                      )}
-                      {booking.status === 'ending' && booking.ending_date && (
-                        <div className="text-center">
-                          <p className="text-xs text-orange-600 font-semibold">
-                            ⏳ Fin dans {getDaysLeft(booking.ending_date)} jour{getDaysLeft(booking.ending_date) > 1 ? 's' : ''}
-                          </p>
-                          <p className="text-xs text-gray-400">
-                            Le {new Date(booking.ending_date).toLocaleDateString('fr-FR')}
-                          </p>
-                          {!booking.notice_acknowledged_at && (
-                            <p className="text-xs text-orange-500 mt-1">⏳ En attente d'accusé de réception</p>
-                          )}
-                          {booking.notice_acknowledged_at && (
-                            <p className="text-xs text-green-600 mt-1">✅ Accusé de réception reçu</p>
-                          )}
-                        </div>
-                      )}
-                      <a href={'/messages?booking_id=' + booking.id}
-                        className="text-xs text-blue-600 hover:underline">
-                        Messages
-                      </a>
-                    </div>
-                  </div>
-
-                  {booking.status === 'ended' && !hasReviewed && (
-                    <ReviewForm
-                      bookingId={booking.id}
-                      targetId={space?.owner_id}
-                      spaceId={space?.id}
-                      type="renter_to_owner"
-                    />
-                  )}
-                </div>
-              )
-            })}
+          <div className="relative">
+            <div className="rounded-3xl overflow-hidden shadow-xl">
+              <img
+                src="/images/hero-garage.jpg"
+                alt="Garage privé rangé, disponible à la location sur Nestock"
+                className="w-full h-auto object-cover"
+              />
+            </div>
+            <div className="absolute bottom-4 left-4 right-4 md:left-6 md:right-auto bg-white rounded-2xl shadow-lg px-5 py-4 max-w-xs">
+              <p className="text-xs text-gray-400 mb-1">Exemple d'annonce</p>
+              <p className="font-semibold text-gray-900 text-sm">Garage · 12 m³</p>
+              <p className="text-blue-600 font-bold text-lg">68 €/mois</p>
+            </div>
           </div>
         </div>
+      </section>
 
-      </div>
-    </div>
+      {/* Apercu carte */}
+      <section className="py-12 px-4 bg-gray-50 border-t border-gray-100">
+        <div className="max-w-5xl mx-auto mb-6">
+          <h2 className="text-2xl font-bold text-gray-900">Espaces disponibles près de chez vous</h2>
+          <p className="text-gray-500 text-sm mt-1">Inscrivez-vous gratuitement pour contacter les propriétaires et réserver.</p>
+        </div>
+        <div className="relative rounded-2xl overflow-hidden border border-gray-200" style={{ height: '500px' }}>
+          <SearchFilters initialFilters={filters} />
+          <div className="h-full pt-14">
+            <MapWithList spaces={spaces ?? []} />
+          </div>
+          <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-gray-50 to-transparent pointer-events-none" />
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10">
+            <a href="/register" className="bg-blue-600 text-white font-bold px-8 py-3 rounded-xl shadow-md hover:bg-blue-700 transition whitespace-nowrap text-lg" style={{ color: '#ffffff' }}>
+              S'inscrire gratuitement pour réserver
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* Stats */}
+      <section className="bg-gray-50 border-b border-gray-100 py-12 px-4">
+        <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+          <div>
+            <p className="text-3xl font-extrabold text-gray-900">{spaces?.length ?? 0}+</p>
+            <p className="text-gray-500 text-sm mt-1">Espaces disponibles</p>
+          </div>
+          <div>
+            <p className="text-3xl font-extrabold text-gray-900">100%</p>
+            <p className="text-gray-500 text-sm mt-1">Contrats sécurisés</p>
+          </div>
+          <div>
+            <p className="text-3xl font-extrabold text-gray-900">0 euro</p>
+            <p className="text-gray-500 text-sm mt-1">Inscription gratuite</p>
+          </div>
+          <div>
+            <p className="text-3xl font-extrabold text-gray-900">15j</p>
+            <p className="text-gray-500 text-sm mt-1">Préavis de résiliation</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Comment ça marche */}
+      <section className="py-20 px-4 bg-white">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900">Comment louer un espace ?</h2>
+            <p className="text-gray-500 mt-2">En quelques étapes simples</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="bg-gray-50 rounded-2xl p-6 text-center space-y-3 border border-gray-100">
+              <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-sm mx-auto">1</div>
+              <div className="text-4xl">🔍</div>
+              <h3 className="font-bold text-gray-800">Recherchez</h3>
+              <p className="text-gray-500 text-sm">Parcourez les annonces sur la carte. Filtrez par ville, type et prix.</p>
+            </div>
+            <div className="bg-gray-50 rounded-2xl p-6 text-center space-y-3 border border-gray-100">
+              <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-sm mx-auto">2</div>
+              <div className="text-4xl">📩</div>
+              <h3 className="font-bold text-gray-800">Demandez</h3>
+              <p className="text-gray-500 text-sm">Envoyez une demande de réservation avec votre date souhaitée.</p>
+            </div>
+            <div className="bg-gray-50 rounded-2xl p-6 text-center space-y-3 border border-gray-100">
+              <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-sm mx-auto">3</div>
+              <div className="text-4xl">✍️</div>
+              <h3 className="font-bold text-gray-800">Signez</h3>
+              <p className="text-gray-500 text-sm">Signez le contrat électronique directement sur la plateforme.</p>
+            </div>
+            <div className="bg-gray-50 rounded-2xl p-6 text-center space-y-3 border border-gray-100">
+              <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-sm mx-auto">4</div>
+              <div className="text-4xl">🔑</div>
+              <h3 className="font-bold text-gray-800">Stockez</h3>
+              <p className="text-gray-500 text-sm">Paiement automatique chaque mois. Résiliez avec 15j de préavis.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Vision & Valeurs */}
+      <section className="py-20 px-4 bg-blue-600">
+        <div className="max-w-4xl mx-auto text-center">
+          <div className="inline-block bg-blue-500 text-white text-sm px-4 py-1.5 rounded-full font-medium mb-6" style={{ color: '#ffffff' }}>
+            Notre vision
+          </div>
+          <p className="text-2xl md:text-3xl font-bold text-white leading-snug mb-16 max-w-2xl mx-auto" style={{ color: '#ffffff' }}>
+            Il existe déjà assez d'espace en France, il suffit de mieux le partager.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-left">
+            <div>
+              <div className="text-3xl mb-3">📍</div>
+              <h3 className="font-bold text-white mb-2" style={{ color: '#ffffff' }}>Proximité</h3>
+              <p className="text-blue-100 text-sm leading-relaxed">
+                Des solutions de stockage à deux pas de chez vous, portées par des particuliers de votre quartier.
+              </p>
+            </div>
+            <div>
+              <div className="text-3xl mb-3">🤝</div>
+              <h3 className="font-bold text-white mb-2" style={{ color: '#ffffff' }}>Confiance</h3>
+              <p className="text-blue-100 text-sm leading-relaxed">
+                Contrats, paiements et suivi gérés de bout en bout, pour louer et proposer un espace en toute sérénité.
+              </p>
+            </div>
+            <div>
+              <div className="text-3xl mb-3">💶</div>
+              <h3 className="font-bold text-white mb-2" style={{ color: '#ffffff' }}>Accessibilité</h3>
+              <p className="text-blue-100 text-sm leading-relaxed">
+                Un stockage jusqu'à deux fois moins cher qu'un box traditionnel.
+              </p>
+            </div>
+            <div>
+              <div className="text-3xl mb-3">🌍</div>
+              <h3 className="font-bold text-white mb-2" style={{ color: '#ffffff' }}>Impact local</h3>
+              <p className="text-blue-100 text-sm leading-relaxed">
+                Valoriser les espaces inutilisés plutôt que d'en construire de nouveaux.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Fonctionnalites */}
+      <FeatureShowcase />
+
+      {/* Pour les propriétaires */}
+      <section className="py-20 px-4 bg-gray-50 border-t border-gray-100">
+        <div className="max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            <div className="space-y-6">
+              <div className="inline-block bg-gray-200 text-gray-700 text-sm px-4 py-1.5 rounded-full font-medium">
+                Pour les propriétaires
+              </div>
+              <h2 className="text-3xl font-bold text-gray-900">Votre espace inutilisé peut vous rapporter</h2>
+              <p className="text-gray-600">Garage vide, cave disponible ? Louez-le et générez des revenus passifs chaque mois.</p>
+              <div className="space-y-2 text-sm text-gray-600">
+                <p>✓ Annonce gratuite et rapide à créer</p>
+                <p>✓ Contrat électronique automatique</p>
+                <p>✓ Paiement sécurisé via Stripe Connect</p>
+                <p>✓ Virements directs sur votre IBAN</p>
+                <p>✓ Vous fixez votre prix, vous gardez tout</p>
+              </div>
+              <a href="/register" className="inline-block bg-blue-600 text-white font-bold px-8 py-3 rounded-xl hover:bg-blue-700 transition" style={{ color: '#ffffff' }}>
+                Déposer mon annonce gratuitement
+              </a>
+            </div>
+            <div className="bg-white rounded-2xl p-8 space-y-4 border border-gray-100 shadow-sm">
+              <p className="font-bold text-gray-700 text-center mb-4">Simulateur de revenus</p>
+              <div className="space-y-3 text-sm">
+                <div className="flex justify-between py-2 border-b border-gray-100">
+                  <span className="text-gray-500">Votre prix</span>
+                  <span className="font-bold text-gray-900">100 euros/mois</span>
+                </div>
+                <div className="flex justify-between py-2 border-b border-gray-100">
+                  <span className="text-gray-500">Commission Nestock (10%)</span>
+                  <span className="text-gray-600">+ 10 euros</span>
+                </div>
+                <div className="flex justify-between py-2 border-b border-gray-100">
+                  <span className="text-gray-500">Frais Stripe</span>
+                  <span className="text-gray-600">+ 1.75 euros</span>
+                </div>
+                <div className="flex justify-between py-2 border-b border-gray-100">
+                  <span className="font-semibold text-gray-900">Locataire paie</span>
+                  <span className="font-bold text-gray-900">111.75 euros/mois</span>
+                </div>
+                <div className="flex justify-between py-2">
+                  <span className="font-semibold text-gray-900">Vous recevez</span>
+                  <span className="font-bold text-blue-600">100 euros/mois ✓</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Avantages */}
+      <section className="py-20 px-4 bg-white">
+        <div className="max-w-5xl mx-auto">
+          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">Pourquoi choisir Nestock ?</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex gap-4 p-5 rounded-xl border border-gray-100 hover:bg-gray-50 transition">
+              <span className="text-3xl">🛡️</span>
+              <div>
+                <h3 className="font-bold text-gray-900">Contrats légaux</h3>
+                <p className="text-gray-500 text-sm mt-1">Contrats conformes au droit français, signés électroniquement (article 1366 du Code civil).</p>
+              </div>
+            </div>
+            <div className="flex gap-4 p-5 rounded-xl border border-gray-100 hover:bg-gray-50 transition">
+              <span className="text-3xl">💳</span>
+              <div>
+                <h3 className="font-bold text-gray-900">Paiements sécurisés</h3>
+                <p className="text-gray-500 text-sm mt-1">Paiements automatiques traites par Stripe (certifie PCI-DSS niveau 1). Proprietaire paye sur son IBAN chaque mois.</p>
+              </div>
+            </div>
+            <div className="flex gap-4 p-5 rounded-xl border border-gray-100 hover:bg-gray-50 transition">
+              <span className="text-3xl">📍</span>
+              <div>
+                <h3 className="font-bold text-gray-900">Carte interactive</h3>
+                <p className="text-gray-500 text-sm mt-1">Visualisez tous les espaces disponibles sur une carte. Filtrez par distance, prix et surface.</p>
+              </div>
+            </div>
+            <div className="flex gap-4 p-5 rounded-xl border border-gray-100 hover:bg-gray-50 transition">
+              <span className="text-3xl">📄</span>
+              <div>
+                <h3 className="font-bold text-gray-900">Quittances automatiques</h3>
+                <p className="text-gray-500 text-sm mt-1">Une quittance de loyer est générée et envoyée par email après chaque paiement mensuel.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <FAQSection />
+
+      {/* CTA final */}
+      <section className="bg-gray-50 border-t border-gray-100 py-20 px-4 text-center">
+        <div className="max-w-2xl mx-auto space-y-6">
+          <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900">Prêt à commencer ?</h2>
+          <p className="text-gray-500 text-lg">Rejoignez Nestock gratuitement et trouvez votre espace de stockage idéal.</p>
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
+            <a href="/register" className="bg-blue-600 text-white font-bold px-8 py-4 rounded-xl hover:bg-blue-700 transition text-lg shadow-sm" style={{ color: '#ffffff' }}>
+              Créer un compte gratuit
+            </a>
+            <a href="/login" className="border border-gray-200 text-gray-700 font-bold px-8 py-4 rounded-xl hover:bg-gray-100 transition text-lg">
+              Se connecter
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-white border-t border-gray-100 text-gray-500 py-10 px-4">
+        <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-sm">
+          <div className="col-span-2 md:col-span-1 space-y-3">
+            <p className="text-gray-900 font-bold text-lg">Nestock</p>
+            <p className="text-xs text-gray-400">L'Airbnb du stockage entre particuliers.</p>
+            <p className="text-xs text-gray-400">contact@nestock.pro</p>
+          </div>
+          <div className="space-y-2">
+            <p className="text-gray-900 font-semibold">Produit</p>
+            <a href="/about" className="block hover:text-gray-900 transition">À propos</a>
+            <a href="/contact" className="block hover:text-gray-900 transition">Contact</a>
+          </div>
+          <div className="space-y-2">
+            <p className="text-gray-900 font-semibold">Compte</p>
+            <a href="/register" className="block hover:text-gray-900 transition">S'inscrire</a>
+            <a href="/login" className="block hover:text-gray-900 transition">Se connecter</a>
+          </div>
+          <div className="space-y-2">
+            <p className="text-gray-900 font-semibold">Légal</p>
+<a href="/cgu" className="block hover:text-gray-900 transition">CGU</a>
+<a href="/confidentialite" className="block hover:text-gray-900 transition">Confidentialité</a>
+          </div>
+        </div>
+        <div className="max-w-5xl mx-auto mt-8 pt-8 border-t border-gray-100 text-center text-xs text-gray-400">
+          <p>2025 Nestock - Tous droits réservés</p>
+        </div>
+      </footer>
+
+    </main>
   )
 }
