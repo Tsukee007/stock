@@ -79,8 +79,8 @@ export default async function Home({
       <section className="bg-white py-16 md:py-24 px-4 border-b border-gray-100 overflow-hidden">
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <div className="space-y-8 text-center md:text-left">
-            <div className="inline-block bg-gray-100 text-gray-600 text-sm px-4 py-1.5 rounded-full font-medium">
-              La marketplace française du stockage entre particuliers
+            <div className="inline-block text-sm px-4 py-2 rounded-full font-semibold" style={{ background: '#FAECE7', color: '#712B13' }}>
+              L'Airbnb du stockage entre particuliers
             </div>
             <h1 className="text-4xl md:text-5xl font-extrabold leading-tight text-gray-900">
               Le garage de votre voisin vaut mieux qu'un box en zone industrielle
