@@ -76,28 +76,44 @@ export default async function Home({
     <main className="bg-white">
 
       {/* Hero */}
-      <section className="bg-white py-24 px-4 border-b border-gray-100">
-        <div className="max-w-5xl mx-auto text-center space-y-8">
-          <div className="inline-block bg-gray-100 text-gray-600 text-sm px-4 py-1.5 rounded-full font-medium">
-            La marketplace francaise du stockage entre particuliers
+      <section className="bg-white py-16 md:py-24 px-4 border-b border-gray-100 overflow-hidden">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+          <div className="space-y-8 text-center md:text-left">
+            <div className="inline-block bg-gray-100 text-gray-600 text-sm px-4 py-1.5 rounded-full font-medium">
+              La marketplace française du stockage entre particuliers
+            </div>
+            <h1 className="text-4xl md:text-5xl font-extrabold leading-tight text-gray-900">
+              Le garage de votre voisin vaut mieux qu'un box en zone industrielle
+            </h1>
+            <p className="text-lg text-gray-500 max-w-xl mx-auto md:mx-0">
+              Nestock connecte les particuliers qui ont de la place et ceux qui en cherchent.
+              Moins cher qu'un self-stockage, à quelques minutes de chez vous, avec contrat et paiement sécurisés.
+            </p>
+            <div className="flex flex-col sm:flex-row justify-center md:justify-start gap-4 pt-2">
+              <a href="/register" className="bg-blue-600 text-white font-bold px-8 py-4 rounded-xl hover:bg-blue-700 transition text-lg shadow-sm" style={{ color: '#ffffff' }}>
+                Trouver un espace
+              </a>
+              <a href="/register" className="border border-gray-200 text-gray-700 font-bold px-8 py-4 rounded-xl hover:bg-gray-50 transition text-lg">
+                Louer mon espace
+              </a>
+            </div>
+            <p className="text-gray-400 text-sm">Inscription gratuite - Aucun frais caché - Contrat inclus</p>
           </div>
-          <h1 className="text-4xl md:text-6xl font-extrabold leading-tight text-gray-900">
-            Louez un espace de stockage<br />
-            <span className="text-gray-500">pres de chez vous</span>
-          </h1>
-          <p className="text-lg text-gray-500 max-w-2xl mx-auto">
-            Caves, garages, boxes, greniers... Nestock connecte proprietaires et locataires
-            pour des locations simples, securisees et avec contrat electronique.
-          </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-4 pt-2">
-            <a href="/register" className="bg-blue-600 text-white font-bold px-8 py-4 rounded-xl hover:bg-blue-700 transition text-lg shadow-sm" style={{ color: '#ffffff' }}>
-              Trouver un espace
-            </a>
-            <a href="/register" className="border border-gray-200 text-gray-700 font-bold px-8 py-4 rounded-xl hover:bg-gray-50 transition text-lg">
-              Louer mon espace
-            </a>
+
+          <div className="relative">
+            <div className="rounded-3xl overflow-hidden shadow-xl">
+              <img
+                src="/images/hero-garage.jpg"
+                alt="Garage privé rangé, disponible à la location sur Nestock"
+                className="w-full h-auto object-cover"
+              />
+            </div>
+            <div className="absolute bottom-4 left-4 right-4 md:left-6 md:right-auto bg-white rounded-2xl shadow-lg px-5 py-4 max-w-xs">
+              <p className="text-xs text-gray-400 mb-1">Exemple d'annonce</p>
+              <p className="font-semibold text-gray-900 text-sm">Garage · 12 m³</p>
+              <p className="text-blue-600 font-bold text-lg">68 €/mois</p>
+            </div>
           </div>
-          <p className="text-gray-400 text-sm">Inscription gratuite - Aucun frais cache - Contrat inclus</p>
         </div>
       </section>
 
