@@ -327,6 +327,46 @@ export default async function Home({
         </div>
       </section>
 
+      {/* Réassurance Stripe */}
+      <section className="py-20 px-4 bg-gray-50">
+        <div className="max-w-4xl mx-auto text-center">
+          <div className="inline-flex items-center gap-2 mb-6">
+            <svg width="52" height="22" viewBox="0 0 60 25" fill="#635BFF">
+              <path d="M59.64 14.28h-8.06c.19 1.93 1.6 2.55 3.2 2.55 1.64 0 2.96-.37 4.05-.95v3.32a8.33 8.33 0 0 1-4.56 1.1c-4.01 0-6.83-2.5-6.83-7.48 0-4.19 2.39-7.52 6.3-7.52 3.92 0 5.96 3.28 5.96 7.5 0 .4-.04 1.26-.06 1.48zm-5.92-5.62c-1.03 0-2.17.73-2.17 2.58h4.25c0-1.85-1.07-2.58-2.08-2.58zM40.95 20.3c-1.44 0-2.32-.6-2.9-1.04l-.02 4.63-4.12.87V6.27h3.76l.08 1.02a4.7 4.7 0 0 1 3.23-1.29c2.9 0 5.62 2.6 5.62 7.4 0 5.23-2.7 6.9-5.65 6.9zm-.95-9.99c-.93 0-1.48.35-1.96.8l.02 6.12c.45.4.98.7 1.94.7 1.49 0 2.48-1.61 2.48-3.79 0-2.13-1-3.83-2.48-3.83zM28.24 5.07c1.36 0 2.2-.88 2.2-2.03C30.44.97 29.6 0 28.24 0c-1.35 0-2.2.97-2.2 2.04 0 1.15.85 2.03 2.2 2.03zm2.07 15.22h-4.17V6.27h4.17v14.02zM21.77 7l-.27-1.44h-3.7v14.47h4.1v-9.86c.92-1.2 2.47-1 2.95-.84V6.27c-.5-.18-2.27-.44-3.08.73zM12.15 6.27l-.1.57c-.72-.8-2.07-1.07-3.43-1.07C5.15 5.77 3 8.3 3 11.03c0 3.2 2.01 4.86 4.62 4.86 1.28 0 2.43-.37 3.13-.98v.48c0 1.77-.96 2.73-3.02 2.73-1.48 0-2.87-.47-3.82-1.03l-.01 3.39c1.05.46 2.62.79 4.17.79 3.88 0 6.64-1.85 6.64-6.48V6.27h-2.56zm-2.98 7.3c-1.18 0-1.95-.77-1.95-2.07 0-1.27.77-2.07 1.95-2.07 1.17 0 1.92.8 1.92 2.07 0 1.3-.75 2.07-1.92 2.07z"/>
+            </svg>
+          </div>
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">Vos paiements protégés par Stripe</h2>
+          <p className="text-gray-500 max-w-xl mx-auto mb-12">
+            Nestock ne gère jamais vos données bancaires directement. Chaque transaction passe par Stripe,
+            l'infrastructure de paiement utilisée par des millions d'entreprises dans le monde, des plus petites
+            startups aux plus grandes plateformes internationales.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-white rounded-2xl p-6 border border-gray-100">
+              <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center mb-4 mx-auto">
+                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+              </div>
+              <h3 className="font-semibold text-gray-900 mb-2 text-sm">Certifié PCI-DSS niveau 1</h3>
+              <p className="text-gray-500 text-xs leading-relaxed">Stripe détient le plus haut niveau de certification pour le traitement sécurisé des paiements par carte.</p>
+            </div>
+            <div className="bg-white rounded-2xl p-6 border border-gray-100">
+              <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center mb-4 mx-auto">
+                <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+              </div>
+              <h3 className="font-semibold text-gray-900 mb-2 text-sm">Vos données ne transitent jamais par Nestock</h3>
+              <p className="text-gray-500 text-xs leading-relaxed">Numéro de carte, IBAN : tout est traité directement par Stripe, chiffré de bout en bout.</p>
+            </div>
+            <div className="bg-white rounded-2xl p-6 border border-gray-100">
+              <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center mb-4 mx-auto">
+                <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m0 16v1m8.485-8.485h-1M4.515 12h-1m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707" /></svg>
+              </div>
+              <h3 className="font-semibold text-gray-900 mb-2 text-sm">Reconnu mondialement</h3>
+              <p className="text-gray-500 text-xs leading-relaxed">Stripe équipe des entreprises de toutes tailles à travers le monde, de la startup aux plus grandes plateformes.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* FAQ */}
       <FAQSection />
 
