@@ -16,7 +16,7 @@
 - Supabase : https://rkcewsargthrbiokhend.supabase.co
 
 ## Statut actuel du projet
-Waitlist désactivée (10/08/2026) : inscription directe ouverte sur toute la plateforme. Priorité produit : finaliser le site, puis bascule complète sur le marketing/acquisition. Stripe toujours en mode test, passage en production planifié juste avant le lancement public (voir section Stripe dédiée).
+Waitlist désactivée (10/08/2026) : inscription directe ouverte sur toute la plateforme. Priorité produit : finaliser le site, puis bascule complète sur le marketing/acquisition. Stripe toujours en mode test, passage en production planifié juste avant le lancement public (voir section Stripe dédiée). Démarche de création d'une micro-entreprise en cours (nécessaire pour le SIRET requis par le KYC Stripe), dossier déposé le 10/08/2026, en attente de validation INPI.
 
 ## Workflow établi
 - Editer les fichiers via VS Code Codespace OU GitHub directement
@@ -162,7 +162,18 @@ STRIPE_WEBHOOK_SECRET, NEXT_PUBLIC_MAPBOX_TOKEN, CRON_SECRET (ajoutee le 10/08, 
 - Toujours verifier que l'apiVersion utilisee dans le code correspond au typage du SDK Stripe reellement installe via npm, pas a une version vue dans un event webhook ou ailleurs — les deux peuvent diverger
 
 ### Passage en production (clés live) — planifié juste avant le lancement public, pas avant
-Étapes identifiées le 10/08/2026 (discussion, pas encore réalisées) :
+
+**Avancement étape 1 (KYC / SIRET) — en cours depuis le 10/08/2026 :**
+- Constat : pas de SIRET disponible pour completer le KYC Stripe. Une ancienne auto-entreprise existait mais s'est revelee radiee et non reactivable via le Guichet unique ("Cette structure est radiee et ne peut pas faire l'objet de formalites via le Guichet Unique")
+- Alternative envisagee puis ecartee : creation d'une societe en Estonie (e-Residency). Ecartee en raison du risque de requalification fiscale francaise (notion de "direction effective" : si la societe est en realite dirigee depuis la France, l'administration francaise peut la considerer comme fiscalement francaise malgre l'immatriculation estonienne), et de la complexite administrative superieure par rapport a une simple micro-entreprise francaise
+- Decision : creation d'une nouvelle micro-entreprise (auto-entrepreneur) en France, demarche gratuite et rapide (SIRET generalement obtenu en quelques jours), plutot qu'une structure a l'etranger
+- Code APE retenu : 63.12Z "Portails internet" (correspond a l'activite de plateforme de mise en relation en ligne, par opposition a une activite de location directe)
+- Description d'activite principale declaree : edition et exploitation d'une plateforme web de mise en relation entre particuliers pour la location d'espaces de stockage, remuneree par une commission sur les transactions
+- Documents fournis lors de la demande : attestation sur l'honneur de non-condamnation et de filiation (modele standard base sur l'article A.123-51 du Code de commerce), justificatif de jouissance des locaux (selon situation de logement), declaration d'option du conjoint (obligatoire des lors qu'on est marie, meme sans salarie et meme si le conjoint n'exerce aucune activite dans l'entreprise — case "absence d'activite professionnelle du conjoint dans l'entreprise" cochee)
+- Demande de creation deposee aupres de l'INPI (formalites.entreprises.gouv.fr) le 10/08/2026, en attente d'attribution du numero SIRET
+- Prochaine action des reception du SIRET : le renseigner avec le RIB dans le Dashboard Stripe pour completer le KYC, puis reprendre les etapes 2 a 6 ci-dessous
+
+Étapes identifiées le 10/08/2026 (discussion, pas encore toutes réalisées) :
 1. Compléter la vérification d'identité (KYC) du compte Stripe Nestock dans le Dashboard : SIRET, RIB de l'entreprise, informations légales — Stripe ne débloque le mode live qu'une fois ces informations validées
 2. Récupérer les nouvelles clés live : pk_live_... et sk_live_... (différentes des clés test actuelles)
 3. Mettre à jour sur Vercel : STRIPE_SECRET_KEY et NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY avec les valeurs live
@@ -209,7 +220,7 @@ STRIPE_WEBHOOK_SECRET, NEXT_PUBLIC_MAPBOX_TOKEN, CRON_SECRET (ajoutee le 10/08, 
 - Corrections qualité : attribution PCI-DSS correcte, ~30 accents corrigés sur la homepage, 3 sur le dashboard, cohérence vouvoiement vérifiée
 
 ## Prochaines étapes
-1. Stripe en production (clés live) — voir les 6 étapes détaillées dans la section Stripe ci-dessus. Prévu juste avant le lancement public, pas avant
+1. Stripe en production (clés live) — étape 1 (SIRET/KYC) en cours, dossier micro-entreprise déposé le 10/08, en attente de validation INPI. Voir les 6 étapes détaillées dans la section Stripe ci-dessus. Prévu juste avant le lancement public, pas avant
 2. Auditer accents/tutoiement sur le reste du site (contrats, quittances, messagerie, pages À propos/Contact/CGU — pas encore vérifiées)
 3. Appliquer la photo hero en fond sur la page /register également, pour la cohérence avec /login (pas encore fait, seule /login a été traitée)
 4. Adapter les posts du calendrier éditorial existant (CTA waitlist obsolètes) avant publication
