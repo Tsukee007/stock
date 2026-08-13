@@ -16,7 +16,7 @@
 - Supabase : https://rkcewsargthrbiokhend.supabase.co
 
 ## Statut actuel du projet
-Waitlist désactivée (10/08/2026) : inscription directe ouverte sur toute la plateforme. Priorité produit : finaliser le site, puis bascule complète sur le marketing/acquisition. Stripe toujours en mode test, passage en production planifié juste avant le lancement public (voir section Stripe dédiée). Démarche de création d'une micro-entreprise en cours (nécessaire pour le SIRET requis par le KYC Stripe), dossier déposé le 10/08/2026, en attente de validation INPI.
+Site jugé fonctionnellement complet et audité (10/08/2026) : toutes les pages passées en revue pour accents/apostrophes/tutoiement, homepage refaite, cron résiliation + remboursement prorata en place. Focus qui bascule maintenant sur l'acquisition/notoriété. Stripe toujours en mode test, passage en production planifié juste avant le lancement public (voir section Stripe dédiée). Démarche de création d'une micro-entreprise en cours (nécessaire pour le SIRET requis par le KYC Stripe), dossier déposé le 10/08/2026, en attente de validation INPI.
 
 ## Workflow établi
 - Editer les fichiers via VS Code Codespace OU GitHub directement
@@ -25,6 +25,7 @@ Waitlist désactivée (10/08/2026) : inscription directe ouverte sur toute la pl
 - Eviter backticks dans JSX (space.id devient space['id'])
 - Les liens markdown corrompent le code JSX dans le terminal
 - Pour ajouter du contenu a un fichier existant : utiliser > (ecrase) et non >> (ajoute a la suite) sauf si l'ajout est explicitement voulu — une confusion des deux a duplique tout le contenu de ce fichier une fois (corrige le 10/08)
+- Next.js 16 : le fichier middleware.ts est deprecie au profit de proxy.ts (fonction renommee middleware -> proxy, reste du code identique). Le repo contient un AGENTS.md / CLAUDE.md deposes par Next.js lui-meme, avertissant que cette version peut differer des connaissances generalistes sur le framework — a garder en tete en cas de comportement inattendu
 - Commandes git : git add . && git commit -m "message" && git push origin main
 - Si rejet : git pull origin main --rebase && git push origin main
 - Variables env : .env.local (Codespace) + Vercel Environment Variables
@@ -72,7 +73,7 @@ message_only, pending, awaiting_signature, confirmed, active, ending, ended, can
 - lib/utils.ts : statusLabels, statusColors, getDaysLeft
 - lib/mailer.ts : SMTP Hostinger, fonction sendEmail générique
 - lib/notifications.ts : créer notifications
-- middleware.ts : contrôle d'accès pré-lancement, désactivé via flag WAITLIST_ACTIVE = false (logique conservée pour réactivation future)
+- proxy.ts (anciennement middleware.ts, migre le 10/08 suite a la depreciation Next.js 16) : contrôle d'accès pré-lancement, désactivé via flag WAITLIST_ACTIVE = false (logique conservée pour réactivation future)
 - public/images/hero-garage.jpg : photo hero de la homepage (hébergée localement, remplace un lien Lovable temporaire), reutilisee en fond de la page de connexion
 - app/login/page.tsx : page connexion avec la photo hero en fond plein ecran (overlay sombre semi-transparent pour garder le formulaire lisible)
 - app/api/cron/end-bookings/route.ts : route du cron job de resiliation automatique a 15 jours (voir section dediee)
@@ -220,12 +221,15 @@ STRIPE_WEBHOOK_SECRET, NEXT_PUBLIC_MAPBOX_TOKEN, CRON_SECRET (ajoutee le 10/08, 
 - Corrections qualité : attribution PCI-DSS correcte, ~30 accents corrigés sur la homepage, 3 sur le dashboard, cohérence vouvoiement vérifiée
 
 ## Prochaines étapes
-1. Stripe en production (clés live) — étape 1 (SIRET/KYC) en cours, dossier micro-entreprise déposé le 10/08, en attente de validation INPI. Voir les 6 étapes détaillées dans la section Stripe ci-dessus. Prévu juste avant le lancement public, pas avant
-2. Auditer accents/tutoiement sur le reste du site (contrats, quittances, messagerie, pages À propos/Contact/CGU — pas encore vérifiées)
-3. Appliquer la photo hero en fond sur la page /register également, pour la cohérence avec /login (pas encore fait, seule /login a été traitée)
-4. Adapter les posts du calendrier éditorial existant (CTA waitlist obsolètes) avant publication
-5. PWA manifest — idée abordée et mise de côté le 10/08/2026, à reconsidérer une fois le site en phase de croissance (permettrait l'installation sur écran d'accueil mobile, mode plein écran sans barre d'adresse)
-6. Une fois le site jugé fini : bascule complète sur le marketing
+1. **Bascule sur le marketing/acquisition** (priorité actuelle a partir du 10/08/2026 soir) — le site est considere pret cote produit
+2. Stripe en production (clés live) — étape 1 (SIRET/KYC) en cours, dossier micro-entreprise déposé le 10/08, en attente de validation INPI. Voir les 6 étapes détaillées dans la section Stripe ci-dessus. Prévu juste avant le lancement public, pas avant
+3. Adapter les posts du calendrier éditorial existant (CTA waitlist obsolètes) avant publication
+4. PWA manifest — idée abordée et mise de côté le 10/08/2026, à reconsidérer une fois le site en phase de croissance
+5. Documents de reference disponibles a la racine du repo :
+   - 01-Nestock-context.md (ce fichier) : journal technique detaille
+   - 02-Nestock-Fonctionnalites.md : synthese produit/technique complete, potentiellement presentable (investisseurs/partenaires)
+   - 03-Nestock-test-stripe-clock-scenario.md : protocole de test du cycle facturation/preavis/remboursement (Stripe Test Clocks), a executer avant le passage en production
+   - 04-Nestock-Identite-Visuelle.md : document de reference de l'identite de marque (palette, typographie, logo, valeurs — cree le 10/08, base sur nestock_identite_visuelle.html)
 
 ## Journal des modifications
 
@@ -281,6 +285,35 @@ STRIPE_WEBHOOK_SECRET, NEXT_PUBLIC_MAPBOX_TOKEN, CRON_SECRET (ajoutee le 10/08, 
 
 **PWA manifest**
 - Concept expliqué à l'utilisateur (installation du site comme une app sur mobile) à sa demande, mis de côté pour plus tard sur sa décision, à reconsidérer une fois le site en phase de croissance
+
+### 10/08/2026 (suite) — Fonctionnalites avancees, audit final, migration Next.js 16, documentation
+**Remboursement au prorata et annulation programmee Stripe**
+- Programmation de l'annulation Stripe exactement a ending_date via subscriptions.update({ cancel_at }), declenchee au moment ou le preavis demarre (app/api/bookings/[id]/status/route.ts) plutot qu'au cron — garantit qu'aucun nouveau prelevement complet ne se declenche pendant le preavis, quelle que soit la date anniversaire de facturation
+- Webhook customer.subscription.deleted enrichi (app/api/stripe/webhook/route.ts) : distingue maintenant le cas "annulation programmee Nestock arrivee a son terme" (calcul et remboursement automatique du prorata des jours non utilises via stripe.refunds.create) du cas "annulation surprise cote Stripe" (comportement existant, conserve)
+- Bug corrige au passage : le cas "annulation surprise" ne renseignait jamais ending_date en base, ce qui aurait fait planter l'affichage du compte a rebours
+- Email de confirmation d'annulation ajoute pour le locataire (etait absent, seul le proprietaire le recevait — asymetrie corrigee)
+- Decision produit tranchee avec l'utilisateur : pas de remboursement si le mois deja paye couvre la periode du sejour ; remboursement uniquement si un prelevement tombe pendant le preavis (jours non utilises)
+- Scenario de test complet redige (Stripe Test Clocks) pour valider tout le cycle facturation -> preavis -> cancel_at -> remboursement sans attendre de vrais cycles mensuels — document 03-test-stripe-clock-scenario.md
+
+**Migration Next.js 16 : middleware.ts -> proxy.ts**
+- Decouverte de fichiers AGENTS.md / CLAUDE.md deposes par Next.js lui-meme dans le repo, avertissant que cette version (16.2.0, tres recente) peut differer des connaissances generalistes sur le framework
+- Ce fichier explique l'avertissement de build recurrent depuis le debut du projet : "The middleware file convention is deprecated. Please use proxy instead"
+- Migration effectuee : middleware.ts renomme en proxy.ts, fonction exportee renommee middleware -> proxy, reste du fichier (PUBLIC_PATHS, WAITLIST_ACTIVE, matcher) inchange
+
+**Documentation produit**
+- Creation de 02-fonctionnalites.md : document de synthese complet (vue d'ensemble + detail technique par fonctionnalite), redige avec une vocation potentiellement presentable (investisseurs/partenaires), distinct de ce fichier qui reste un journal technique de developpement
+- Fichiers .md renommes avec prefixes numeriques (01/02/03) a la racine du repo pour les regrouper visuellement
+
+**Audit final accents / tutoiement / apostrophes**
+- Toutes les pages restantes du site passees en revue : contrat de location, quittance, messagerie, register, About, Contact, CGU, Confidentialite
+- Fautes trouvees et corrigees : contrat ("incompletes" -> "incomplètes", "Completer" -> "Compléter"), quittance ("Ref." -> "Réf." pour coherence), messagerie ("Selectionnez" -> "Sélectionnez")
+- About, Contact et CGU necessitaient une correction plus large : accents ET apostrophes manquants sur la quasi-totalite du texte (meme defaut que l'ancien code source waitlist). Corrige integralement, footer harmonise avec la nouvelle accroche "L'Airbnb du stockage entre particuliers" sur ces deux pages (elles avaient garde l'ancienne "marketplace francaise")
+- Register et Confidentialite : deja propres, aucune correction necessaire
+- Photo hero appliquee en fond sur /register (meme traitement que /login : overlay sombre semi-transparent), pour la coherence entre les deux pages d'authentification
+- Audit considere termine sur l'ensemble du site connu a ce jour
+
+**Fin de session : bascule de priorite**
+- Le site etant considere fonctionnellement complet et audite, la priorite bascule officiellement sur l'acquisition/notoriete (marketing) a partir de maintenant, conformement a la strategie annoncee par l'utilisateur en debut de session
 
 ### 20/07/2026
 - Email de confirmation waitlist enrichi : phases de lancement + lien de parrainage UTM
