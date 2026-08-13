@@ -353,7 +353,7 @@ export async function POST(req: Request) {
             status: 'paid',
             limit: 1,
           })
-          const lastInvoice = invoices.data[0]
+          const lastInvoice = invoices.data[0] as any
 
           if (lastInvoice && lastInvoice.period_start && lastInvoice.period_end && booking.ending_date) {
             const periodStart = lastInvoice.period_start
@@ -423,6 +423,15 @@ export async function POST(req: Request) {
         message: 'Votre abonnement a ete annule via Stripe. Un preavis de 15 jours a ete initie, fin le ' + endingDate.toLocaleDateString('fr-FR') + '.',
         link: '/dashboard/bookings/' + booking.id
       })
+
+      const { data: renterUser } = await supabase.auth.admin.getUserById(booking.renter_id)
+      if (renterUser?.user?.email) {
+        await sendEmail({
+          to: renterUser.user.email,
+          subject: 'Annulation abonnement — ' + (spaceData?.title || 'Nestock'),
+          html: '<div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto;"><h2 style="color: #2563eb;">Nestock</h2><p>Votre abonnement Stripe pour <strong>' + (spaceData?.title || 'votre location') + '</strong> a ete annule.</p><p>Un preavis de 15 jours a ete automatiquement initie. La location se terminera le <strong>' + endingDate.toLocaleDateString('fr-FR') + '</strong>.</p><a href="' + process.env.NEXT_PUBLIC_SITE_URL + '/dashboard" style="background: #2563eb; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block; margin-top: 16px;">Voir ma location</a></div>'
+        })
+      }
 
       if (spaceData) {
         await supabase.from('notifications').insert({
