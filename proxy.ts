@@ -17,7 +17,7 @@ const PUBLIC_PATHS = [
 // Repasser a true pour reactiver le blocage pre-lancement si besoin.
 const WAITLIST_ACTIVE = false
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   if (!WAITLIST_ACTIVE) {
     return NextResponse.next()
   }
