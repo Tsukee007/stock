@@ -2,6 +2,9 @@ import { createClient } from '@/lib/supabase/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { sendEmail } from '@/lib/mailer'
 import { NextResponse } from 'next/server'
+import Stripe from 'stripe'
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-02-25.clover' })
 
 export async function POST(
   req: Request,
@@ -44,6 +47,21 @@ export async function POST(
       ending_date: endingDate.toISOString(),
       notice_initiated_by: isRenter ? 'renter' : 'owner'
     }).eq('id', id)
+
+    // Programme l'annulation de la subscription Stripe exactement a la date de fin du preavis.
+    // Ainsi aucun nouveau prelevement mensuel ne peut se declencher apres cette date,
+    // meme si la date anniversaire de facturation tombe pendant le preavis.
+    // Le webhook customer.subscription.deleted se chargera du remboursement au prorata
+    // le jour ou cette annulation programmee s'execute reellement.
+    if (booking.stripe_subscription_id) {
+      try {
+        await stripe.subscriptions.update(booking.stripe_subscription_id, {
+          cancel_at: Math.floor(endingDate.getTime() / 1000),
+        })
+      } catch (stripeErr) {
+        console.error('Erreur programmation annulation Stripe pour booking ' + id + ':', stripeErr)
+      }
+    }
 
     const otherUserId = isOwner ? booking.renter_id : spaceData.owner_id
     const otherRole = isOwner ? 'Le propriétaire' : 'Le locataire'

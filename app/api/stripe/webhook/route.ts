@@ -324,31 +324,103 @@ export async function POST(req: Request) {
     }
   }
 
-  if (event.type === 'customer.subscription.deleted' || 
+  if (event.type === 'customer.subscription.deleted' ||
       (event.type === 'customer.subscription.updated' && (event.data.object as any).cancel_at_period_end === true)) {
     const subscription = event.data.object as any
     const subscriptionId = subscription.id
 
     const { data: booking } = await supabase
       .from('bookings')
-      .select('id, renter_id, space_id')
+      .select('id, renter_id, space_id, status, ending_date')
       .eq('stripe_subscription_id', subscriptionId)
       .single()
 
     if (booking) {
-      await supabase.from('bookings').update({ status: 'ending' }).eq('id', booking.id)
-
       const { data: spaceData } = await supabase
         .from('spaces')
         .select('owner_id, title')
         .eq('id', booking.space_id)
         .single()
 
+      // Cas 1 : la reservation etait deja en preavis (status 'ending') et l'annulation
+      // programmee via cancel_at vient de se declencher a la date prevue.
+      // Il s'agit du deroulement normal du preavis Nestock, pas d'une annulation surprise.
+      // On calcule et rembourse le prorata des jours non utilises du dernier mois si besoin.
+      if (event.type === 'customer.subscription.deleted' && booking.status === 'ending') {
+        try {
+          const invoices = await stripe.invoices.list({
+            subscription: subscriptionId,
+            status: 'paid',
+            limit: 1,
+          })
+          const lastInvoice = invoices.data[0]
+
+          if (lastInvoice && lastInvoice.period_start && lastInvoice.period_end && booking.ending_date) {
+            const periodStart = lastInvoice.period_start
+            const periodEnd = lastInvoice.period_end
+            const endingDateUnix = Math.floor(new Date(booking.ending_date).getTime() / 1000)
+
+            const totalDays = (periodEnd - periodStart) / 86400
+            const usedDays = Math.max(0, Math.min(totalDays, (endingDateUnix - periodStart) / 86400))
+            const unusedDays = totalDays - usedDays
+
+            if (unusedDays > 0.5 && totalDays > 0) {
+              const refundRatio = unusedDays / totalDays
+              const refundAmount = Math.round(lastInvoice.amount_paid * refundRatio)
+              const paymentIntentId = lastInvoice.payment_intent as string
+
+              if (refundAmount > 0 && paymentIntentId) {
+                await stripe.refunds.create({
+                  payment_intent: paymentIntentId,
+                  amount: refundAmount,
+                })
+
+                const refundAmountEur = (refundAmount / 100).toFixed(2)
+
+                await supabase.from('notifications').insert({
+                  user_id: booking.renter_id,
+                  type: 'refund',
+                  title: 'Remboursement au prorata',
+                  message: 'Vous avez ete rembourse de ' + refundAmountEur + ' EUR correspondant aux jours non utilises de votre dernier mois pour ' + (spaceData?.title || 'votre location') + '.',
+                  link: '/dashboard/bookings/' + booking.id
+                })
+
+                const { data: renterUser } = await supabase.auth.admin.getUserById(booking.renter_id)
+                if (renterUser?.user?.email) {
+                  await sendEmail({
+                    to: renterUser.user.email,
+                    subject: 'Remboursement au prorata — ' + (spaceData?.title || 'Nestock'),
+                    html: '<div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto;"><h2 style="color: #2563eb;">Nestock</h2><p>Votre location pour <strong>' + (spaceData?.title || '') + '</strong> etant terminee avant la fin de votre periode de facturation, vous avez ete rembourse au prorata des jours non utilises.</p><p style="font-size: 24px; font-weight: bold; color: #16a34a;">' + refundAmountEur + ' EUR</p><p>Ce montant sera credite sur votre moyen de paiement sous quelques jours ouvres.</p></div>'
+                  })
+                }
+              }
+            }
+          }
+        } catch (refundErr) {
+          console.error('Erreur calcul/remboursement prorata pour booking ' + booking.id + ':', refundErr)
+        }
+        // Le cron end-bookings se charge de faire passer le statut a 'ended' une fois
+        // ending_date atteinte — pas besoin de le faire ici.
+        return NextResponse.json({ received: true })
+      }
+
+      // Cas 2 : annulation surprise, pas encore de preavis en cours (ex: le locataire
+      // annule directement depuis son espace client Stripe plutot que via Nestock).
+      // Comportement existant : on convertit en preavis standard de 15 jours.
+      const endingDate = new Date()
+      endingDate.setDate(endingDate.getDate() + 15)
+
+      await supabase.from('bookings').update({
+        status: 'ending',
+        ending_date: endingDate.toISOString(),
+        notice_initiated_by: 'renter'
+      }).eq('id', booking.id)
+
       await supabase.from('notifications').insert({
         user_id: booking.renter_id,
         type: 'subscription_cancelled',
         title: 'Abonnement annule',
-        message: 'Votre abonnement a ete annule via Stripe. La location se terminera a la fin de la periode en cours.',
+        message: 'Votre abonnement a ete annule via Stripe. Un preavis de 15 jours a ete initie, fin le ' + endingDate.toLocaleDateString('fr-FR') + '.',
         link: '/dashboard/bookings/' + booking.id
       })
 
@@ -357,7 +429,7 @@ export async function POST(req: Request) {
           user_id: spaceData.owner_id,
           type: 'subscription_cancelled',
           title: 'Annulation locataire',
-          message: 'Le locataire a annule son abonnement Stripe pour ' + spaceData.title + '. La location passera en previs et se terminera a la fin de la periode en cours.',
+          message: 'Le locataire a annule son abonnement Stripe pour ' + spaceData.title + '. La location passe en preavis, fin le ' + endingDate.toLocaleDateString('fr-FR') + '.',
           link: '/dashboard'
         })
 
@@ -366,7 +438,7 @@ export async function POST(req: Request) {
           await sendEmail({
             to: ownerUser.user.email,
             subject: 'Annulation abonnement — ' + spaceData.title,
-            html: '<div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto;"><h2 style="color: #2563eb;">Nestock</h2><p>Le locataire a annule son abonnement Stripe pour <strong>' + spaceData.title + '</strong>.</p><p>La location passera en statut <strong>Préavis</strong> et se terminera a la fin de la periode en cours.</p><p>Vous recevrez une notification quand la location sera officiellement terminee.</p></div>'
+            html: '<div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto;"><h2 style="color: #2563eb;">Nestock</h2><p>Le locataire a annule son abonnement Stripe pour <strong>' + spaceData.title + '</strong>.</p><p>La location passe en statut <strong>Préavis</strong> et se terminera le <strong>' + endingDate.toLocaleDateString('fr-FR') + '</strong>.</p></div>'
           })
         }
       }
