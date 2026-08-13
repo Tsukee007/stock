@@ -87,9 +87,9 @@ export default async function ContractPage({
         {profileIncomplete && (
           <div className="bg-red-50 border border-red-200 rounded-xl p-4 space-y-3">
             <p className="font-semibold text-red-700">⚠️ Profil incomplet</p>
-            <p className="text-sm text-red-600">Vos informations personnelles sont incompletes. Vous devez completer votre profil avant de pouvoir signer ce contrat.</p>
+            <p className="text-sm text-red-600">Vos informations personnelles sont incomplètes. Vous devez compléter votre profil avant de pouvoir signer ce contrat.</p>
             <a href="/profile" className="inline-block bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-red-700">
-              Completer mon profil →
+              Compléter mon profil →
             </a>
           </div>
         )}

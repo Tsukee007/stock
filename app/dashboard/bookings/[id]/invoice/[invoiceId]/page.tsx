@@ -67,7 +67,7 @@ export default async function InvoicePage({
             <h1 className="text-2xl font-bold text-blue-600">NESTOCK</h1>
             <p className="text-gray-500 text-xs">nestock.pro</p>
             <h2 className="text-xl font-bold mt-4 text-gray-800">QUITTANCE DE LOYER</h2>
-            <p className="text-gray-500 text-sm mt-1">Ref. {invoice.reference}</p>
+            <p className="text-gray-500 text-sm mt-1">Réf. {invoice.reference}</p>
             <p className="text-gray-500 text-sm">Date : {dateStr}</p>
           </div>
 

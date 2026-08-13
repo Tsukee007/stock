@@ -79,7 +79,7 @@ export default async function MessagesPage({
             <div className="flex items-center justify-center h-full text-gray-400">
               <div className="text-center">
                 <p className="text-4xl mb-3">💬</p>
-                <p>Selectionnez une conversation</p>
+                <p>Sélectionnez une conversation</p>
               </div>
             </div>
           )}

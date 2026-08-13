@@ -63,10 +63,17 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center pb-20">
-      <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-md space-y-4">
+    <div
+      className="min-h-screen flex items-center justify-center pb-20 px-4"
+      style={{
+        backgroundImage: "linear-gradient(rgba(15, 23, 42, 0.55), rgba(15, 23, 42, 0.55)), url('/images/hero-garage.jpg')",
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}
+    >
+      <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md space-y-4 relative z-10">
         <div className="text-center">
-          <h1 className="text-2xl font-bold">Créer un compte</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Créer un compte</h1>
           <p className="text-gray-500 text-sm mt-1">Rejoignez Nestock gratuitement</p>
         </div>
 
@@ -108,7 +115,8 @@ export default function RegisterPage() {
         </div>
 
         <button onClick={handleSubmit} disabled={loading}
-          className="w-full bg-blue-600 text-white rounded-lg p-3 font-semibold hover:bg-blue-700 disabled:opacity-50">
+          className="w-full bg-blue-600 text-white rounded-lg p-3 font-semibold hover:bg-blue-700 disabled:opacity-50"
+          style={{ color: '#ffffff' }}>
           {loading ? 'Création...' : 'Créer mon compte'}
         </button>
 
