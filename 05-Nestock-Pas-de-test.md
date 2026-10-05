@@ -28,6 +28,10 @@ Cahier de tests destiné à des agents IA (et à un humain si besoin). Chaque te
 |---|---|---|
 | T-STRIPE-01 | Parcours complet : « Accéder à mon compte Stripe » → connexion → formulaire Stripe → tableau de bord Stripe | À faire |
 | T-STRIPE-02 | Retours depuis Stripe sur le bon domaine (nestock.pro) | OK |
+| T-STRIPE-03 | Déjà connecté, sans compte Stripe → formulaire Stripe direct | À faire |
+| T-STRIPE-04 | Inscription Stripe interrompue puis reprise (pas de doublon) | À faire |
+| T-STRIPE-05 | Compte Stripe complet → tableau de bord Stripe direct | À faire |
+| T-STRIPE-06 | Connexion normale non perturbée (retour après connexion sécurisé) | À faire |
 | T-NAV-01 | Menu visiteur non connecté | À faire |
 | T-NAV-02 | Menu utilisateur connecté | À faire |
 | T-NAV-03 | Pages réservées : redirection vers la connexion | À faire |
@@ -76,6 +80,66 @@ Cahier de tests destiné à des agents IA (et à un humain si besoin). Chaque te
 | 2026-10-05 | Claude Code | Échec | Redirection vers `https://nestock.tsukee.fr/` même après reconstruction du site. Hypothèse : la variable `NEXT_PUBLIC_SITE_URL` a été modifiée dans un projet Vercel qui ne sert pas nestock.pro (deux projets : `stock` et `stock-kb8s`). Impacte aussi le retour de l'inscription Stripe (T-STRIPE-01, étape 6). |
 | 2026-10-05 | Claude Code | OK | Après modification de `NEXT_PUBLIC_SITE_URL` dans le projet Vercel `stock-kb8s` + redeploy : `/api/logout` redirige vers `https://nestock.pro/`. Vérifié aussi : `https://nestock.pro/stripe/connect?success=true&space_id=abc` → 307 vers `https://www.nestock.pro/stripe/connect?success=true&space_id=abc` (chemin et paramètres conservés). |
 
+### T-STRIPE-03 — Déjà connecté à Nestock, sans compte Stripe
+
+- **Objectif** : un utilisateur déjà connecté arrive directement sur le formulaire Stripe, sans repasser par la connexion.
+- **Prérequis** : compte de test Nestock **connecté**, **sans** compte Stripe (jamais cliqué sur le bouton Stripe).
+- **Étapes** :
+  1. Ouvrir https://www.nestock.pro/api/stripe/dashboard (même effet que le bouton « Accéder à mon compte Stripe », qui n'est visible que sur la page d'accueil visiteur).
+  2. Noter la page atteinte.
+- **Résultat attendu** : arrivée directe sur le formulaire Stripe (domaine `connect.stripe.com`), sans page de connexion Nestock ni page « Connexion Stripe » intermédiaire.
+- **Statut courant** : À faire
+
+| Date | Agent | Statut | Observations |
+|---|---|---|---|
+
+### T-STRIPE-04 — Inscription Stripe interrompue puis reprise
+
+- **Objectif** : un propriétaire qui abandonne le formulaire Stripe en cours de route peut le reprendre, sans qu'un second compte Stripe soit créé.
+- **Prérequis** : compte de test Nestock connecté, sans compte Stripe terminé.
+- **Étapes** :
+  1. Ouvrir https://www.nestock.pro/api/stripe/dashboard, remplir **seulement la première page** du formulaire Stripe, puis fermer l'onglet.
+  2. Rouvrir https://www.nestock.pro/api/stripe/dashboard.
+  3. Dans le tableau de bord Stripe (mode test) → Connect → Comptes connectés, rechercher l'e-mail du compte de test.
+- **Résultat attendu** :
+  - Étape 2 : retour sur le formulaire Stripe, avec les informations déjà saisies conservées.
+  - Étape 3 : **un seul** compte connecté pour cet e-mail.
+- **Statut courant** : À faire
+
+| Date | Agent | Statut | Observations |
+|---|---|---|---|
+
+### T-STRIPE-05 — Compte Stripe complet : accès direct au tableau de bord
+
+- **Objectif** : un propriétaire dont le compte Stripe est complet arrive directement dans son espace Stripe, sans saisir d'e-mail.
+- **Prérequis** : T-STRIPE-01 réussi (compte de test avec compte Stripe complet), être connecté à Nestock.
+- **Étapes** :
+  1. Ouvrir https://www.nestock.pro/api/stripe/dashboard.
+  2. Ouvrir https://www.nestock.pro/stripe/connect et cliquer sur **« Ouvrir mon tableau de bord Stripe »**.
+- **Résultat attendu** : dans les deux cas, ouverture directe du tableau de bord Stripe Express (`connect.stripe.com`) du compte de test, sans demande d'e-mail ni de code.
+- **Statut courant** : À faire
+
+| Date | Agent | Statut | Observations |
+|---|---|---|---|
+
+### T-STRIPE-06 — Connexion normale non perturbée
+
+- **Objectif** : le retour automatique après connexion ne modifie pas la connexion classique, et ne peut pas renvoyer vers un site extérieur.
+- **Prérequis** : compte de test Nestock, être déconnecté.
+- **Étapes** :
+  1. Ouvrir https://www.nestock.pro/login, se connecter.
+  2. Se déconnecter, ouvrir `https://www.nestock.pro/login?next=//exemple.com`, se connecter.
+     Recommencer avec `https://www.nestock.pro/login?next=/%5Cexemple.com`.
+  3. Se déconnecter, ouvrir `https://www.nestock.pro/login?next=/dashboard`, se connecter.
+- **Résultat attendu** :
+  - Étape 1 : arrivée sur la page d'accueil, sans encadré Stripe sur la page de connexion.
+  - Étape 2 (les deux adresses) : arrivée sur la page d'accueil de Nestock, **jamais** sur exemple.com.
+  - Étape 3 : arrivée sur le Dashboard.
+- **Statut courant** : À faire
+
+| Date | Agent | Statut | Observations |
+|---|---|---|---|
+
 ---
 
 ## Navigation
@@ -111,7 +175,7 @@ Cahier de tests destiné à des agents IA (et à un humain si besoin). Chaque te
 - **Objectif** : les pages réservées renvoient vers la connexion quand on n'est pas connecté.
 - **Prérequis** : être déconnecté.
 - **Étapes** : ouvrir successivement `/messages`, `/dashboard`, `/spaces/new`, `/stripe/connect`, `/api/stripe/dashboard`.
-- **Résultat attendu** : chaque adresse redirige vers `https://www.nestock.pro/login`, sans afficher le contenu de la page (en particulier, aucun formulaire « Déposer » visible).
+- **Résultat attendu** : chaque adresse redirige vers `https://www.nestock.pro/login` (pour `/api/stripe/dashboard` : `/login?raison=stripe&next=/api/stripe/dashboard`), sans afficher le contenu de la page (en particulier, aucun formulaire « Déposer » visible).
 - **Statut courant** : À faire
 
 | Date | Agent | Statut | Observations |

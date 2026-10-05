@@ -18,7 +18,7 @@ export default function LoginPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const n = params.get('next') ?? ''
-    if (n.startsWith('/') && !n.startsWith('//')) setNext(n)
+    if (n.startsWith('/') && !n.startsWith('//') && !n.includes('\\')) setNext(n)
     setRaison(params.get('raison') ?? '')
   }, [])
 
