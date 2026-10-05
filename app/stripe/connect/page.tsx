@@ -58,6 +58,10 @@ export default function StripeConnectPage() {
           <p>✅ Virements directs sur votre compte</p>
           <p>✅ Tableau de bord Stripe disponible</p>
         </div>
+        <a href="/api/stripe/dashboard"
+          className="block w-full rounded-lg p-3 font-semibold hover:opacity-90" style={{ background: '#635BFF', color: '#ffffff' }}>
+          Ouvrir mon tableau de bord Stripe
+        </a>
         <button onClick={() => router.push(spaceId ? '/spaces/' + spaceId : '/spaces/new')}
           className="w-full bg-blue-600 text-white rounded-lg p-3 font-semibold hover:bg-blue-700">
           {spaceId ? 'Voir mon annonce →' : 'Deposer mon annonce →'}

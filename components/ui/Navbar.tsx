@@ -13,14 +13,12 @@ export default function Navbar({ user }: Props) {
   const pathname = usePathname()
   const [menuOpen, setMenuOpen] = useState(false)
 
-  // Messages, Dashboard et Déposer : réservés aux utilisateurs connectés
+  // Messages et Dashboard : toujours visibles (redirigent vers /login si non connecté) ; Déposer : connectés uniquement
   const links = [
     { href: '/', title: 'Accueil' },
-    ...(user ? [
-      { href: '/messages', title: 'Messages' },
-      { href: '/dashboard', title: 'Dashboard' },
-      { href: '/spaces/new', title: 'Déposer' },
-    ] : []),
+    { href: '/messages', title: 'Messages' },
+    { href: '/dashboard', title: 'Dashboard' },
+    ...(user ? [{ href: '/spaces/new', title: 'Déposer' }] : []),
     { href: '/about', title: 'À propos' },
     { href: '/contact', title: 'Contact' },
   ]

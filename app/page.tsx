@@ -147,32 +147,32 @@ export default async function Home({
           <p className="text-2xl md:text-3xl font-bold text-white leading-snug mb-16 max-w-2xl mx-auto" style={{ color: '#ffffff' }}>
             Il existe déjà assez d'espace en France, il suffit de mieux le partager.
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-left">
-            <div>
-              <div className="text-3xl mb-3">📍</div>
-              <h3 className="font-bold text-white mb-2" style={{ color: '#ffffff' }}>Proximité</h3>
-              <p className="text-white text-sm leading-relaxed" style={{ color: '#ffffff' }}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+            <div className="rounded-2xl p-8 border border-white/20" style={{ background: 'rgba(255,255,255,0.1)' }}>
+              <div className="text-4xl mb-4">📍</div>
+              <h3 className="text-xl font-bold mb-3" style={{ color: '#ffffff' }}>Proximité</h3>
+              <p className="text-base leading-relaxed" style={{ color: '#ffffff' }}>
                 Des solutions de stockage à deux pas de chez vous, portées par des particuliers de votre quartier.
               </p>
             </div>
-            <div>
-              <div className="text-3xl mb-3">🤝</div>
-              <h3 className="font-bold text-white mb-2" style={{ color: '#ffffff' }}>Confiance</h3>
-              <p className="text-white text-sm leading-relaxed" style={{ color: '#ffffff' }}>
+            <div className="rounded-2xl p-8 border border-white/20" style={{ background: 'rgba(255,255,255,0.1)' }}>
+              <div className="text-4xl mb-4">🤝</div>
+              <h3 className="text-xl font-bold mb-3" style={{ color: '#ffffff' }}>Confiance</h3>
+              <p className="text-base leading-relaxed" style={{ color: '#ffffff' }}>
                 Contrats, paiements et suivi gérés de bout en bout, pour louer et proposer un espace en toute sérénité.
               </p>
             </div>
-            <div>
-              <div className="text-3xl mb-3">💶</div>
-              <h3 className="font-bold text-white mb-2" style={{ color: '#ffffff' }}>Accessibilité</h3>
-              <p className="text-white text-sm leading-relaxed" style={{ color: '#ffffff' }}>
+            <div className="rounded-2xl p-8 border border-white/20" style={{ background: 'rgba(255,255,255,0.1)' }}>
+              <div className="text-4xl mb-4">💶</div>
+              <h3 className="text-xl font-bold mb-3" style={{ color: '#ffffff' }}>Accessibilité</h3>
+              <p className="text-base leading-relaxed" style={{ color: '#ffffff' }}>
                 Un stockage jusqu'à deux fois moins cher qu'un box traditionnel.
               </p>
             </div>
-            <div>
-              <div className="text-3xl mb-3">🌍</div>
-              <h3 className="font-bold text-white mb-2" style={{ color: '#ffffff' }}>Impact local</h3>
-              <p className="text-white text-sm leading-relaxed" style={{ color: '#ffffff' }}>
+            <div className="rounded-2xl p-8 border border-white/20" style={{ background: 'rgba(255,255,255,0.1)' }}>
+              <div className="text-4xl mb-4">🌍</div>
+              <h3 className="text-xl font-bold mb-3" style={{ color: '#ffffff' }}>Impact local</h3>
+              <p className="text-base leading-relaxed" style={{ color: '#ffffff' }}>
                 Valoriser les espaces inutilisés plutôt que d'en construire de nouveaux.
               </p>
             </div>
@@ -307,10 +307,10 @@ export default async function Home({
           <div className="mt-8 bg-white rounded-2xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
             <div>
               <h3 className="font-bold text-gray-900">Propriétaire sur Nestock ?</h3>
-              <p className="text-gray-500 text-sm mt-1">Connectez-vous à votre compte Stripe pour suivre vos versements et gérer vos informations bancaires.</p>
+              <p className="text-gray-500 text-sm mt-1">Créez ou ouvrez votre compte Stripe pour recevoir vos loyers, suivre vos versements et gérer vos informations bancaires.</p>
             </div>
-            <a href="https://connect.stripe.com/express_login" target="_blank" rel="noopener noreferrer" className="shrink-0 inline-flex items-center gap-2 font-bold px-6 py-3 rounded-xl transition hover:opacity-90 whitespace-nowrap" style={{ background: '#635BFF', color: '#ffffff' }}>
-              Se connecter à mon compte Stripe
+            <a href="/api/stripe/dashboard" className="shrink-0 inline-flex items-center gap-2 font-bold px-6 py-3 rounded-xl transition hover:opacity-90 whitespace-nowrap" style={{ background: '#635BFF', color: '#ffffff' }}>
+              Accéder à mon compte Stripe
             </a>
           </div>
         </div>
