@@ -16,10 +16,10 @@ export default function Navbar({ user }: Props) {
   // Messages et Dashboard : toujours visibles (redirigent vers /login si non connecté) ; Déposer : connectés uniquement
   const links = [
     { href: '/', title: 'Accueil' },
+    { href: '/about', title: 'À propos' },
     { href: '/messages', title: 'Messages' },
     { href: '/dashboard', title: 'Dashboard' },
     ...(user ? [{ href: '/spaces/new', title: 'Déposer' }] : []),
-    { href: '/about', title: 'À propos' },
     { href: '/contact', title: 'Contact' },
   ]
 
