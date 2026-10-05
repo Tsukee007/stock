@@ -286,7 +286,7 @@ export default async function Home({
               <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center mb-4 mx-auto">
                 <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2 text-sm">Certifie PCI-DSS niveau 1</h3>
+              <h3 className="font-semibold text-gray-900 mb-2 text-sm">Certification</h3>
               <p className="text-gray-500 text-xs leading-relaxed">Stripe detient le plus haut niveau de certification pour le traitement securise des paiements par carte.</p>
             </div>
             <div className="bg-white rounded-2xl p-6">
@@ -303,6 +303,15 @@ export default async function Home({
               <h3 className="font-semibold text-gray-900 mb-2 text-sm">Reconnu mondialement</h3>
               <p className="text-gray-500 text-xs leading-relaxed">Stripe equipe des entreprises de toutes tailles a travers le monde, de la startup aux plus grandes plateformes.</p>
             </div>
+          </div>
+          <div className="mt-8 bg-white rounded-2xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
+            <div>
+              <h3 className="font-bold text-gray-900">Propriétaire sur Nestock ?</h3>
+              <p className="text-gray-500 text-sm mt-1">Connectez-vous à votre compte Stripe pour suivre vos versements et gérer vos informations bancaires.</p>
+            </div>
+            <a href="https://connect.stripe.com/express_login" target="_blank" rel="noopener noreferrer" className="shrink-0 inline-flex items-center gap-2 font-bold px-6 py-3 rounded-xl transition hover:opacity-90 whitespace-nowrap" style={{ background: '#635BFF', color: '#ffffff' }}>
+              Se connecter à mon compte Stripe
+            </a>
           </div>
         </div>
       </section>
