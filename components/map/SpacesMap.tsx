@@ -1,6 +1,6 @@
 'use client'
 
-import Map, { Marker, Popup } from 'react-map-gl'
+import Map, { Marker, Popup, NavigationControl } from 'react-map-gl'
 import { useState, useEffect } from 'react'
 import 'mapbox-gl/dist/mapbox-gl.css'
 
@@ -21,9 +21,20 @@ type Props = {
   spaces: Space[]
   selectedId?: string | null
   onSelect?: (id: string | null) => void
+  // Page d'accueil : la molette seule fait défiler la page, Ctrl/⌘ + molette zoome
+  cooperativeGestures?: boolean
 }
 
-export default function SpacesMap({ spaces, selectedId, onSelect }: Props) {
+const mapLocale = {
+  'ScrollZoomBlocker.CtrlMessage': 'Maintenez Ctrl + molette pour zoomer sur la carte',
+  'ScrollZoomBlocker.CmdMessage': 'Maintenez ⌘ + molette pour zoomer sur la carte',
+  'TouchPanBlocker.Message': 'Utilisez deux doigts pour déplacer la carte',
+  'NavigationControl.ZoomIn': 'Zoomer',
+  'NavigationControl.ZoomOut': 'Dézoomer',
+  'NavigationControl.ResetBearing': 'Réorienter vers le nord',
+}
+
+export default function SpacesMap({ spaces, selectedId, onSelect, cooperativeGestures = false }: Props) {
   const [viewport, setViewport] = useState({
     longitude: 2.3522,
     latitude: 46.8566,
@@ -54,7 +65,10 @@ export default function SpacesMap({ spaces, selectedId, onSelect }: Props) {
       onMove={e => setViewport(e.viewState)}
       style={{ width: '100%', height: '100%' }}
       mapStyle="mapbox://styles/mapbox/streets-v12"
+      cooperativeGestures={cooperativeGestures}
+      locale={mapLocale}
     >
+      {cooperativeGestures && <NavigationControl position="top-right" showCompass={false} />}
       {spaces.map(space => {
         const isSelected = selectedId === space.id
         return (

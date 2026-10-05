@@ -79,9 +79,10 @@ export default async function Home({
       <section className="bg-white py-16 md:py-24 px-4 border-b border-gray-100 overflow-hidden">
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <div className="space-y-8 text-center md:text-left">
-            <div className="inline-block text-sm px-4 py-2 rounded-full font-semibold" style={{ background: '#FAECE7', color: '#712B13' }}>
-              L'Airbnb du stockage entre particuliers
-            </div>
+            <a href="https://climate.stripe.com/ShwhDB" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm px-4 py-2 rounded-full font-semibold border border-green-200 hover:border-green-400 transition" style={{ background: '#F0FDF4', color: '#166534' }}>
+              <svg className="w-4 h-4 shrink-0" style={{ color: '#16a34a' }} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" /></svg>
+              1 % de nos revenus finance l'élimination du CO₂ (Stripe Climate)
+            </a>
             <h1 className="text-4xl md:text-5xl font-extrabold leading-tight text-gray-900">
               Le garage de votre voisin vaut mieux qu'un box en zone industrielle
             </h1>
@@ -126,7 +127,7 @@ export default async function Home({
         <div className="relative rounded-2xl overflow-hidden border border-gray-200" style={{ height: '500px' }}>
           <SearchFilters initialFilters={filters} />
           <div className="h-full pt-14">
-            <MapWithList spaces={spaces ?? []} />
+            <MapWithList spaces={spaces ?? []} cooperativeGestures />
           </div>
           <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-gray-50 to-transparent pointer-events-none" />
           <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10">
@@ -137,24 +138,44 @@ export default async function Home({
         </div>
       </section>
 
-      {/* Stats */}
-      <section className="bg-gray-50 border-b border-gray-100 py-12 px-4">
-        <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-          <div>
-            <p className="text-3xl font-extrabold text-gray-900">{spaces?.length ?? 0}+</p>
-            <p className="text-gray-500 text-sm mt-1">Espaces disponibles</p>
+      {/* Vision & Valeurs */}
+      <section className="py-20 px-4 bg-blue-600">
+        <div className="max-w-4xl mx-auto text-center">
+          <div className="inline-block bg-blue-500 text-white text-sm px-4 py-1.5 rounded-full font-medium mb-6" style={{ color: '#ffffff' }}>
+            Notre vision
           </div>
-          <div>
-            <p className="text-3xl font-extrabold text-gray-900">100%</p>
-            <p className="text-gray-500 text-sm mt-1">Contrats sécurisés</p>
-          </div>
-          <div>
-            <p className="text-3xl font-extrabold text-gray-900">0 euro</p>
-            <p className="text-gray-500 text-sm mt-1">Inscription gratuite</p>
-          </div>
-          <div>
-            <p className="text-3xl font-extrabold text-gray-900">15j</p>
-            <p className="text-gray-500 text-sm mt-1">Préavis de résiliation</p>
+          <p className="text-2xl md:text-3xl font-bold text-white leading-snug mb-16 max-w-2xl mx-auto" style={{ color: '#ffffff' }}>
+            Il existe déjà assez d'espace en France, il suffit de mieux le partager.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-left">
+            <div>
+              <div className="text-3xl mb-3">📍</div>
+              <h3 className="font-bold text-white mb-2" style={{ color: '#ffffff' }}>Proximité</h3>
+              <p className="text-white text-sm leading-relaxed" style={{ color: '#ffffff' }}>
+                Des solutions de stockage à deux pas de chez vous, portées par des particuliers de votre quartier.
+              </p>
+            </div>
+            <div>
+              <div className="text-3xl mb-3">🤝</div>
+              <h3 className="font-bold text-white mb-2" style={{ color: '#ffffff' }}>Confiance</h3>
+              <p className="text-white text-sm leading-relaxed" style={{ color: '#ffffff' }}>
+                Contrats, paiements et suivi gérés de bout en bout, pour louer et proposer un espace en toute sérénité.
+              </p>
+            </div>
+            <div>
+              <div className="text-3xl mb-3">💶</div>
+              <h3 className="font-bold text-white mb-2" style={{ color: '#ffffff' }}>Accessibilité</h3>
+              <p className="text-white text-sm leading-relaxed" style={{ color: '#ffffff' }}>
+                Un stockage jusqu'à deux fois moins cher qu'un box traditionnel.
+              </p>
+            </div>
+            <div>
+              <div className="text-3xl mb-3">🌍</div>
+              <h3 className="font-bold text-white mb-2" style={{ color: '#ffffff' }}>Impact local</h3>
+              <p className="text-white text-sm leading-relaxed" style={{ color: '#ffffff' }}>
+                Valoriser les espaces inutilisés plutôt que d'en construire de nouveaux.
+              </p>
+            </div>
           </div>
         </div>
       </section>
@@ -190,48 +211,6 @@ export default async function Home({
               <div className="text-4xl">🔑</div>
               <h3 className="font-bold text-gray-800">Stockez</h3>
               <p className="text-gray-500 text-sm">Paiement automatique chaque mois. Résiliez avec 15j de préavis.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Vision & Valeurs */}
-      <section className="py-20 px-4 bg-blue-600">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-block bg-blue-500 text-white text-sm px-4 py-1.5 rounded-full font-medium mb-6" style={{ color: '#ffffff' }}>
-            Notre vision
-          </div>
-          <p className="text-2xl md:text-3xl font-bold text-white leading-snug mb-16 max-w-2xl mx-auto" style={{ color: '#ffffff' }}>
-            Il existe déjà assez d'espace en France, il suffit de mieux le partager.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-left">
-            <div>
-              <div className="text-3xl mb-3">📍</div>
-              <h3 className="font-bold text-white mb-2" style={{ color: '#ffffff' }}>Proximité</h3>
-              <p className="text-blue-100 text-sm leading-relaxed">
-                Des solutions de stockage à deux pas de chez vous, portées par des particuliers de votre quartier.
-              </p>
-            </div>
-            <div>
-              <div className="text-3xl mb-3">🤝</div>
-              <h3 className="font-bold text-white mb-2" style={{ color: '#ffffff' }}>Confiance</h3>
-              <p className="text-blue-100 text-sm leading-relaxed">
-                Contrats, paiements et suivi gérés de bout en bout, pour louer et proposer un espace en toute sérénité.
-              </p>
-            </div>
-            <div>
-              <div className="text-3xl mb-3">💶</div>
-              <h3 className="font-bold text-white mb-2" style={{ color: '#ffffff' }}>Accessibilité</h3>
-              <p className="text-blue-100 text-sm leading-relaxed">
-                Un stockage jusqu'à deux fois moins cher qu'un box traditionnel.
-              </p>
-            </div>
-            <div>
-              <div className="text-3xl mb-3">🌍</div>
-              <h3 className="font-bold text-white mb-2" style={{ color: '#ffffff' }}>Impact local</h3>
-              <p className="text-blue-100 text-sm leading-relaxed">
-                Valoriser les espaces inutilisés plutôt que d'en construire de nouveaux.
-              </p>
             </div>
           </div>
         </div>
@@ -328,43 +307,6 @@ export default async function Home({
         </div>
       </section>
 
-      {/* Avantages */}
-      <section className="py-20 px-4 bg-white">
-        <div className="max-w-5xl mx-auto">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">Pourquoi choisir Nestock ?</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="flex gap-4 p-5 rounded-xl border border-gray-100 hover:bg-gray-50 transition">
-              <span className="text-3xl">🛡️</span>
-              <div>
-                <h3 className="font-bold text-gray-900">Contrats légaux</h3>
-                <p className="text-gray-500 text-sm mt-1">Contrats conformes au droit français, signés électroniquement (article 1366 du Code civil).</p>
-              </div>
-            </div>
-            <div className="flex gap-4 p-5 rounded-xl border border-gray-100 hover:bg-gray-50 transition">
-              <span className="text-3xl">💳</span>
-              <div>
-                <h3 className="font-bold text-gray-900">Paiements sécurisés</h3>
-                <p className="text-gray-500 text-sm mt-1">Paiements automatiques traites par Stripe (certifie PCI-DSS niveau 1). Proprietaire paye sur son IBAN chaque mois.</p>
-              </div>
-            </div>
-            <div className="flex gap-4 p-5 rounded-xl border border-gray-100 hover:bg-gray-50 transition">
-              <span className="text-3xl">📍</span>
-              <div>
-                <h3 className="font-bold text-gray-900">Carte interactive</h3>
-                <p className="text-gray-500 text-sm mt-1">Visualisez tous les espaces disponibles sur une carte. Filtrez par distance, prix et surface.</p>
-              </div>
-            </div>
-            <div className="flex gap-4 p-5 rounded-xl border border-gray-100 hover:bg-gray-50 transition">
-              <span className="text-3xl">📄</span>
-              <div>
-                <h3 className="font-bold text-gray-900">Quittances automatiques</h3>
-                <p className="text-gray-500 text-sm mt-1">Une quittance de loyer est générée et envoyée par email après chaque paiement mensuel.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* FAQ */}
       <FAQSection />
 
@@ -389,7 +331,6 @@ export default async function Home({
         <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-sm">
           <div className="col-span-2 md:col-span-1 space-y-3">
             <p className="text-gray-900 font-bold text-lg">Nestock</p>
-            <p className="text-xs text-gray-400">L'Airbnb du stockage entre particuliers.</p>
             <p className="text-xs text-gray-400">contact@nestock.pro</p>
             <a href="https://climate.stripe.com/ShwhDB" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-xs hover:underline transition" style={{ color: '#6b7280' }}>
               <svg className="w-4 h-4 shrink-0" style={{ color: '#16a34a' }} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" /></svg>

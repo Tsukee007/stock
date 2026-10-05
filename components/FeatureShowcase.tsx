@@ -153,8 +153,8 @@ export default function FeatureShowcase() {
     <section className="py-20 px-4 bg-gray-50">
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">Tout ce dont vous avez besoin</h2>
-          <p className="text-gray-500 max-w-xl mx-auto">Une plateforme complète, pensée pour être simple et efficace.</p>
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">Une plateforme complète</h2>
+          <p className="text-gray-500 max-w-xl mx-auto">Tout ce dont vous avez besoin, pensé pour être simple et efficace.</p>
         </div>
         <div className="grid md:grid-cols-2 gap-8 items-start">
           <div className="space-y-3">

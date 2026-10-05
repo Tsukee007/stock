@@ -26,7 +26,7 @@ const typeEmoji: Record<string, string> = {
   autre: '📋'
 }
 
-export default function MapWithList({ spaces }: { spaces: Space[] }) {
+export default function MapWithList({ spaces, cooperativeGestures = false }: { spaces: Space[]; cooperativeGestures?: boolean }) {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [view, setView] = useState<'list' | 'map'>('list')
 
@@ -122,6 +122,7 @@ export default function MapWithList({ spaces }: { spaces: Space[] }) {
           spaces={spaces}
           selectedId={selectedId}
           onSelect={(id) => setSelectedId(id)}
+          cooperativeGestures={cooperativeGestures}
         />
       </div>
 

@@ -13,17 +13,20 @@ export default function Navbar({ user }: Props) {
   const pathname = usePathname()
   const [menuOpen, setMenuOpen] = useState(false)
 
+  // Messages, Dashboard et Déposer : réservés aux utilisateurs connectés
   const links = [
-    { href: '/', title: 'Carte' },
-    { href: '/messages', title: 'Messages' },
-    { href: '/dashboard', title: 'Dashboard' },
-    { href: '/spaces/new', title: 'Déposer' },
+    { href: '/', title: 'Accueil' },
+    ...(user ? [
+      { href: '/messages', title: 'Messages' },
+      { href: '/dashboard', title: 'Dashboard' },
+      { href: '/spaces/new', title: 'Déposer' },
+    ] : []),
     { href: '/about', title: 'À propos' },
     { href: '/contact', title: 'Contact' },
   ]
 
   const mobileLinks = [
-    { href: '/', label: '🗺️', title: 'Carte' },
+    { href: '/', label: '🏠', title: 'Accueil' },
     { href: '/messages', label: '💬', title: 'Messages' },
     { href: '/dashboard', label: '📋', title: 'Dashboard' },
     { href: '/spaces/new', label: '➕', title: 'Déposer' },
