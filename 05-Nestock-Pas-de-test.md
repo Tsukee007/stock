@@ -27,7 +27,7 @@ Cahier de tests destiné à des agents IA (et à un humain si besoin). Chaque te
 | ID | Test | Statut courant |
 |---|---|---|
 | T-STRIPE-01 | Parcours complet : connexion → « Accéder à mon compte Stripe » → création du compte | À faire |
-| T-STRIPE-02 | Retours depuis Stripe sur le bon domaine (nestock.pro) | Échec |
+| T-STRIPE-02 | Retours depuis Stripe sur le bon domaine (nestock.pro) | OK |
 | T-NAV-01 | Menu visiteur non connecté | À faire |
 | T-NAV-02 | Menu utilisateur connecté | À faire |
 | T-NAV-03 | Pages réservées : redirection vers la connexion | À faire |
@@ -69,12 +69,13 @@ Cahier de tests destiné à des agents IA (et à un humain si besoin). Chaque te
 - **Étapes** :
   1. Ouvrir `https://www.nestock.pro/api/logout` (ou exécuter `curl -s -o /dev/null -w '%{redirect_url}' https://www.nestock.pro/api/logout`).
   2. Noter l'URL de redirection.
-- **Résultat attendu** : redirection vers `https://www.nestock.pro/`.
-- **Statut courant** : Échec
+- **Résultat attendu** : redirection vers `https://nestock.pro/` ou `https://www.nestock.pro/` (le premier redirige vers le second en conservant chemin et paramètres) — jamais `nestock.tsukee.fr`.
+- **Statut courant** : OK
 
 | Date | Agent | Statut | Observations |
 |---|---|---|---|
 | 2026-10-05 | Claude Code | Échec | Redirection vers `https://nestock.tsukee.fr/` même après reconstruction du site. Hypothèse : la variable `NEXT_PUBLIC_SITE_URL` a été modifiée dans un projet Vercel qui ne sert pas nestock.pro (deux projets : `stock` et `stock-kb8s`). Impacte aussi le retour de l'inscription Stripe (T-STRIPE-01, étape 6). |
+| 2026-10-05 | Claude Code | OK | Après modification de `NEXT_PUBLIC_SITE_URL` dans le projet Vercel `stock-kb8s` + redeploy : `/api/logout` redirige vers `https://nestock.pro/`. Vérifié aussi : `https://nestock.pro/stripe/connect?success=true&space_id=abc` → 307 vers `https://www.nestock.pro/stripe/connect?success=true&space_id=abc` (chemin et paramètres conservés). |
 
 ---
 
