@@ -26,7 +26,7 @@ Cahier de tests destiné à des agents IA (et à un humain si besoin). Chaque te
 
 | ID | Test | Statut courant |
 |---|---|---|
-| T-STRIPE-01 | Parcours complet : connexion → « Accéder à mon compte Stripe » → création du compte | À faire |
+| T-STRIPE-01 | Parcours complet : « Accéder à mon compte Stripe » → connexion → formulaire Stripe → tableau de bord Stripe | À faire |
 | T-STRIPE-02 | Retours depuis Stripe sur le bon domaine (nestock.pro) | OK |
 | T-NAV-01 | Menu visiteur non connecté | À faire |
 | T-NAV-02 | Menu utilisateur connecté | À faire |
@@ -42,21 +42,20 @@ Cahier de tests destiné à des agents IA (et à un humain si besoin). Chaque te
 
 ### T-STRIPE-01 — Parcours complet de création du compte Stripe
 
-- **Objectif** : un propriétaire peut créer son compte Stripe depuis la page d'accueil puis accéder à son tableau de bord Stripe.
+- **Objectif** : depuis la page d'accueil, le bouton « Accéder à mon compte Stripe » amène toujours sur une page Stripe : formulaire de création si le compte n'existe pas, tableau de bord Stripe sinon.
 - **Prérequis** : un compte de test Nestock **sans** compte Stripe terminé.
 - **Étapes** :
   1. Ouvrir https://www.nestock.pro sans être connecté.
   2. Dans la section « Vos paiements protégés par Stripe », cliquer sur **« Accéder à mon compte Stripe »**.
-  3. Vérifier qu'on arrive sur la page de connexion Nestock, se connecter avec le compte de test.
-  4. Revenir sur la page d'accueil et recliquer sur **« Accéder à mon compte Stripe »**.
-  5. Sur la page « Connexion Stripe », lancer la création du compte et remplir le formulaire Stripe avec les données de test.
-  6. Terminer le formulaire Stripe et noter l'URL de retour.
-  7. Recliquer sur **« Accéder à mon compte Stripe »** depuis la page d'accueil.
+  3. Lire le message affiché sur la page de connexion, puis se connecter avec le compte de test.
+  4. Remplir le formulaire Stripe avec les données de test (voir Consignes) jusqu'au bout.
+  5. Noter l'URL et le message de retour.
+  6. Revenir sur la page d'accueil et recliquer sur **« Accéder à mon compte Stripe »**.
 - **Résultat attendu** :
-  - Étape 3 : redirection vers `https://www.nestock.pro/login`.
-  - Étape 4 : arrivée sur `https://www.nestock.pro/stripe/connect`.
-  - Étape 6 : retour sur `https://www.nestock.pro/stripe/connect?success=true…` avec le message « Compte Stripe connecté ! », **toujours connecté**.
-  - Étape 7 : ouverture du tableau de bord Stripe Express (domaine `connect.stripe.com`).
+  - Étape 3 : page `https://www.nestock.pro/login?raison=stripe&next=/api/stripe/dashboard` avec le message « Connectez-vous à Nestock pour accéder à votre compte Stripe… ».
+  - Étape 3 (après connexion) : redirection **automatique** vers le formulaire Stripe (domaine `connect.stripe.com`), sans repasser par la page d'accueil.
+  - Étape 5 : retour sur `https://www.nestock.pro/stripe/connect?success=true` avec « Compte Stripe connecté ! », **toujours connecté**.
+  - Étape 6 : ouverture directe du tableau de bord Stripe Express (`connect.stripe.com`), **sans saisie d'e-mail**.
 - **Statut courant** : À faire
 
 | Date | Agent | Statut | Observations |

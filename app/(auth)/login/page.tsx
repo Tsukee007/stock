@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -11,14 +11,26 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const router = useRouter()
   const supabase = createClient()
+  // ?next=/chemin : page où revenir après connexion ; ?raison=stripe : message explicatif
+  const [next, setNext] = useState('/')
+  const [raison, setRaison] = useState('')
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const n = params.get('next') ?? ''
+    if (n.startsWith('/') && !n.startsWith('//')) setNext(n)
+    setRaison(params.get('raison') ?? '')
+  }, [])
 
   const handleLogin = async () => {
     setLoading(true)
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) {
       setError(error.message)
-    } else {
+    } else if (next === '/') {
       router.push('/')
+    } else {
+      window.location.assign(next)
     }
     setLoading(false)
   }
@@ -34,6 +46,11 @@ export default function LoginPage() {
     >
       <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md relative z-10">
         <h1 className="text-2xl font-bold text-center mb-6 text-gray-900">Connexion</h1>
+        {raison === 'stripe' && (
+          <p className="text-sm mb-4 rounded-lg p-3" style={{ background: '#EEF2FF', color: '#3730A3' }}>
+            Connectez-vous à Nestock pour accéder à votre compte Stripe : vous serez ensuite redirigé automatiquement vers Stripe.
+          </p>
+        )}
         {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
         <input
           type="email"
