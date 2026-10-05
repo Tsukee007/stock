@@ -59,7 +59,7 @@ Cahier de tests destiné à des agents IA (et à un humain si besoin). Chaque te
 | T-RESA-04 | Signature bloquée si profil incomplet | À faire |
 | T-RESA-05 | Annonce louée non réservable | À faire |
 | T-PAY-01 | Premier paiement et quittance | À faire |
-| T-PAY-02 | Webhook Stripe accessible et protégé | Échec |
+| T-PAY-02 | Webhook Stripe accessible et protégé | Partiel |
 | T-PAY-03 | Gestion du paiement côté locataire | À faire |
 | T-RESIL-01 | Préavis de 15 jours | À faire |
 | T-RESIL-02 | Cycle complet facturation → préavis → remboursement | À faire |
@@ -612,11 +612,12 @@ Cahier de tests destiné à des agents IA (et à un humain si besoin). Chaque te
 - **Résultat attendu** :
   - Étape 1 : code **400** (signature invalide), sans URL de redirection — jamais 307/308, jamais 200.
   - Étape 2 : les dernières tentatives réelles sont en 200.
-- **Statut courant** : Échec
+- **Statut courant** : Partiel
 
 | Date | Agent | Statut | Observations |
 |---|---|---|---|
 | 2026-10-05 | Claude Code | Échec | Pas de redirection (OK), mais réponse `200 {"received":true}` à un message signé « invalide ». `app/api/stripe/webhook/route.ts` : en cas d'échec de `constructEvent`, le code fait `event = JSON.parse(body)` et traite l'événement quand même → n'importe qui peut forger un événement Stripe (`checkout.session.completed`, `invoice.paid`, `customer.subscription.deleted`…). Sans corps, réponse 500. Étape 2 non faite (pas d'accès au tableau de bord Stripe). |
+| 2026-10-05 | Claude Code | Partiel | Après correction (rejet des événements non signés) : étape 1 → `400`, sans redirection ; sans en-tête de signature → `400`. Étape 2 à faire : vérifier dans Stripe que les vrais événements arrivent toujours en 200 (sinon `STRIPE_WEBHOOK_SECRET` sur Vercel `stock-kb8s` ne correspond pas à la clé `whsec_` de l'endpoint de test). |
 
 ### T-PAY-03 — Gestion du paiement côté locataire
 
