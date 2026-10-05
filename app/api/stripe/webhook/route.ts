@@ -102,13 +102,16 @@ function generateQuittanceHtml(data: {
 
 export async function POST(req: Request) {
   const body = await req.text()
-  const sig = req.headers.get('stripe-signature')!
+  const sig = req.headers.get('stripe-signature')
 
+  // Seuls les événements signés par Stripe sont traités : un message non signé ou mal signé est rejeté
+  if (!sig) return NextResponse.json({ error: 'Signature manquante' }, { status: 400 })
   let event: Stripe.Event
   try {
     event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET!)
   } catch (err: any) {
-    event = JSON.parse(body) as Stripe.Event
+    console.error('Webhook Stripe : signature invalide', err?.message)
+    return NextResponse.json({ error: 'Signature invalide' }, { status: 400 })
   }
 
   if (event.type === 'checkout.session.completed') {
