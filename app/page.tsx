@@ -391,6 +391,10 @@ export default async function Home({
             <p className="text-gray-900 font-bold text-lg">Nestock</p>
             <p className="text-xs text-gray-400">L'Airbnb du stockage entre particuliers.</p>
             <p className="text-xs text-gray-400">contact@nestock.pro</p>
+            <a href="https://climate.stripe.com/ShwhDB" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-xs hover:underline transition" style={{ color: '#6b7280' }}>
+              <svg className="w-4 h-4 shrink-0" style={{ color: '#16a34a' }} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" /></svg>
+              1 % de nos revenus finance l'élimination du CO₂ (Stripe Climate)
+            </a>
           </div>
           <div className="space-y-2">
             <p className="text-gray-900 font-semibold">Produit</p>
