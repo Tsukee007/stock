@@ -6,8 +6,9 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-02
 
 // Bouton "compte Stripe" : non connecte -> /login, compte Stripe incomplet -> /stripe/connect (creation),
 // compte complet -> lien de connexion unique vers le tableau de bord Stripe Express
-export async function GET() {
-  const site = process.env.NEXT_PUBLIC_SITE_URL!
+export async function GET(req: Request) {
+  // Redirections sur le domaine de la requete (cookies de session lies au domaine)
+  const site = req.url
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.redirect(new URL('/login', site))
