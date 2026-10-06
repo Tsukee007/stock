@@ -228,8 +228,8 @@ STRIPE_WEBHOOK_SECRET, NEXT_PUBLIC_MAPBOX_TOKEN, CRON_SECRET (ajoutee le 10/08, 
 5. Documents de reference disponibles a la racine du repo :
    - 01-Nestock-context.md (ce fichier) : journal technique detaille
    - 02-Nestock-Fonctionnalites.md : synthese produit/technique complete, potentiellement presentable (investisseurs/partenaires)
-   - 03-Nestock-test-stripe-clock-scenario.md : protocole de test du cycle facturation/preavis/remboursement (Stripe Test Clocks), a executer avant le passage en production
    - 04-Nestock-Identite-Visuelle.md : document de reference de l'identite de marque (palette, typographie, logo, valeurs — cree le 10/08, base sur nestock_identite_visuelle.html)
+   - 05-Nestock-Scenarios-de-tests.md : cahier de tests (agents IA ou humain) ; contient en annexe le protocole Stripe Test Clocks (cycle facturation/preavis/remboursement, test T-RESIL-02) et le test de passage en live (T-PROD-01). Fusion le 06/10/2026 de l'ancien 03-Nestock-test-stripe-clock-scenario.md et de 05-Nestock-Pas-de-test.md
 
 ## Journal des modifications
 

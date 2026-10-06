@@ -1,6 +1,8 @@
-# Nestock — Pas de test
+# Nestock — Scénarios de tests
 
 Cahier de tests destiné à des agents IA (et à un humain si besoin). Chaque test décrit **quoi faire** et **ce qu'on doit obtenir** ; l'agent qui l'exécute **ajoute son retour** dans l'historique du test.
+
+Le protocole détaillé du cycle facturation → préavis → remboursement (Stripe Test Clocks) est en [annexe](#annexe--protocole-stripe-test-clocks) ; il est exécuté par le test T-RESIL-02.
 
 ---
 
@@ -64,6 +66,7 @@ Cahier de tests destiné à des agents IA (et à un humain si besoin). Chaque te
 | T-RESIL-01 | Préavis de 15 jours | À faire |
 | T-RESIL-02 | Cycle complet facturation → préavis → remboursement | À faire |
 | T-RESIL-03 | Tâche de clôture protégée | À faire |
+| T-PROD-01 | Passage de Stripe en mode live | À faire |
 | T-MSG-01 | Messagerie en temps réel | À faire |
 | T-NOTIF-01 | Cloche de notifications | À faire |
 | T-AVIS-01 | Avis en fin de location | À faire |
@@ -595,6 +598,7 @@ Cahier de tests destiné à des agents IA (et à un humain si besoin). Chaque te
 - **Résultat attendu** :
   - Montant payé = prix TTC de l'annonce (2 décimales).
   - Statut « Location active » ; quittance NST-FAC-AAAA-XXXXX consultable, imprimable, reçue par e-mail par les deux parties.
+  - Supabase, table `invoices` : la ligne du premier paiement a un `stripe_payment_id` renseigné (`pi_…`), pas vide.
   - Stripe : commission de 10 % prélevée, le reste transféré au compte connecté du propriétaire.
 - **Statut courant** : À faire
 
@@ -662,13 +666,18 @@ Cahier de tests destiné à des agents IA (et à un humain si besoin). Chaque te
 ### T-RESIL-02 — Cycle complet facturation → préavis → remboursement
 
 - **Objectif** : valider annulation programmée, remboursement au prorata et clôture par le cron, sans attendre 15 jours.
-- **Source** : 03-Nestock-test-stripe-clock-scenario.md
-- **Prérequis** : accès au tableau de bord Stripe (mode test) et à Supabase ; CRON_SECRET.
+- **Source** : annexe « Protocole Stripe Test Clocks » (ci-dessous) ; correction du webhook pour l'API Stripe basil (commit e766249, 06/10/2026).
+- **Prérequis** : accès au tableau de bord Stripe (mode test) et à Supabase ; CRON_SECRET ; version du site déployée contenant le commit e766249.
 - **Étapes** :
-  1. Dérouler intégralement le protocole de `03-Nestock-test-stripe-clock-scenario.md` (étapes 1 à 5, puis nettoyage).
+  1. Dérouler intégralement le protocole de l'annexe (étapes 1 à 6, puis nettoyage).
   2. Reporter dans les observations le résultat de chaque bloc « ✅ Vérifications ».
 - **Résultat attendu** :
-  - Toutes les vérifications du document 03 sont validées (invoice.paid en 200, cancel_at programmé, remboursement au prorata si prélèvement pendant le préavis, cron processed ≥ 1, statut ended, annonce de nouveau disponible).
+  - Toutes les vérifications de l'annexe sont validées, en particulier :
+  - **Facture du 2e mois** (`invoice.paid`, renouvellement) : webhook en 200, nouvelle ligne `invoices` avec `stripe_payment_id` renseigné, quittance reçue par e-mail par les deux parties, notifications « Loyer prélevé » / « Loyer reçu ».
+  - `cancel_at` programmé à la date de fin du préavis.
+  - **Fin du préavis** : remboursement partiel du dernier loyer payé, d'un montant égal à `montant payé × jours non utilisés ÷ jours de la période` (à 1 centime près), visible dans Stripe → Paiements ; e-mail et notification « Remboursement au prorata » avec ce même montant.
+  - **Aucun avoir** sur le compte du client dans Stripe : solde client à 0 €, aucune ligne de prorata (« Unused time… ») sur ses factures.
+  - Cron : `processed` ≥ 1, statut `ended`, annonce de nouveau disponible.
 - **Statut courant** : À faire
 
 | Date | Agent | Statut | Observations |
@@ -684,6 +693,35 @@ Cahier de tests destiné à des agents IA (et à un humain si besoin). Chaque te
   2. Même commande avec un faux secret : `-H 'Authorization: Bearer faux'`.
 - **Résultat attendu** :
   - Les deux appels sont refusés (401 ou 403), aucune location modifiée.
+- **Statut courant** : À faire
+
+| Date | Agent | Statut | Observations |
+|---|---|---|---|
+
+---
+
+## Mise en production
+
+### T-PROD-01 — Passage de Stripe en mode live
+
+- **Objectif** : basculer les paiements en réel sans casser le webhook, et le prouver avec un vrai paiement.
+- **Source** : session du 06/10/2026 (préparation de la mise en production).
+- **Exécutant** : **humain uniquement** (vraie carte, clés live). Exception à la consigne 1 : ce test se fait en mode **live**. Un agent peut seulement exécuter l'étape 6 et relire les résultats.
+- **Prérequis** :
+  - T-RESIL-02 **OK** (et T-PAY-02 OK) — ne jamais commencer avant.
+  - Compte Stripe validé par Stripe (SIRET, pièce d'identité, IBAN) et mode live débloqué.
+- **Étapes** :
+  1. Stripe (mode live) → Connect : compléter le profil de plateforme.
+  2. Stripe (mode live) → Développeurs → Webhooks : créer un endpoint `https://www.nestock.pro/api/stripe/webhook` avec les 4 événements `checkout.session.completed`, `invoice.paid`, `customer.subscription.updated`, `customer.subscription.deleted`. Noter sa clé `whsec_…` (différente de celle du mode test).
+  3. Vercel, projet qui sert nestock.pro (`stock-kb8s`) : remplacer `STRIPE_SECRET_KEY` (`sk_live_…`) et `STRIPE_WEBHOOK_SECRET` (`whsec_…` live) pour l'environnement Production.
+  4. Redéployer la production (les variables ne sont prises en compte qu'au déploiement suivant).
+  5. Vérifier que l'endpoint répond sans redirection : `curl -I https://www.nestock.pro/api/stripe/webhook`.
+  6. Faire un vrai paiement de bout en bout (petit montant, annonce et comptes réels), puis consulter Stripe live → Webhooks → tentatives récentes, Supabase `bookings` / `invoices`, et les e-mails.
+  7. Résilier cette location de test et vérifier le remboursement (ou rembourser manuellement depuis Stripe).
+- **Résultat attendu** :
+  - Étape 5 : code **405** (méthode non autorisée : la route n'accepte que POST), jamais 307/308 ni 404.
+  - Étape 6 : événement `checkout.session.completed` en **200** dans le webhook live ; location `active` ; ligne `invoices` avec `stripe_payment_id` renseigné ; quittance reçue par les deux parties ; commission de 10 % prélevée et le reste transféré au compte connecté du propriétaire.
+  - Étape 7 : l'argent du paiement de test est revenu sur la carte.
 - **Statut courant** : À faire
 
 | Date | Agent | Statut | Observations |
@@ -809,6 +847,114 @@ Cahier de tests destiné à des agents IA (et à un humain si besoin). Chaque te
 
 | Date | Agent | Statut | Observations |
 |---|---|---|---|
+
+---
+
+## Annexe — Protocole Stripe Test Clocks
+
+Protocole exécuté par **T-RESIL-02**. Il valide en quelques minutes tout le cycle :
+facturation mensuelle → déclenchement du préavis → annulation Stripe programmée (`cancel_at`) → remboursement automatique au prorata → clôture par le cron.
+
+Il utilise les **Stripe Test Clocks**, qui simulent l'écoulement du temps sans attendre de vrais cycles de facturation. Fonctionne uniquement en mode test.
+
+⚠️ Toujours en mode **test** Stripe (jamais en mode live).
+
+### Préparation
+
+1. Aller sur [dashboard.stripe.com/test/test-clocks](https://dashboard.stripe.com/test/test-clocks)
+2. Cliquer **« Create a test clock »**
+3. Noter l'heure de départ (par défaut : maintenant)
+
+### Étape 1 — Créer un client et un abonnement rattachés au test clock
+
+1. Dans l'interface du test clock, cliquer **« Create customer »** : le client Stripe est rattaché à l'horloge.
+2. Attacher une carte de test au client (`4242 4242 4242 4242`, date future, CVC quelconque).
+3. Créer un abonnement pour ce client, avec un prix mensuel équivalent à celui d'une annonce de test sur Nestock.
+
+**Alternative plus réaliste :** faire une vraie réservation de test sur `nestock.pro` (mode test) avec un compte locataire de test, et rattacher après coup le client Stripe généré à un test clock via l'API. Plus fidèle au parcours utilisateur, mais plus long à mettre en place ; la méthode manuelle suffit à valider la logique serveur.
+
+**✅ Vérification à ce stade :**
+- Dans Supabase, table `bookings` : créer (ou identifier) une ligne de réservation de test avec `stripe_subscription_id` = l'ID de l'abonnement créé, `status = 'active'`. Le locataire (`renter_id`) et le propriétaire de l'annonce doivent être des comptes de test dont on lit les e-mails.
+
+### Étape 2 — Premier prélèvement
+
+1. Dans l'interface du test clock, cliquer **« Advance clock »** et avancer de quelques minutes après la création de l'abonnement.
+
+**✅ Vérifications :**
+- Stripe → Webhooks → endpoint de test → tentatives récentes : `invoice.paid` en **200**.
+- **Aucune** nouvelle ligne dans `invoices` : c'est normal. Le webhook ignore la 1re facture d'un abonnement (`billing_reason = subscription_create`), car dans le vrai parcours elle est traitée par `checkout.session.completed` (testé par T-PAY-01).
+
+### Étape 3 — Facture du 2e mois
+
+1. Avancer le test clock d'**un mois** (juste après la date anniversaire de l'abonnement).
+
+**✅ Vérifications :**
+- `invoice.paid` (renouvellement) en **200** dans les tentatives récentes du webhook.
+- Supabase, table `invoices` : nouvelle ligne `status = 'paid'`, `stripe_payment_id` renseigné (`pi_…`).
+- E-mail « Quittance de loyer mensuelle » reçu par le locataire, « Paiement mensuel reçu » par le propriétaire.
+- Notifications « Loyer prélevé » (locataire) et « Loyer reçu » (propriétaire).
+
+### Étape 4 — Déclencher le préavis
+
+1. Se connecter sur le site avec le compte locataire ou propriétaire de test et cliquer **« Résilier »** depuis le Dashboard.
+   Ou par l'API :
+   ```bash
+   curl -X POST https://www.nestock.pro/api/bookings/{BOOKING_ID}/status \
+     -H "Content-Type: application/json" \
+     -H "Cookie: [session Supabase]" \
+     -d '{"status": "ending"}'
+   ```
+2. Ouvrir immédiatement l'abonnement dans Stripe.
+
+**✅ Vérifications :**
+- Supabase : `bookings.status = 'ending'`, `ending_date` renseignée (15 jours après le déclenchement).
+- Stripe : l'abonnement affiche **« Cancels on [date] »** (le `cancel_at` programmé).
+- Stripe : **aucune** ligne de prorata ni avoir créé sur le client à ce moment-là.
+- Notification + e-mail de préavis reçus par l'autre partie.
+
+### Étape 5 — Fin du préavis et remboursement au prorata
+
+**C'est le cœur du test** : `cancel_at` déclenche-t-il l'annulation à la bonne date, et le remboursement est-il juste ?
+
+1. Noter, sur la **dernière facture payée** de l'abonnement, le montant payé et la période de la ligne d'abonnement (ex. « 6 nov. – 6 déc. »). Attention : c'est la période de la **ligne**, pas les dates « Period » de l'en-tête de facture, qui désignent le mois précédent.
+2. Calculer le remboursement attendu : `montant payé × (fin de période − ending_date) ÷ (fin de période − début de période)`, en jours.
+3. Avancer le test clock **au-delà de `ending_date`**. Si une date anniversaire tombe pendant le préavis, Stripe émet d'abord un nouveau `invoice.paid` : c'est voulu (le locataire paie un mois complet mais ne reste que quelques jours), refaire alors les points 1 et 2 avec cette nouvelle facture.
+
+**✅ Vérifications, dans l'ordre où elles doivent apparaître :**
+- `customer.subscription.deleted` en **200** dans les tentatives récentes du webhook.
+- Stripe → Paiements → le dernier paiement : **remboursement partiel** du montant calculé au point 2 (à 1 centime près).
+- E-mail « Remboursement au prorata » reçu par le locataire, avec le même montant ; notification in-app correspondante.
+- Stripe → client : **solde à 0 €**, aucun avoir, aucune ligne « Unused time… » sur ses factures (sinon le locataire serait crédité deux fois).
+
+### Étape 6 — Clôture par le cron
+
+Le cron `/api/cron/end-bookings` tourne une fois par jour (2 h du matin). Il compare `ending_date` à la date **réelle** du serveur, pas à celle du test clock : on le déclenche à la main.
+
+```bash
+curl -X GET https://www.nestock.pro/api/cron/end-bookings \
+  -H "Authorization: Bearer VOTRE_CRON_SECRET"
+```
+
+Si `ending_date` est encore dans le futur réel, modifier temporairement `ending_date` de la ligne de test dans Supabase (date passée) avant l'appel.
+
+**✅ Vérifications :**
+- Réponse JSON avec `processed: 1` (ou plus) et le détail du traitement.
+- `bookings.status = 'ended'` dans Supabase.
+- Notification + e-mail de fin de location reçus par les deux parties.
+- L'annonce redevient visible et disponible.
+
+### Nettoyage après le test
+
+1. Supprimer le test clock depuis le tableau de bord Stripe (ça supprime aussi le client et l'abonnement de test associés).
+2. Supprimer les lignes de test dans `bookings` et `invoices` dans Supabase, pour ne pas fausser les données ni les statistiques.
+
+### Points d'échec probables à surveiller
+
+- **Aucun événement n'arrive au webhook** : vérifier que le test clock est en mode test et que l'endpoint est configuré côté test dans Stripe. Si les événements arrivent en **400** : `STRIPE_WEBHOOK_SECRET` sur Vercel ne correspond pas à la clé `whsec_` de l'endpoint de test.
+- **Pas de quittance au 2e mois** : vérifier dans les logs Vercel que la réservation est trouvée (`bookings.stripe_subscription_id` doit être exactement l'ID de l'abonnement, `sub_…`).
+- **`stripe_payment_id` vide** : chercher « paiement introuvable pour la facture » dans les logs Vercel.
+- **Pas de remboursement** : chercher « Erreur calcul/remboursement prorata » dans les logs Vercel ; vérifier que `ending_date` est bien dans la période de la dernière facture payée.
+- **Avoir présent sur le client** : l'annulation a été programmée sans `proration_behavior: 'none'` (version du site antérieure au commit e766249).
 
 ---
 
