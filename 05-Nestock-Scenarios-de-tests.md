@@ -72,7 +72,7 @@ Le protocole détaillé du cycle facturation → préavis → remboursement (Str
 | T-AVIS-01 | Avis en fin de location | À faire |
 | T-SEC-01 | Données d'autrui inaccessibles | À faire |
 | T-SEC-02 | Panels d'administration protégés | OK |
-| T-LEGAL-01 | Pages légales et RGPD | Échec |
+| T-LEGAL-01 | Pages légales et RGPD | OK |
 | T-UI-01 | Orthographe, ton et marque | À faire |
 
 ---
@@ -835,12 +835,13 @@ Le protocole détaillé du cycle facturation → préavis → remboursement (Str
   - CGU et Confidentialité s'affichent, contact contact@nestock.pro présent.
   - Mention RGPD sur les formulaires de collecte.
   - /waitlist redirige vers la page d'accueil.
-- **Statut courant** : Échec
+- **Statut courant** : OK
 
 | Date | Agent | Statut | Observations |
 |---|---|---|---|
 | 2026-10-06 | Claude Code | Échec | Étape 1 OK : `/cgu` et `/confidentialite` → 200, `contact@nestock.pro` présent sur les deux. Étape 3 OK : `/waitlist` → 307 vers `https://www.nestock.pro/`. Étape 2 en échec : **aucune mention RGPD** sur les formulaires de `/register` (`app/(auth)/register/page.tsx`) et `/contact` (`app/contact/page.tsx`) — ni dans le HTML servi ni dans le code ; `/contact` n'a que les liens CGU / Confidentialité du pied de page. |
 | 2026-10-06 | Testeur (AI Framework) | Échec | Étape 1 OK : `/cgu` → 200 (titre « Conditions Générales d'Utilisation », `contact@nestock.pro` présent) ; `/confidentialite` → 200 (titre « Politique de Confidentialité », mention « article 6.1.b RGPD », `contact@nestock.pro` présent). Étape 3 OK : `/waitlist` → 307 vers `/`. Étape 2 en échec : le formulaire de `/register` (champs nom, e-mail, téléphone, adresse, mot de passe, bouton « Créer mon compte ») ne comporte aucune mention RGPD ni case à cocher ni lien vers la politique de confidentialité dans le HTML rendu ; le formulaire de `/contact` (nom, e-mail, sujet, message) n'en comporte pas non plus, seul le pied de page affiche les liens CGU/Confidentialité, pas une mention RGPD sur le formulaire lui-même. |
+| 2026-10-06 | Testeur (AI Framework) | OK | Étape 1 : `/cgu` → 200 (titre « Conditions Générales d'Utilisation », mention « contact@nestock.pro » présente en pied de texte, article 8) ; `/confidentialite` → 200 (titre « Politique de Confidentialité », mention « article 6.1.b RGPD », « contact@nestock.pro » présent). Étape 3 : `/waitlist` → 307 vers `/`. Étape 2 : contrairement au retour précédent du jour (Échec), le formulaire de `/register` contient désormais le texte « Conformément au RGPD, vous pouvez y accéder, les rectifier, les supprimer ou vous opposer à leur traitement en écrivant à contact@nestock.pro », avec lien vers les CGU ; le formulaire de `/contact` contient « Conformément au RGPD, vous pouvez y accéder, les rectifier ou les faire supprimer en écrivant à contact@nestock.pro » avec lien vers la Politique de confidentialité. Les trois étapes sont désormais conformes au résultat attendu. |
 
 ### T-UI-01 — Orthographe, ton et marque
 
