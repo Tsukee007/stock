@@ -57,6 +57,8 @@ export async function POST(
       try {
         await stripe.subscriptions.update(booking.stripe_subscription_id, {
           cancel_at: Math.floor(endingDate.getTime() / 1000),
+          // Pas d'avoir Stripe automatique : le webhook rembourse deja les jours non utilises
+          proration_behavior: 'none',
         })
       } catch (stripeErr) {
         console.error('Erreur programmation annulation Stripe pour booking ' + id + ':', stripeErr)

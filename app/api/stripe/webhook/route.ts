@@ -10,6 +10,23 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
+// Depuis l'API 2025-03-31.basil, les factures n'ont plus de champ payment_intent :
+// le paiement d'une facture se retrouve via la liste des InvoicePayments
+async function getInvoicePaymentIntentId(invoiceId: string): Promise<string | null> {
+  const payments = await stripe.invoicePayments.list({ invoice: invoiceId, limit: 10 })
+  const paid = payments.data.find(p => p.status === 'paid' && p.payment.type === 'payment_intent')
+  const pi = paid?.payment.payment_intent
+  if (!pi) return null
+  return typeof pi === 'string' ? pi : pi.id
+}
+
+// Depuis l'API 2025-03-31.basil, l'abonnement d'une facture est dans parent.subscription_details
+function getInvoiceSubscriptionId(invoice: Stripe.Invoice): string | null {
+  const sub = invoice.parent?.subscription_details?.subscription
+  if (!sub) return null
+  return typeof sub === 'string' ? sub : sub.id
+}
+
 function generateQuittanceHtml(data: {
   reference: string
   date: string
@@ -149,13 +166,24 @@ export async function POST(req: Request) {
 
     const amount = session.amount_total ? session.amount_total / 100 : spaceData.price_month
 
+    // En mode abonnement, session.payment_intent est vide : le paiement est porte par la 1re facture
+    let paymentIntentId = typeof session.payment_intent === 'string' ? session.payment_intent : null
+    if (!paymentIntentId && session.invoice) {
+      const sessionInvoiceId = typeof session.invoice === 'string' ? session.invoice : session.invoice.id
+      try {
+        paymentIntentId = await getInvoicePaymentIntentId(sessionInvoiceId)
+      } catch (err) {
+        console.error('Webhook Stripe : paiement introuvable pour la facture ' + sessionInvoiceId, err)
+      }
+    }
+
     const { data: invoice } = await supabase.from('invoices').insert({
       booking_id: bookingId,
       contract_id: contractId || null,
       owner_id: spaceData.owner_id,
       renter_id: booking.renter_id,
       amount,
-      stripe_payment_id: session.payment_intent as string,
+      stripe_payment_id: paymentIntentId,
       status: 'paid'
     }).select().single()
 
@@ -227,10 +255,10 @@ export async function POST(req: Request) {
   }
 
   if (event.type === 'invoice.paid') {
-    const invoice = event.data.object as any
-    const subscriptionId = invoice.subscription as string
+    const invoice = event.data.object as Stripe.Invoice
+    const subscriptionId = getInvoiceSubscriptionId(invoice)
 
-    if (!subscriptionId) return NextResponse.json({ received: true })
+    if (!subscriptionId || !invoice.id) return NextResponse.json({ received: true })
 
     const { data: booking } = await supabase
       .from('bookings')
@@ -257,12 +285,19 @@ export async function POST(req: Request) {
       .eq('id', booking.renter_id)
       .single()
 
+    let paymentIntentId: string | null = null
+    try {
+      paymentIntentId = await getInvoicePaymentIntentId(invoice.id)
+    } catch (err) {
+      console.error('Webhook Stripe : paiement introuvable pour la facture ' + invoice.id, err)
+    }
+
     const { data: newInvoice } = await supabase.from('invoices').insert({
       booking_id: booking.id,
       owner_id: spaceData.owner_id,
       renter_id: booking.renter_id,
       amount,
-      stripe_payment_id: invoice.payment_intent as string,
+      stripe_payment_id: paymentIntentId,
       status: 'paid'
     }).select().single()
 
@@ -356,11 +391,14 @@ export async function POST(req: Request) {
             status: 'paid',
             limit: 1,
           })
-          const lastInvoice = invoices.data[0] as any
+          const lastInvoice = invoices.data[0]
+          // invoice.period_start/period_end designent la periode PRECEDENTE sur une facture
+          // d'abonnement : le mois reellement paye d'avance est la periode de la ligne
+          const paidPeriod = lastInvoice?.lines.data[0]?.period
 
-          if (lastInvoice && lastInvoice.period_start && lastInvoice.period_end && booking.ending_date) {
-            const periodStart = lastInvoice.period_start
-            const periodEnd = lastInvoice.period_end
+          if (lastInvoice?.id && paidPeriod && booking.ending_date) {
+            const periodStart = paidPeriod.start
+            const periodEnd = paidPeriod.end
             const endingDateUnix = Math.floor(new Date(booking.ending_date).getTime() / 1000)
 
             const totalDays = (periodEnd - periodStart) / 86400
@@ -370,7 +408,7 @@ export async function POST(req: Request) {
             if (unusedDays > 0.5 && totalDays > 0) {
               const refundRatio = unusedDays / totalDays
               const refundAmount = Math.round(lastInvoice.amount_paid * refundRatio)
-              const paymentIntentId = lastInvoice.payment_intent as string
+              const paymentIntentId = await getInvoicePaymentIntentId(lastInvoice.id)
 
               if (refundAmount > 0 && paymentIntentId) {
                 await stripe.refunds.create({
