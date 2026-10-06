@@ -54,6 +54,7 @@ message_only, pending, awaiting_signature, confirmed, active, ending, ended, can
 - app/waitlist/page.tsx : redirect() vers / (contenu recyclé sur la homepage)
 - app/admin-waitlist/page.tsx : dashboard admin waitlist avec stats (conservé pour historique)
 - app/admin-calendar/page.tsx : calendrier editorial avec stats par reseau
+- app/admin-tests/page.tsx : suivi des tests (à réaliser / en cours / terminés, résumés en langage simple), alimenté par l'agent Testeur d'AI Framework (06/10/2026)
 - app/dashboard/page.tsx : dashboard principal, unifié propriétaire/locataire (pas de vue séparée par rôle — affiche les deux sections selon les données de l'utilisateur)
 - app/dashboard/bookings/[id]/page.tsx : détail location
 - app/dashboard/bookings/[id]/invoice/[invoiceId]/page.tsx : quittance
@@ -84,7 +85,9 @@ message_only, pending, awaiting_signature, confirmed, active, ending, ended, can
 ## Routes API
 - /api/waitlist : inscription waitlist + email confirmation (phases lancement + lien parrainage) + email notification admin (route conservée, plus liée au parcours principal)
 - /api/admin-waitlist : dashboard stats waitlist (protege par mot de passe)
-- /api/admin-calendar : calendrier editorial CRUD (protege par mot de passe)
+- /api/admin-calendar : calendrier editorial CRUD (protege par mot de passe ; refuse tout si ADMIN_PASSWORD absent, depuis le 06/10/2026)
+- /api/admin-tests : lecture du suivi des tests (protege par mot de passe)
+- /api/admin-tests/sync : reception du suivi envoye par AI Framework (protege par TESTS_SYNC_SECRET), table Supabase test_tracking (supabase/test_tracking.sql, RLS sans politique : cle service uniquement)
 - /api/bookings/create : créer réservation
 - /api/bookings/[id]/status : changer statut
 - /api/contracts/sign : signer contrat + Stripe checkout
@@ -101,8 +104,8 @@ const WAITLIST_ACTIVE = false // desactive le 10/08/2026, inscription directe ou
 ```
 PUBLIC_PATHS (utilisés uniquement si WAITLIST_ACTIVE repasse à true) :
 ```
-/waitlist, /admin-waitlist, /admin-calendar,
-/api/waitlist, /api/admin-waitlist, /api/admin-calendar,
+/waitlist, /admin-waitlist, /admin-calendar, /admin-tests,
+/api/waitlist, /api/admin-waitlist, /api/admin-calendar, /api/admin-tests,
 /api/stripe/webhook, /_next, /favicon.ico
 ```
 ⚠️ Toute nouvelle route API destinée à un service externe (webhook, callback...) doit être ajoutée à PUBLIC_PATHS avant toute réactivation du blocage, sinon redirection 307 non suivie par les services externes.
@@ -148,7 +151,8 @@ Dossier : /marketing dans le repo GitHub
 NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, NEXT_PUBLIC_SUPABASE_ANON_KEY,
 SMTP_USER, SMTP_PASS, ADMIN_PASSWORD, NEXT_PUBLIC_SITE_URL=https://nestock.pro,
 STRIPE_SECRET_KEY (mode test), NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY (mode test),
-STRIPE_WEBHOOK_SECRET, NEXT_PUBLIC_MAPBOX_TOKEN, CRON_SECRET (ajoutee le 10/08, protege la route /api/cron/end-bookings)
+STRIPE_WEBHOOK_SECRET, NEXT_PUBLIC_MAPBOX_TOKEN, CRON_SECRET (ajoutee le 10/08, protege la route /api/cron/end-bookings),
+TESTS_SYNC_SECRET (06/10/2026, meme valeur que TEST_SYNC_SECRET_NESTOCK dans le .env d'AI Framework ; protege /api/admin-tests/sync)
 
 ## Stripe
 - Mode test actuellement (clés pk_test_ / sk_test_)
@@ -232,6 +236,12 @@ STRIPE_WEBHOOK_SECRET, NEXT_PUBLIC_MAPBOX_TOKEN, CRON_SECRET (ajoutee le 10/08, 
    - 05-Nestock-Scenarios-de-tests.md : cahier de tests (agents IA ou humain) ; contient en annexe le protocole Stripe Test Clocks (cycle facturation/preavis/remboursement, test T-RESIL-02) et le test de passage en live (T-PROD-01). Fusion le 06/10/2026 de l'ancien 03-Nestock-test-stripe-clock-scenario.md et de 05-Nestock-Pas-de-test.md
 
 ## Journal des modifications
+
+### 06/10/2026 — Tests automatisés par AI Framework, page /admin-tests, corrections
+- Cahier de tests (05-Nestock-Scenarios-de-tests.md) exécuté par l'agent **Testeur** d'AI Framework (~/Developer/framework-ia, projet « nestock ») : requêtes HTTP + navigateur, comptes de test dans le .env d'AI Framework (jamais vus par l'agent)
+- Page **/admin-tests** (onglet « Tests » des pages admin) : suivi à réaliser / en cours / terminés, résumé en langage simple par test, détails techniques repliés ; rafraîchie toutes les 30 s. Alimentée par AI Framework (POST /api/admin-tests/sync) → table Supabase test_tracking
+- Correction T-LEGAL-01 : mention RGPD sous les formulaires d'inscription (/register) et de contact (/contact)
+- Correction /api/admin-calendar : refuse tout accès si ADMIN_PASSWORD n'est pas défini (avant : une requête sans mot de passe passait dans ce cas)
 
 ### 10/08/2026 — Refonte homepage, retrait waitlist, cron résiliation, favicon, section Stripe
 **Retrait de la waitlist**

@@ -109,6 +109,7 @@ export default function AdminWaitlist() {
           <div className="flex gap-3">
             <span className="text-sm bg-blue-50 text-blue-600 border border-blue-200 px-4 py-2 rounded-lg font-medium">Waitlist</span>
             <a href="/admin-calendar" className="text-sm text-gray-500 hover:text-gray-700 border border-gray-200 px-4 py-2 rounded-lg">Calendrier</a>
+            <a href="/admin-tests" className="text-sm text-gray-500 hover:text-gray-700 border border-gray-200 px-4 py-2 rounded-lg">Tests</a>
             <button onClick={() => { localStorage.removeItem('nestock_admin_pwd'); setData(null) }} className="text-sm text-gray-500 hover:text-gray-700 border border-gray-200 px-4 py-2 rounded-lg">
               Deconnexion
             </button>

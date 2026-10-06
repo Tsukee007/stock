@@ -79,6 +79,12 @@ export default function ContactPage() {
             style={{ color: '#ffffff' }}>
             {loading ? 'Envoi...' : 'Envoyer le message'}
           </button>
+          <p className="text-xs text-gray-500 leading-relaxed">
+            Votre nom, votre e-mail et votre message sont utilisés par Nestock uniquement pour répondre à votre demande.
+            Conformément au RGPD, vous pouvez y accéder, les rectifier ou les faire supprimer en écrivant à{' '}
+            <a href="mailto:contact@nestock.pro" className="text-blue-600 hover:underline">contact@nestock.pro</a>.{' '}
+            <a href="/confidentialite" className="text-blue-600 hover:underline">Politique de confidentialité</a>
+          </p>
         </div>
 
       </div>

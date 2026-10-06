@@ -39,7 +39,7 @@ Le protocole détaillé du cycle facturation → préavis → remboursement (Str
 | T-STRIPE-06 | Connexion normale non perturbée (retour après connexion sécurisé) | À faire |
 | T-NAV-01 | Menu visiteur non connecté | À faire |
 | T-NAV-02 | Menu utilisateur connecté | À faire |
-| T-NAV-03 | Pages réservées : redirection vers la connexion | À faire |
+| T-NAV-03 | Pages réservées : redirection vers la connexion | OK |
 | T-DASH-01 | Le Dashboard affiche le tableau de bord, pas la carte | À faire |
 | T-MAP-01 | Carte de la page d'accueil : défilement, zoom, déplacement | À faire |
 | T-LAND-01 | Contenu de la page d'accueil | À faire |
@@ -65,14 +65,14 @@ Le protocole détaillé du cycle facturation → préavis → remboursement (Str
 | T-PAY-03 | Gestion du paiement côté locataire | À faire |
 | T-RESIL-01 | Préavis de 15 jours | À faire |
 | T-RESIL-02 | Cycle complet facturation → préavis → remboursement | À faire |
-| T-RESIL-03 | Tâche de clôture protégée | À faire |
+| T-RESIL-03 | Tâche de clôture protégée | OK |
 | T-PROD-01 | Passage de Stripe en mode live | À faire |
 | T-MSG-01 | Messagerie en temps réel | À faire |
 | T-NOTIF-01 | Cloche de notifications | À faire |
 | T-AVIS-01 | Avis en fin de location | À faire |
 | T-SEC-01 | Données d'autrui inaccessibles | À faire |
-| T-SEC-02 | Panels d'administration protégés | À faire |
-| T-LEGAL-01 | Pages légales et RGPD | À faire |
+| T-SEC-02 | Panels d'administration protégés | OK |
+| T-LEGAL-01 | Pages légales et RGPD | Échec |
 | T-UI-01 | Orthographe, ton et marque | À faire |
 
 ---
@@ -114,6 +114,7 @@ Le protocole détaillé du cycle facturation → préavis → remboursement (Str
 |---|---|---|---|
 | 2026-10-05 | Claude Code | Échec | Redirection vers `https://nestock.tsukee.fr/` même après reconstruction du site. Hypothèse : la variable `NEXT_PUBLIC_SITE_URL` a été modifiée dans un projet Vercel qui ne sert pas nestock.pro (deux projets : `stock` et `stock-kb8s`). Impacte aussi le retour de l'inscription Stripe (T-STRIPE-01, étape 6). |
 | 2026-10-05 | Claude Code | OK | Après modification de `NEXT_PUBLIC_SITE_URL` dans le projet Vercel `stock-kb8s` + redeploy : `/api/logout` redirige vers `https://nestock.pro/`. Vérifié aussi : `https://nestock.pro/stripe/connect?success=true&space_id=abc` → 307 vers `https://www.nestock.pro/stripe/connect?success=true&space_id=abc` (chemin et paramètres conservés). |
+| 2026-10-06 | Testeur (AI Framework) | OK | Re-test : `/api/logout` → 307 vers `https://nestock.pro/` (pas `nestock.tsukee.fr`), conforme au résultat attendu (domaine accepté, chaîne de redirection vers www déjà validée précédemment). |
 
 ### T-STRIPE-03 — Déjà connecté à Nestock, sans compte Stripe
 
@@ -211,10 +212,12 @@ Le protocole détaillé du cycle facturation → préavis → remboursement (Str
 - **Prérequis** : être déconnecté.
 - **Étapes** : ouvrir successivement `/messages`, `/dashboard`, `/spaces/new`, `/stripe/connect`, `/api/stripe/dashboard`.
 - **Résultat attendu** : chaque adresse redirige vers `https://www.nestock.pro/login` (pour `/api/stripe/dashboard` : `/login?raison=stripe&next=/api/stripe/dashboard`), sans afficher le contenu de la page (en particulier, aucun formulaire « Déposer » visible).
-- **Statut courant** : À faire
+- **Statut courant** : OK
 
 | Date | Agent | Statut | Observations |
 |---|---|---|---|
+| 2026-10-06 | Claude Code | OK | Vérifié par `curl` (sans suivre les redirections) : `/messages`, `/dashboard`, `/spaces/new`, `/stripe/connect` → 307 vers `https://www.nestock.pro/login` ; `/api/stripe/dashboard` → 307 vers `https://www.nestock.pro/login?raison=stripe&next=/api/stripe/dashboard`. Le contenu des pages n'est pas servi (redirection côté serveur). |
+| 2026-10-06 | Testeur (AI Framework) | OK | Re-test par requêtes directes : `/messages`, `/dashboard`, `/spaces/new`, `/stripe/connect` → 307 vers `/login` ; `/api/stripe/dashboard` → 307 vers `https://www.nestock.pro/login?raison=stripe&next=/api/stripe/dashboard`. Le corps renvoyé avec la redirection ne contient que la coquille technique de la page (scripts, méta), aucun contenu réel (pas de formulaire « Déposer », pas de liste de messages). |
 
 ---
 
@@ -622,6 +625,7 @@ Le protocole détaillé du cycle facturation → préavis → remboursement (Str
 |---|---|---|---|
 | 2026-10-05 | Claude Code | Échec | Pas de redirection (OK), mais réponse `200 {"received":true}` à un message signé « invalide ». `app/api/stripe/webhook/route.ts` : en cas d'échec de `constructEvent`, le code fait `event = JSON.parse(body)` et traite l'événement quand même → n'importe qui peut forger un événement Stripe (`checkout.session.completed`, `invoice.paid`, `customer.subscription.deleted`…). Sans corps, réponse 500. Étape 2 non faite (pas d'accès au tableau de bord Stripe). |
 | 2026-10-05 | Claude Code | Partiel | Après correction (rejet des événements non signés) : étape 1 → `400`, sans redirection ; sans en-tête de signature → `400`. Étape 2 à faire : vérifier dans Stripe que les vrais événements arrivent toujours en 200 (sinon `STRIPE_WEBHOOK_SECRET` sur Vercel `stock-kb8s` ne correspond pas à la clé `whsec_` de l'endpoint de test). |
+| 2026-10-06 | Testeur (AI Framework) | Partiel | Étape 1 : `POST /api/stripe/webhook` avec `stripe-signature: invalide` et corps vide → code `400`, réponse `{"error":"Signature invalide"}`, sans URL de redirection : conforme au résultat attendu. Étape 2 non réalisable : aucun accès au tableau de bord Stripe (compte/identifiants non fournis à l'agent) pour vérifier que les vraies tentatives de webhook arrivent en 200. |
 
 ### T-PAY-03 — Gestion du paiement côté locataire
 
@@ -693,10 +697,12 @@ Le protocole détaillé du cycle facturation → préavis → remboursement (Str
   2. Même commande avec un faux secret : `-H 'Authorization: Bearer faux'`.
 - **Résultat attendu** :
   - Les deux appels sont refusés (401 ou 403), aucune location modifiée.
-- **Statut courant** : À faire
+- **Statut courant** : OK
 
 | Date | Agent | Statut | Observations |
 |---|---|---|---|
+| 2026-10-06 | Claude Code | OK | Sans secret → `401` ; avec `Authorization: Bearer faux` → `401`. |
+| 2026-10-06 | Testeur (AI Framework) | OK | Re-test : `GET /api/cron/end-bookings` sans en-tête → `401 {"error":"Non autorise"}` ; avec `Authorization: Bearer faux` → `401 {"error":"Non autorise"}`. Les deux tentatives sont refusées, conforme au résultat attendu. |
 
 ---
 
@@ -809,10 +815,12 @@ Le protocole détaillé du cycle facturation → préavis → remboursement (Str
   2. Saisir un mauvais mot de passe.
 - **Résultat attendu** :
   - Aucune donnée affichée avant authentification ; mauvais mot de passe refusé.
-- **Statut courant** : À faire
+- **Statut courant** : OK
 
 | Date | Agent | Statut | Observations |
 |---|---|---|---|
+| 2026-10-06 | Claude Code | OK | Vérifié par `curl` (étapes équivalentes à la navigation privée) : `/admin-waitlist` et `/admin-calendar` → 200 avec formulaire de mot de passe seul, aucune donnée dans le HTML. Les données passent par les API : `POST /api/admin-waitlist` avec mauvais mot de passe → `401 {"error":"Mot de passe incorrect"}` ; `POST /api/admin-calendar` avec mauvais mot de passe → `401 {"error":"Non autorise"}`, sans mot de passe (`{"action":"get"}`) → `401`. Hypothèse : `/api/admin-calendar` ne vérifie pas que `ADMIN_PASSWORD` est défini (`password !== process.env.ADMIN_PASSWORD`) ; si la variable disparaissait de Vercel, une requête sans mot de passe passerait. `/api/admin-waitlist` fait bien ce contrôle. |
+| 2026-10-06 | Testeur (AI Framework) | OK | Re-test : `GET /admin-waitlist` et `GET /admin-calendar` → `200`, uniquement un formulaire de mot de passe (aucune donnée de waitlist ni de calendrier dans le HTML). `POST /api/admin-waitlist` avec mauvais mot de passe → `401 {"error":"Mot de passe incorrect"}` ; `POST /api/admin-calendar` avec mauvais mot de passe → `401 {"error":"Non autorise"}`. Conforme au résultat attendu. |
 
 ### T-LEGAL-01 — Pages légales et RGPD
 
@@ -827,10 +835,12 @@ Le protocole détaillé du cycle facturation → préavis → remboursement (Str
   - CGU et Confidentialité s'affichent, contact contact@nestock.pro présent.
   - Mention RGPD sur les formulaires de collecte.
   - /waitlist redirige vers la page d'accueil.
-- **Statut courant** : À faire
+- **Statut courant** : Échec
 
 | Date | Agent | Statut | Observations |
 |---|---|---|---|
+| 2026-10-06 | Claude Code | Échec | Étape 1 OK : `/cgu` et `/confidentialite` → 200, `contact@nestock.pro` présent sur les deux. Étape 3 OK : `/waitlist` → 307 vers `https://www.nestock.pro/`. Étape 2 en échec : **aucune mention RGPD** sur les formulaires de `/register` (`app/(auth)/register/page.tsx`) et `/contact` (`app/contact/page.tsx`) — ni dans le HTML servi ni dans le code ; `/contact` n'a que les liens CGU / Confidentialité du pied de page. |
+| 2026-10-06 | Testeur (AI Framework) | Échec | Étape 1 OK : `/cgu` → 200 (titre « Conditions Générales d'Utilisation », `contact@nestock.pro` présent) ; `/confidentialite` → 200 (titre « Politique de Confidentialité », mention « article 6.1.b RGPD », `contact@nestock.pro` présent). Étape 3 OK : `/waitlist` → 307 vers `/`. Étape 2 en échec : le formulaire de `/register` (champs nom, e-mail, téléphone, adresse, mot de passe, bouton « Créer mon compte ») ne comporte aucune mention RGPD ni case à cocher ni lien vers la politique de confidentialité dans le HTML rendu ; le formulaire de `/contact` (nom, e-mail, sujet, message) n'en comporte pas non plus, seul le pied de page affiche les liens CGU/Confidentialité, pas une mention RGPD sur le formulaire lui-même. |
 
 ### T-UI-01 — Orthographe, ton et marque
 

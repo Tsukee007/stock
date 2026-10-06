@@ -10,7 +10,12 @@ export async function POST(req: Request) {
   try {
     const { password, action, post } = await req.json()
 
-    if (password !== process.env.ADMIN_PASSWORD) {
+    // Sans ADMIN_PASSWORD, `password !== undefined` laisserait passer une requête sans mot de passe.
+    const adminPassword = process.env.ADMIN_PASSWORD
+    if (!adminPassword) {
+      return NextResponse.json({ error: 'Variable ADMIN_PASSWORD non configuree sur Vercel' }, { status: 500 })
+    }
+    if (password !== adminPassword) {
       return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
     }
 

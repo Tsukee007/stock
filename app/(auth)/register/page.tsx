@@ -120,6 +120,14 @@ export default function RegisterPage() {
           {loading ? 'Création...' : 'Créer mon compte'}
         </button>
 
+        <p className="text-xs text-gray-500 leading-relaxed">
+          En créant votre compte, vous acceptez les <a href="/cgu" className="text-blue-600 hover:underline">conditions générales d&apos;utilisation</a>.
+          Vos données sont traitées par Nestock pour gérer votre compte, vos annonces et vos locations, et conservées pendant la durée de votre compte.
+          Conformément au RGPD, vous pouvez y accéder, les rectifier, les supprimer ou vous opposer à leur traitement en écrivant à{' '}
+          <a href="mailto:contact@nestock.pro" className="text-blue-600 hover:underline">contact@nestock.pro</a>.{' '}
+          <a href="/confidentialite" className="text-blue-600 hover:underline">Politique de confidentialité</a>
+        </p>
+
         <p className="text-center text-sm text-gray-500">
           Déjà un compte ?{' '}
           <a href="/login" className="text-blue-600 hover:underline">Se connecter</a>

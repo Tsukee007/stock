@@ -79,6 +79,7 @@ Pas de distinction de "rôle" figée : un même utilisateur voit les deux facett
 ### 2.12 Panels d'administration
 - `/admin-waitlist` : historique des inscriptions à l'ancienne liste d'attente (période pré-lancement), statistiques et sources de trafic (UTM)
 - `/admin-calendar` : calendrier éditorial marketing (2 mois, 37 posts sur 4 réseaux), suivi des performances par publication
+- `/admin-tests` : suivi des tests du site (à réaliser, en cours, terminés), chaque résultat résumé en langage simple ; alimenté automatiquement par l'agent Testeur d'AI Framework
 
 *Protégés par mot de passe (`ADMIN_PASSWORD`), session persistante via localStorage.*
 
