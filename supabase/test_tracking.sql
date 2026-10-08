@@ -18,3 +18,6 @@ create table if not exists public.test_tracking (
 -- RLS activée sans aucune politique : la table n'est lisible et modifiable
 -- que côté serveur, avec la clé service (routes /api/admin-tests).
 alter table public.test_tracking enable row level security;
+
+-- 08/10/2026 : étapes du test en langage simple (fiche « nom, objectif, actions, statut, résultat »).
+alter table public.test_tracking add column if not exists actions text[];

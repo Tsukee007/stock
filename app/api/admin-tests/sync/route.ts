@@ -15,6 +15,7 @@ interface SyncedTest {
   title: string
   category?: string | null
   description?: string | null
+  actions?: string[] | null
   status: string
   summary?: string | null
   details?: string | null
@@ -57,6 +58,7 @@ export async function POST(req: Request) {
     title: t.title,
     category: t.category ?? null,
     description: t.description ?? null,
+    actions: Array.isArray(t.actions) && t.actions.length ? t.actions.map(String) : null,
     status: t.status,
     summary: t.summary ?? null,
     details: t.details ?? null,
@@ -66,7 +68,11 @@ export async function POST(req: Request) {
     synced_at: syncedAt,
   }))
 
-  const { error } = await supabase.from('test_tracking').upsert(rows, { onConflict: 'test_id' })
+  let { error } = await supabase.from('test_tracking').upsert(rows, { onConflict: 'test_id' })
+  if (error && /actions/.test(error.message)) {
+    // Colonne « actions » pas encore créée (supabase/test_tracking.sql) : on synchronise sans les étapes.
+    ;({ error } = await supabase.from('test_tracking').upsert(rows.map(({ actions: _actions, ...row }) => row), { onConflict: 'test_id' }))
+  }
   if (error) {
     console.error('Sync tests:', error)
     return NextResponse.json({ error: 'Erreur base de donnees' }, { status: 500 })

@@ -11,6 +11,7 @@ interface TestRow {
   title: string
   category: string | null
   description: string | null
+  actions: string[] | null
   status: string
   summary: string | null
   details: string | null
@@ -192,32 +193,36 @@ export default function AdminTests() {
             return (
               <div key={t.test_id}>
                 {newCategory && <h2 className="text-xs font-semibold uppercase tracking-wide text-gray-400 mt-5 mb-2">{t.category || 'Autres'}</h2>}
-                <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full border ${status.pill}`}>{status.label}</span>
-                    <span className="font-medium text-gray-900 text-sm">{t.title}</span>
-                  </div>
-                  {finished && (
-                    <p className="text-sm text-gray-800 mt-2 leading-relaxed">
-                      {t.summary ?? 'Résultat noté dans le cahier de tests. Le résumé en langage simple sera rédigé au prochain passage du Testeur sur ce test.'}
-                    </p>
-                  )}
-                  {t.status === 'En cours' && (
-                    <p className="text-sm text-blue-700 mt-2">Le Testeur est en train de vérifier ce point.</p>
-                  )}
-                  {t.description && (
-                    <p className="text-sm text-gray-500 mt-2"><span className="font-medium text-gray-600">À quoi sert ce test :</span> {t.description}</p>
-                  )}
-                  {finished && t.result_date && (
-                    <p className="text-xs text-gray-400 mt-2">{t.result_date}{t.source ? ` · ${t.source}` : ''}{t.mission_id ? ` · mission M#${t.mission_id}` : ''}</p>
-                  )}
-                  <details className="mt-2 text-xs">
-                    <summary className="cursor-pointer text-gray-500">Détails techniques</summary>
+                <article className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+                  <h3 className="font-semibold text-gray-900">{t.title}</h3>
+                  <dl className="mt-2 grid grid-cols-1 sm:grid-cols-[90px_1fr] gap-x-3 gap-y-1.5 text-sm leading-relaxed">
+                    <dt className="font-medium text-gray-500">Objectif</dt>
+                    <dd className="text-gray-800 mb-1 sm:mb-0">{t.description || '—'}</dd>
+                    <dt className="font-medium text-gray-500">Actions</dt>
+                    <dd className="text-gray-800 mb-1 sm:mb-0">
+                      {t.actions?.length
+                        ? <ol className="list-decimal pl-5 space-y-0.5">{t.actions.map(a => <li key={a}>{a}</li>)}</ol>
+                        : <span className="text-gray-500">Les étapes détaillées sont dans le cahier de tests.</span>}
+                    </dd>
+                    <dt className="font-medium text-gray-500">Statut</dt>
+                    <dd className="mb-1 sm:mb-0">
+                      <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full border ${status.pill}`}>{status.label}</span>
+                      {finished && t.result_date && <span className="text-xs text-gray-400 ml-2">({t.result_date})</span>}
+                    </dd>
+                    <dt className="font-medium text-gray-500">Résultat</dt>
+                    <dd className="text-gray-800">
+                      {finished
+                        ? (t.summary ?? 'Résultat noté dans le cahier de tests ; il sera reformulé simplement au prochain passage du Testeur.')
+                        : t.status === 'En cours' ? 'Le Testeur est en train de faire ce test.' : 'Pas encore testé.'}
+                    </dd>
+                  </dl>
+                  <details className="mt-3 text-xs">
+                    <summary className="cursor-pointer text-gray-400">Pour l&apos;équipe technique</summary>
                     <p className="text-gray-500 mt-1 break-words">
                       {t.details?.startsWith(`Test ${t.test_id}`) ? t.details : `Test ${t.test_id}. ${finished && t.details ? t.details : ''}`}
                     </p>
                   </details>
-                </div>
+                </article>
               </div>
             )
           })}
