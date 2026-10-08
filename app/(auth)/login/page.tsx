@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { authErrorMessage } from '@/lib/authErrors'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -26,7 +27,7 @@ export default function LoginPage() {
     setLoading(true)
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) {
-      setError(error.message)
+      setError(authErrorMessage(error))
     } else if (next === '/') {
       router.push('/')
     } else {

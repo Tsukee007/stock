@@ -36,16 +36,16 @@ Le protocole détaillé du cycle facturation → préavis → remboursement (Str
 | T-STRIPE-03 | Déjà connecté, sans compte Stripe → formulaire Stripe direct | À faire |
 | T-STRIPE-04 | Inscription Stripe interrompue puis reprise (pas de doublon) | À faire |
 | T-STRIPE-05 | Compte Stripe complet → tableau de bord Stripe direct | À faire |
-| T-STRIPE-06 | Connexion normale non perturbée (retour après connexion sécurisé) | À faire |
-| T-NAV-01 | Menu visiteur non connecté | À faire |
-| T-NAV-02 | Menu utilisateur connecté | À faire |
+| T-STRIPE-06 | Connexion normale non perturbée (retour après connexion sécurisé) | Bloqué |
+| T-NAV-01 | Menu visiteur non connecté | Partiel |
+| T-NAV-02 | Menu utilisateur connecté | Bloqué |
 | T-NAV-03 | Pages réservées : redirection vers la connexion | OK |
-| T-DASH-01 | Le Dashboard affiche le tableau de bord, pas la carte | À faire |
+| T-DASH-01 | Le Dashboard affiche le tableau de bord, pas la carte | Bloqué |
 | T-MAP-01 | Carte de la page d'accueil : défilement, zoom, déplacement | À faire |
 | T-LAND-01 | Contenu de la page d'accueil | À faire |
 | T-LAND-02 | Lien Stripe Climate (haut de page + pieds de page) | À faire |
 | T-AUTH-01 | Inscription d'un nouveau compte | À faire |
-| T-AUTH-02 | Erreurs de connexion | À faire |
+| T-AUTH-02 | Erreurs de connexion | OK |
 | T-AUTH-03 | Mot de passe oublié de bout en bout | À faire |
 | T-AUTH-04 | Modification du profil et déconnexion | À faire |
 | T-ANN-01 | Création d'une annonce avec photos | À faire |
@@ -171,10 +171,11 @@ Le protocole détaillé du cycle facturation → préavis → remboursement (Str
   - Étape 1 : arrivée sur la page d'accueil, sans encadré Stripe sur la page de connexion.
   - Étape 2 (les deux adresses) : arrivée sur la page d'accueil de Nestock, **jamais** sur exemple.com.
   - Étape 3 : arrivée sur le Dashboard.
-- **Statut courant** : À faire
+- **Statut courant** : Bloqué
 
 | Date | Agent | Statut | Observations |
 |---|---|---|---|
+| 2026-10-08 | Testeur (AI Framework) | Bloqué | Étape 1 : connexion avec le compte Propriétaire sur /login échoue (Invalid login credentials). Même échec avec les comptes Locataire et 3e compte. Étapes 2 et 3 non réalisables faute de connexion réussie. |
 
 ---
 
@@ -188,10 +189,11 @@ Le protocole détaillé du cycle facturation → préavis → remboursement (Str
   1. Ouvrir https://www.nestock.pro sur ordinateur, lire le menu du haut.
   2. Ouvrir le site sur mobile (ou fenêtre de 390 px), ouvrir le menu ☰.
 - **Résultat attendu** : entrées dans cet ordre : **Accueil, À propos, Messages, Dashboard, Contact** ; pas d'entrée « Carte » ni « Déposer ».
-- **Statut courant** : À faire
+- **Statut courant** : Partiel
 
 | Date | Agent | Statut | Observations |
 |---|---|---|---|
+| 2026-10-08 | Testeur (AI Framework) | Partiel | Déconnecté, sur https://www.nestock.pro : menu ordinateur lu = Accueil, À propos, Messages, Dashboard, Contact (ordre conforme), aucune entrée Carte ni Déposer : conforme. Étape 2 (menu mobile sur fenêtre 390px) non réalisable : pas de contrôle de la taille de fenêtre disponible dans l'outil de navigation. |
 
 ### T-NAV-02 — Menu utilisateur connecté
 
@@ -201,10 +203,11 @@ Le protocole détaillé du cycle facturation → préavis → remboursement (Str
   1. Lire le menu du haut sur ordinateur.
   2. Sur mobile, lire la barre de navigation fixe en bas d'écran.
 - **Résultat attendu** : ordinateur, dans cet ordre : **Accueil, À propos, Messages, Dashboard, Déposer, Contact** ; mobile (barre du bas) : **Accueil, Messages, Dashboard, Déposer, Profil**.
-- **Statut courant** : À faire
+- **Statut courant** : Bloqué
 
 | Date | Agent | Statut | Observations |
 |---|---|---|---|
+| 2026-10-08 | Testeur (AI Framework) | Bloqué | Tentative de connexion avec le compte Propriétaire sur /login : message Invalid login credentials, retour sur /login. Même résultat avec les comptes Locataire et 3e compte. Test bloqué faute de compte de test fonctionnel. |
 
 ### T-NAV-03 — Pages réservées : redirection vers la connexion
 
@@ -231,10 +234,11 @@ Le protocole détaillé du cycle facturation → préavis → remboursement (Str
   1. Cliquer sur **Dashboard** dans le menu.
   2. Parcourir la page.
 - **Résultat attendu** : sections de locations et d'annonces avec statuts, boutons (quittances, préavis, suppression d'annonce…) ; **aucune carte** ni liste « espaces trouvés ».
-- **Statut courant** : À faire
+- **Statut courant** : Bloqué
 
 | Date | Agent | Statut | Observations |
 |---|---|---|---|
+| 2026-10-08 | Testeur (AI Framework) | Bloqué | Connexion impossible avec le compte Propriétaire sur https://www.nestock.pro/login : message Invalid login credentials. Impossible d'ouvrir /dashboard en tant qu'utilisateur connecté. |
 
 ---
 
@@ -329,10 +333,11 @@ Le protocole détaillé du cycle facturation → préavis → remboursement (Str
 - **Résultat attendu** :
   - Un message d'erreur s'affiche à chaque fois, l'utilisateur reste sur /login.
   - Signaler en observation si le message est en anglais (ex. « Invalid login credentials »).
-- **Statut courant** : À faire
+- **Statut courant** : OK
 
 | Date | Agent | Statut | Observations |
 |---|---|---|---|
+| 2026-10-08 | Testeur (AI Framework) | OK | Sur /login, déconnecté : adresse inexistante + mot de passe quelconque, e-mail valide + mauvais mot de passe, et champs vides, produisent respectivement Invalid login credentials, Invalid login credentials, et missing email or phone, dans les trois cas sans quitter /login et sans erreur technique visible. Messages en anglais, non traduits. |
 
 ### T-AUTH-03 — Mot de passe oublié de bout en bout
 

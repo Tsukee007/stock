@@ -148,7 +148,7 @@ export default function AdminTests() {
             <span className="text-sm text-gray-500">{done} terminé{done > 1 ? 's' : ''} sur {total}</span>
           </div>
           <p className="text-sm text-gray-500 mt-1 mb-4">
-            Chaque test vérifie un point précis du site. Les tests sont réalisés par l&apos;agent Testeur d&apos;AI Framework ; le résultat le plus récent est affiché.
+            Chaque test vérifie une chose précise sur le site. Le résultat le plus récent est affiché.
             {lastSync && <> Dernière mise à jour : {lastSync}.</>}
           </p>
           {total > 0 && (
@@ -196,7 +196,6 @@ export default function AdminTests() {
                   <div className="flex flex-wrap items-center gap-2">
                     <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full border ${status.pill}`}>{status.label}</span>
                     <span className="font-medium text-gray-900 text-sm">{t.title}</span>
-                    <span className="text-xs text-gray-400 font-mono">{t.test_id}</span>
                   </div>
                   {finished && (
                     <p className="text-sm text-gray-800 mt-2 leading-relaxed">
@@ -207,17 +206,17 @@ export default function AdminTests() {
                     <p className="text-sm text-blue-700 mt-2">Le Testeur est en train de vérifier ce point.</p>
                   )}
                   {t.description && (
-                    <p className="text-sm text-gray-500 mt-2"><span className="font-medium text-gray-600">Ce que ce test vérifie :</span> {t.description}</p>
+                    <p className="text-sm text-gray-500 mt-2"><span className="font-medium text-gray-600">À quoi sert ce test :</span> {t.description}</p>
                   )}
                   {finished && t.result_date && (
                     <p className="text-xs text-gray-400 mt-2">{t.result_date}{t.source ? ` · ${t.source}` : ''}{t.mission_id ? ` · mission M#${t.mission_id}` : ''}</p>
                   )}
-                  {finished && t.details && (
-                    <details className="mt-2 text-xs">
-                      <summary className="cursor-pointer text-gray-500">Détails techniques</summary>
-                      <p className="text-gray-500 mt-1 break-words">{t.details}</p>
-                    </details>
-                  )}
+                  <details className="mt-2 text-xs">
+                    <summary className="cursor-pointer text-gray-500">Détails techniques</summary>
+                    <p className="text-gray-500 mt-1 break-words">
+                      {t.details?.startsWith(`Test ${t.test_id}`) ? t.details : `Test ${t.test_id}. ${finished && t.details ? t.details : ''}`}
+                    </p>
+                  </details>
                 </div>
               </div>
             )

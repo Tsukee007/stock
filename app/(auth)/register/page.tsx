@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { authErrorMessage } from '@/lib/authErrors'
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -42,7 +43,7 @@ export default function RegisterPage() {
     })
 
     if (signUpError) {
-      setError(signUpError.message)
+      setError(authErrorMessage(signUpError))
       setLoading(false)
       return
     }
