@@ -225,6 +225,7 @@ TESTS_SYNC_SECRET (06/10/2026, meme valeur que TEST_SYNC_SECRET_NESTOCK dans le 
 - Corrections qualité : attribution PCI-DSS correcte, ~30 accents corrigés sur la homepage, 3 sur le dashboard, cohérence vouvoiement vérifiée
 
 ## Prochaines étapes
+0. **Tests — reprise prévue (décision du 08/10/2026)** : créer une **base de test séparée** (projet Supabase « Nestock-tests », vide, + Nestock lancé en local sur `http://localhost:3000`) pour que l'agent Testeur d'AI Framework fasse tous les tests, création des comptes comprise. Puis **vider la base du site**, seulement après avoir vérifié qu'aucun vrai utilisateur n'y est inscrit et après une sauvegarde (irréversible ; waitlist et calendrier éditorial y vivent aussi). À faire aussi dans la base du site : `alter table public.test_tracking add column if not exists actions text[];` (rubrique « Actions » de /admin-tests)
 1. **Bascule sur le marketing/acquisition** (priorité actuelle a partir du 10/08/2026 soir) — le site est considere pret cote produit
 2. Stripe en production (clés live) — étape 1 (SIRET/KYC) en cours, dossier micro-entreprise déposé le 10/08, en attente de validation INPI. Voir les 6 étapes détaillées dans la section Stripe ci-dessus. Prévu juste avant le lancement public, pas avant
 3. Adapter les posts du calendrier éditorial existant (CTA waitlist obsolètes) avant publication
@@ -242,6 +243,8 @@ TESTS_SYNC_SECRET (06/10/2026, meme valeur que TEST_SYNC_SECRET_NESTOCK dans le 
 - Page **/admin-tests** (onglet « Tests » des pages admin) : suivi à réaliser / en cours / terminés, résumé en langage simple par test, détails techniques repliés ; rafraîchie toutes les 30 s. Alimentée par AI Framework (POST /api/admin-tests/sync) → table Supabase test_tracking
 - Correction T-LEGAL-01 : mention RGPD sous les formulaires d'inscription (/register) et de contact (/contact)
 - Correction /api/admin-calendar : refuse tout accès si ADMIN_PASSWORD n'est pas défini (avant : une requête sans mot de passe passait dans ce cas)
+- 08/10 : messages d'erreur de connexion et d'inscription traduits en français (lib/authErrors.ts, T-AUTH-02) ; /admin-tests : fiche de test en 5 rubriques (nom, objectif, actions, statut, résultat avec ce qui bloque), titres et textes pour tout public rédigés par le Testeur
+- 08/10 : la connexion des comptes de test échouait parce qu'ils n'existaient pas sur le site (seul le .env d'AI Framework était rempli). Claude ne crée pas de compte sur le site en ligne → comptes à créer à la main, ou base de test séparée (voir Prochaines étapes)
 
 ### 10/08/2026 — Refonte homepage, retrait waitlist, cron résiliation, favicon, section Stripe
 **Retrait de la waitlist**
