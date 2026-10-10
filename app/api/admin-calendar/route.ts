@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
+import { getAdminUser } from '@/lib/admin'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -8,16 +9,10 @@ const supabase = createClient(
 
 export async function POST(req: Request) {
   try {
-    const { password, action, post } = await req.json()
-
-    // Sans ADMIN_PASSWORD, `password !== undefined` laisserait passer une requête sans mot de passe.
-    const adminPassword = process.env.ADMIN_PASSWORD
-    if (!adminPassword) {
-      return NextResponse.json({ error: 'Variable ADMIN_PASSWORD non configuree sur Vercel' }, { status: 500 })
-    }
-    if (password !== adminPassword) {
+    if (!(await getAdminUser())) {
       return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
     }
+    const { action, post } = await req.json()
 
     if (action === 'get') {
       const { data, error } = await supabase

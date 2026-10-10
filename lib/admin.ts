@@ -9,13 +9,20 @@ export function isAdmin(user: Pick<User, 'app_metadata'> | null) {
   return user?.app_metadata?.role === 'admin'
 }
 
-// A appeler en tete de chaque page ou route d'administration
+// A appeler en tete de chaque page d'administration
 export async function requireAdmin() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login?next=/admin')
   if (!isAdmin(user)) redirect('/')
   return user
+}
+
+// Variante pour les routes API : renvoie null au lieu de rediriger (la route repond 401)
+export async function getAdminUser() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  return isAdmin(user) ? user : null
 }
 
 // Lecture de toutes les donnees (contourne les regles RLS) : uniquement apres requireAdmin()

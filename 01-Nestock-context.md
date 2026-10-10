@@ -52,9 +52,9 @@ message_only, pending, awaiting_signature, confirmed, active, ending, ended, can
 - app/page.tsx : landing page complète (hero photo, vision & valeurs, showcase fonctionnalités, avantages, FAQ, CTA final)
 - app/layout.tsx : layout racine, inclut AnnouncementBanner + Navbar
 - app/waitlist/page.tsx : redirect() vers / (contenu recyclé sur la homepage)
-- app/admin-waitlist/page.tsx : dashboard admin waitlist avec stats (conservé pour historique)
-- app/admin-calendar/page.tsx : calendrier editorial avec stats par reseau
-- app/admin-tests/page.tsx : suivi des tests (à réaliser / en cours / terminés, résumés en langage simple), alimenté par l'agent Testeur d'AI Framework (06/10/2026)
+- app/admin/ : espace d'administration réservé au rôle admin (layout.tsx vérifie le rôle, AdminNav.tsx = menu) ; inscrits/ (liste + fiche [id]), calendrier/ (calendrier editorial avec stats par reseau), tests/ (suivi des tests alimenté par l'agent Testeur d'AI Framework)
+- lib/admin.ts : requireAdmin() (pages), getAdminUser() (routes API), adminClient() (clé service_role)
+- app/admin-waitlist, app/admin-inscrits, app/admin-calendar, app/admin-tests : anciennes adresses, redirigent vers /admin/...
 - app/dashboard/page.tsx : dashboard principal, unifié propriétaire/locataire (pas de vue séparée par rôle — affiche les deux sections selon les données de l'utilisateur)
 - app/dashboard/bookings/[id]/page.tsx : détail location
 - app/dashboard/bookings/[id]/invoice/[invoiceId]/page.tsx : quittance
@@ -84,9 +84,9 @@ message_only, pending, awaiting_signature, confirmed, active, ending, ended, can
 
 ## Routes API
 - /api/waitlist : inscription waitlist + email confirmation (phases lancement + lien parrainage) + email notification admin (route conservée, plus liée au parcours principal)
-- /api/admin-waitlist : dashboard stats waitlist (protege par mot de passe)
-- /api/admin-calendar : calendrier editorial CRUD (protege par mot de passe ; refuse tout si ADMIN_PASSWORD absent, depuis le 06/10/2026)
-- /api/admin-tests : lecture du suivi des tests (protege par mot de passe)
+- /api/inscription : e-mail à l'admin à chaque nouvelle inscription
+- /api/admin-calendar : calendrier editorial CRUD (réservé au rôle admin connecté depuis le 10/10/2026, plus de mot de passe)
+- /api/admin-tests (GET) : lecture du suivi des tests (réservé au rôle admin connecté)
 - /api/admin-tests/sync : reception du suivi envoye par AI Framework (protege par TESTS_SYNC_SECRET), table Supabase test_tracking (supabase/test_tracking.sql, RLS sans politique : cle service uniquement)
 - /api/bookings/create : créer réservation
 - /api/bookings/[id]/status : changer statut
@@ -237,6 +237,11 @@ TESTS_SYNC_SECRET (06/10/2026, meme valeur que TEST_SYNC_SECRET_NESTOCK dans le 
    - 05-Nestock-Scenarios-de-tests.md : cahier de tests (agents IA ou humain) ; contient en annexe le protocole Stripe Test Clocks (cycle facturation/preavis/remboursement, test T-RESIL-02) et le test de passage en live (T-PROD-01). Fusion le 06/10/2026 de l'ancien 03-Nestock-test-stripe-clock-scenario.md et de 05-Nestock-Pas-de-test.md
 
 ## Journal des modifications
+
+### 10/10/2026 — Espace d'administration /admin
+- Liste des inscrits et fiche de chaque inscrit (/admin/inscrits), e-mail à l'admin à chaque inscription
+- Calendrier et suivi des tests déplacés dans /admin (/admin/calendrier, /admin/tests) : accès par le rôle admin du compte connecté, le mot de passe commun ADMIN_PASSWORD et sa mémorisation dans le navigateur sont supprimés. La variable ADMIN_PASSWORD n'est plus utilisée (peut être retirée de Vercel)
+- Menu latéral avec la rubrique ouverte mise en avant ; les anciennes adresses redirigent
 
 ### 06/10/2026 — Tests automatisés par AI Framework, page /admin-tests, corrections
 - Cahier de tests (05-Nestock-Scenarios-de-tests.md) exécuté par l'agent **Testeur** d'AI Framework (~/Developer/framework-ia, projet « nestock ») : requêtes HTTP + navigateur, comptes de test dans le .env d'AI Framework (jamais vus par l'agent)

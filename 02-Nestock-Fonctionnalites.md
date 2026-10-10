@@ -76,12 +76,12 @@ Un seul tableau de bord qui affiche automatiquement, pour l'utilisateur connect�
 
 Pas de distinction de "rôle" figée : un même utilisateur voit les deux facettes selon ses données réelles.
 
-### 2.12 Panels d'administration
-- `/admin-waitlist` : historique des inscriptions à l'ancienne liste d'attente (période pré-lancement), statistiques et sources de trafic (UTM)
-- `/admin-calendar` : calendrier éditorial marketing (2 mois, 37 posts sur 4 réseaux), suivi des performances par publication
-- `/admin-tests` : suivi des tests du site (à réaliser, en cours, terminés), chaque résultat résumé en langage simple ; alimenté automatiquement par l'agent Testeur d'AI Framework
+### 2.12 Espace d'administration (`/admin`)
+- `/admin/inscrits` : comptes inscrits (statistiques, e-mail confirmé, annonces, demandes) et fiche détaillée de chaque inscrit ; un e-mail est envoyé à l'admin à chaque nouvelle inscription
+- `/admin/calendrier` : calendrier éditorial marketing (2 mois, 37 posts sur 4 réseaux), suivi des performances par publication
+- `/admin/tests` : suivi des tests du site (à réaliser, en cours, terminés), chaque résultat résumé en langage simple ; alimenté automatiquement par l'agent Testeur d'AI Framework
 
-*Protégés par mot de passe (`ADMIN_PASSWORD`), session persistante via localStorage.*
+*Réservé aux comptes dont `app_metadata.role` vaut `admin` (modifiable uniquement avec la clé service_role). Le lien « Administration » apparaît dans le menu pour ces comptes. Les anciennes adresses (`/admin-inscrits`, `/admin-waitlist`, `/admin-calendar`, `/admin-tests`) redirigent vers l'espace d'administration.*
 
 ### 2.13 Identité de marque & Landing page
 Landing page publique avec : bandeau de notoriété, hero avec photo réelle et proposition de valeur ("L'Airbnb du stockage entre particuliers"), section Vision & Valeurs (Proximité, Confiance, Accessibilité, Impact local), showcase interactif des fonctionnalités, section de réassurance dédiée aux paiements Stripe, FAQ enrichie (7 questions), simulateur de revenus propriétaire.
