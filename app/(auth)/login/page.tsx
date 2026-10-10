@@ -1,7 +1,6 @@
 'use client'
 
 import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { authErrorMessage } from '@/lib/authErrors'
 
@@ -10,7 +9,6 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const router = useRouter()
   const supabase = createClient()
   // ?next=/chemin : page où revenir après connexion ; ?raison=stripe : message explicatif
   const [next, setNext] = useState('/')
@@ -28,9 +26,8 @@ export default function LoginPage() {
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) {
       setError(authErrorMessage(error))
-    } else if (next === '/') {
-      router.push('/')
     } else {
+      // Rechargement complet : le menu du haut (rendu cote serveur) affiche alors le compte connecte
       window.location.assign(next)
     }
     setLoading(false)

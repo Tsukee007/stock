@@ -61,7 +61,7 @@ export async function POST(req: Request) {
           <p><strong>Ville :</strong> ${escape([postal_code, city].filter(Boolean).join(' '))}</p>
           <p><strong>Date :</strong> ${escape(date)}</p>
           <p style="color: #6b7280;">La personne doit encore confirmer son adresse e-mail.</p>
-          <p><a href="${process.env.NEXT_PUBLIC_SITE_URL}/admin-inscrits" style="color: #2563eb;">Voir la liste des inscrits</a></p>
+          <p><a href="${process.env.NEXT_PUBLIC_SITE_URL}/admin/inscrits/${user.id}" style="color: #2563eb;">Voir sa fiche dans l'administration</a></p>
         </div>
       `,
     })

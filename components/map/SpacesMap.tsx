@@ -1,6 +1,7 @@
 'use client'
 
 import Map, { Marker, Popup, NavigationControl } from 'react-map-gl'
+import { type RentalStatus, rentalStatusBadge, rentalStatusLabels, rentalStatusMarker } from '@/lib/utils'
 import { useState, useEffect } from 'react'
 import 'mapbox-gl/dist/mapbox-gl.css'
 
@@ -13,7 +14,7 @@ type Space = {
   price_month: number
   price_ttc?: number
   type: string
-  is_booked?: boolean
+  rental_status?: RentalStatus
   surface_m2?: number
 }
 
@@ -78,12 +79,10 @@ export default function SpacesMap({ spaces, selectedId, onSelect, cooperativeGes
             latitude={space.lat}
             onClick={() => onSelect?.(isSelected ? null : space.id)}
           >
-            <div className={`
+            <div title={rentalStatusLabels[space.rental_status ?? 'available']} className={`
               font-bold text-xs px-2 py-1 rounded-full cursor-pointer shadow-md transition-all
-              ${isSelected
-                ? 'bg-blue-700 text-white scale-125 ring-2 ring-white ring-offset-1'
-                : 'bg-white text-blue-600 border border-blue-200 hover:bg-blue-50'
-              }
+              text-white ${rentalStatusMarker[space.rental_status ?? 'available']}
+              ${isSelected ? 'scale-125 ring-2 ring-white ring-offset-1' : 'border border-white'}
             `}>
               {(space.price_ttc ?? Math.round(space.price_month * 1.10)).toFixed(2)}€
             </div>
@@ -104,8 +103,8 @@ export default function SpacesMap({ spaces, selectedId, onSelect, cooperativeGes
           >
             <div className="p-2 min-w-40">
               <h3 className="font-bold text-sm">{space.title}</h3>
-              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${space.is_booked ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}`}>
-                {space.is_booked ? 'En location' : 'A louer'}
+              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${rentalStatusBadge[space.rental_status ?? 'available']}`}>
+                {rentalStatusLabels[space.rental_status ?? 'available']}
               </span>
               <p className="text-gray-500 text-xs">📍 {space.city}</p>
               {space.surface_m2 && (

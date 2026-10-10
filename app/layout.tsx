@@ -4,6 +4,7 @@ import './globals.css'
 import { createClient } from '@/lib/supabase/server'
 import Navbar from '@/components/ui/Navbar'
 import AnnouncementBanner from '@/components/AnnouncementBanner'
+import { isAdmin } from '@/lib/admin'
 
 const geist = Geist({ subsets: ['latin'] })
 
@@ -24,7 +25,7 @@ export default async function RootLayout({
     <html lang="fr">
       <body className={geist.className}>
         <AnnouncementBanner />
-        <Navbar user={user ? { email: user.email ?? '', id: user.id } : null} />
+        <Navbar user={user ? { email: user.email ?? '', id: user.id, admin: isAdmin(user) } : null} />
         <div className="pb-16 md:pb-0">
           {children}
         </div>

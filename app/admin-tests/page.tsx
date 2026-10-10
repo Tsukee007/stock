@@ -134,7 +134,7 @@ export default function AdminTests() {
         <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
           <span className="text-xl font-bold text-blue-600">Nestock Admin</span>
           <div className="flex flex-wrap gap-2">
-            <a href="/admin-inscrits" className="text-sm text-gray-500 hover:text-gray-700 border border-gray-200 px-4 py-2 rounded-lg">Inscrits</a>
+            <a href="/admin/inscrits" className="text-sm text-gray-500 hover:text-gray-700 border border-gray-200 px-4 py-2 rounded-lg">Inscrits</a>
             <a href="/admin-calendar" className="text-sm text-gray-500 hover:text-gray-700 border border-gray-200 px-4 py-2 rounded-lg">Calendrier</a>
             <span className="text-sm bg-blue-50 text-blue-600 border border-blue-200 px-4 py-2 rounded-lg font-medium">Tests</span>
             <button type="button" onClick={() => { localStorage.removeItem('nestock_admin_pwd'); setData(null) }} className="text-sm text-gray-500 hover:text-gray-700 border border-gray-200 px-4 py-2 rounded-lg">

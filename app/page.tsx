@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import SearchFilters from '@/components/map/SearchFilters'
 import MapWithList from '@/components/map/MapWithList'
+import { getRentalStatus } from '@/lib/utils'
 import FAQSection from '@/components/FAQSection'
 import FeatureShowcase from '@/components/FeatureShowcase'
 
@@ -48,7 +49,7 @@ export default async function Home({
   let { data: rawSpaces } = await query
   let spaces = rawSpaces?.map(s => ({
     ...s,
-    is_booked: (s.bookings as any[])?.some((b: any) => ['active', 'confirmed', 'awaiting_signature'].includes(b.status)) ?? false,
+    rental_status: getRentalStatus(s.bookings as any[]),
     profiles: Array.isArray(s.profiles) ? s.profiles[0] : s.profiles
   }))
 

@@ -6,7 +6,7 @@ import NotificationBell from '@/components/ui/NotificationBell'
 import Logo from '@/components/Logo'
 
 type Props = {
-  user: { email: string; id: string } | null
+  user: { email: string; id: string; admin?: boolean } | null
 }
 
 export default function Navbar({ user }: Props) {
@@ -21,6 +21,7 @@ export default function Navbar({ user }: Props) {
     { href: '/dashboard', title: 'Dashboard' },
     ...(user ? [{ href: '/spaces/new', title: 'Déposer' }] : []),
     { href: '/contact', title: 'Contact' },
+    ...(user?.admin ? [{ href: '/admin', title: 'Administration' }] : []),
   ]
 
   const mobileLinks = [
