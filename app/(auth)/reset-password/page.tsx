@@ -16,8 +16,18 @@ export default function ResetPasswordPage() {
 
   useEffect(() => {
     const code = searchParams.get('code')
-    
-    if (code) {
+    const tokenHash = searchParams.get('token_hash')
+
+    if (tokenHash) {
+      // Lien avec token_hash (modele d'e-mail recommande par Supabase pour le rendu serveur)
+      supabase.auth.verifyOtp({ type: 'recovery', token_hash: tokenHash }).then(({ error }) => {
+        if (error) {
+          setError('Lien invalide ou expiré. Veuillez redemander un nouveau lien.')
+        } else {
+          setReady(true)
+        }
+      })
+    } else if (code) {
       // Echanger le code contre une session
       supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
         if (error) {

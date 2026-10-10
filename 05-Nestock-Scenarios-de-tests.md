@@ -46,8 +46,10 @@ Le protocole détaillé du cycle facturation → préavis → remboursement (Str
 | T-LAND-02 | Lien Stripe Climate (haut de page + pieds de page) | À faire |
 | T-AUTH-01 | Inscription d'un nouveau compte | À faire |
 | T-AUTH-02 | Erreurs de connexion | OK |
-| T-AUTH-03 | Mot de passe oublié de bout en bout | À faire |
+| T-AUTH-03 | Mot de passe oublié de bout en bout (utilisateur et admin) | Échec |
 | T-AUTH-04 | Modification du profil et déconnexion | À faire |
+| T-AUTH-05 | Connexion réussie : utilisateur et admin | À faire |
+| T-AUTH-06 | Réinitialisation du mot de passe : cas d'erreur | À faire |
 | T-ANN-01 | Création d'une annonce avec photos | À faire |
 | T-ANN-02 | Limites des photos | À faire |
 | T-ANN-03 | Modification d'une annonce | À faire |
@@ -71,7 +73,7 @@ Le protocole détaillé du cycle facturation → préavis → remboursement (Str
 | T-NOTIF-01 | Cloche de notifications | À faire |
 | T-AVIS-01 | Avis en fin de location | À faire |
 | T-SEC-01 | Données d'autrui inaccessibles | À faire |
-| T-SEC-02 | Panels d'administration protégés | OK |
+| T-SEC-02 | Panels d'administration protégés | À faire |
 | T-LEGAL-01 | Pages légales et RGPD | OK |
 | T-UI-01 | Orthographe, ton et marque | À faire |
 
@@ -341,22 +343,24 @@ Le protocole détaillé du cycle facturation → préavis → remboursement (Str
 
 ### T-AUTH-03 — Mot de passe oublié de bout en bout
 
-- **Objectif** : le lien de réinitialisation reçu par e-mail fonctionne.
-- **Source** : 01-Nestock-context.md (bug 11/05 « Lien reset password invalide »)
-- **Prérequis** : compte de test avec accès à sa boîte mail.
+- **Objectif** : le lien de réinitialisation reçu par e-mail fonctionne, pour un utilisateur comme pour le compte admin.
+- **Source** : 01-Nestock-context.md (bug 11/05 « Lien reset password invalide » ; 10/10/2026 : e-mail non reçu pour le compte admin)
+- **Prérequis** : compte de test utilisateur avec accès à sa boîte mail ; compte admin de test avec accès à sa boîte mail (base de test uniquement, jamais le vrai compte admin).
 - **Étapes** :
-  1. Sur /login, cliquer « Mot de passe oublié ? », saisir l'e-mail du compte de test.
+  1. Sur /login, cliquer « Mot de passe oublié ? », saisir l'e-mail du compte de test utilisateur.
   2. Ouvrir l'e-mail reçu et cliquer sur le lien.
   3. Saisir un nouveau mot de passe, valider.
   4. Se connecter avec le nouveau mot de passe.
+  5. Refaire les étapes 1 à 4 avec le compte admin de test.
 - **Résultat attendu** :
-  - E-mail reçu en quelques minutes.
+  - E-mail reçu en quelques minutes, pour les deux comptes (vérifier aussi les spams).
   - Le lien ouvre https://www.nestock.pro/reset-password (pas une erreur, pas l'ancien domaine nestock.tsukee.fr, pas localhost).
   - Connexion réussie avec le nouveau mot de passe.
-- **Statut courant** : À faire
+- **Statut courant** : Échec
 
 | Date | Agent | Statut | Observations |
 |---|---|---|---|
+| 2026-10-10 | Utilisateur (manuel) + Claude Code | Échec | Sur https://www.nestock.pro/forgot-password, deux demandes pour le compte admin : page « Email envoyé ! » mais aucun e-mail reçu (spams compris). Cause à chercher dans la configuration d'envoi des e-mails de Supabase (Authentication → Emails → SMTP Settings). Contournement : lien de réinitialisation généré avec la clé service_role. Ajout du même jour : /reset-password accepte aussi les liens `?token_hash=` (format recommandé par Supabase). |
 
 ### T-AUTH-04 — Modification du profil et déconnexion
 
@@ -372,6 +376,54 @@ Le protocole détaillé du cycle facturation → préavis → remboursement (Str
   - Modifications conservées après rechargement.
   - Après déconnexion : retour sur la page d'accueil de nestock.pro, menu visiteur.
   - /dashboard redirige vers /login.
+- **Statut courant** : À faire
+
+| Date | Agent | Statut | Observations |
+|---|---|---|---|
+
+### T-AUTH-05 — Connexion réussie : utilisateur et admin
+
+- **Objectif** : un utilisateur et un administrateur peuvent se connecter et arrivent au bon endroit.
+- **Source** : 02-Nestock-Fonctionnalites.md §2.1 et §2.12
+- **Prérequis** : être déconnecté ; un compte de test utilisateur (ex. Locataire) et un compte admin de test (base de test uniquement, jamais le vrai compte admin).
+- **Étapes** :
+  1. Ouvrir /login, saisir l'e-mail et le mot de passe du compte utilisateur, appuyer sur la touche Entrée.
+  2. Si rien ne se passe, cliquer sur « Se connecter ».
+  3. Vérifier le menu du haut, puis ouvrir /admin.
+  4. Se déconnecter, puis ouvrir /admin/tests (non connecté) et se connecter avec le compte admin de test.
+  5. Vérifier le menu du haut, puis ouvrir /admin/inscrits, /admin/calendrier et /admin/tests.
+- **Résultat attendu** :
+  - Compte utilisateur : connexion réussie, le menu affiche le compte connecté, sans lien « Administration » ; /admin renvoie vers l'accueil.
+  - Compte admin : connexion réussie, retour dans l'espace d'administration ; le menu du haut affiche « Administration » ; les trois pages s'affichent avec leurs données.
+  - Signaler en observation si la touche Entrée ne valide pas le formulaire (connu le 10/10/2026 : il faut cliquer sur le bouton).
+- **Statut courant** : À faire
+
+| Date | Agent | Statut | Observations |
+|---|---|---|---|
+
+### T-AUTH-06 — Réinitialisation du mot de passe : cas d'erreur
+
+- **Objectif** : les erreurs pendant la réinitialisation sont expliquées clairement, en français, sans plantage.
+- **Source** : 01-Nestock-context.md (10/10/2026, panne de l'e-mail de réinitialisation)
+- **Prérequis** : compte de test utilisateur avec accès à sa boîte mail ; être déconnecté.
+- **Étapes** :
+  1. Sur /forgot-password, valider avec le champ vide, puis avec une adresse mal écrite (ex. « test@ »).
+  2. Sur /forgot-password, saisir une adresse qui n'a pas de compte.
+  3. Demander un lien pour le compte de test, l'ouvrir, puis saisir deux mots de passe différents.
+  4. Saisir un mot de passe de moins de 6 caractères (identique dans les deux champs).
+  5. Saisir un mot de passe valide et le confirmer. Puis rouvrir le même lien une deuxième fois.
+  6. Demander deux liens de suite, puis ouvrir le premier.
+  7. Ouvrir directement https://www.nestock.pro/reset-password (sans lien), attendre quelques secondes et essayer de changer le mot de passe.
+  8. Ouvrir https://www.nestock.pro/reset-password?token_hash=faux.
+- **Résultat attendu** :
+  - Étape 1 : message d'erreur en français, on reste sur la page.
+  - Étape 2 : même page de confirmation que pour une adresse inscrite (le site ne révèle pas qui est inscrit), aucun e-mail envoyé.
+  - Étape 3 : « Les mots de passe ne correspondent pas ».
+  - Étape 4 : « Le mot de passe doit faire au moins 6 caractères ».
+  - Étape 5 : mot de passe changé, retour sur /login ; à la deuxième ouverture, page « Lien invalide » avec « Demander un nouveau lien ».
+  - Étape 6 : le premier lien est refusé (page « Lien invalide ») ou accepté, noter lequel en observation.
+  - Étapes 7 et 8 : page « Lien invalide » ou message clair en français ; jamais de formulaire qui échoue avec un message technique en anglais (ex. « Auth session missing! »).
+  - Signaler en observation tout message en anglais.
 - **Statut courant** : À faire
 
 | Date | Agent | Statut | Observations |
