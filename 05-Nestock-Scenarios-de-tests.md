@@ -46,7 +46,7 @@ Le protocole détaillé du cycle facturation → préavis → remboursement (Str
 | T-LAND-02 | Lien Stripe Climate (haut de page + pieds de page) | À faire |
 | T-AUTH-01 | Inscription d'un nouveau compte | À faire |
 | T-AUTH-02 | Erreurs de connexion | OK |
-| T-AUTH-03 | Mot de passe oublié de bout en bout (utilisateur et admin) | Échec |
+| T-AUTH-03 | Mot de passe oublié de bout en bout (utilisateur et admin) | À faire |
 | T-AUTH-04 | Modification du profil et déconnexion | À faire |
 | T-AUTH-05 | Connexion réussie : utilisateur et admin | À faire |
 | T-AUTH-06 | Réinitialisation du mot de passe : cas d'erreur | À faire |
@@ -344,7 +344,7 @@ Le protocole détaillé du cycle facturation → préavis → remboursement (Str
 ### T-AUTH-03 — Mot de passe oublié de bout en bout
 
 - **Objectif** : le lien de réinitialisation reçu par e-mail fonctionne, pour un utilisateur comme pour le compte admin.
-- **Source** : 01-Nestock-context.md (bug 11/05 « Lien reset password invalide » ; 10/10/2026 : e-mail non reçu pour le compte admin)
+- **Source** : 01-Nestock-context.md (bug 11/05 « Lien reset password invalide »)
 - **Prérequis** : compte de test utilisateur avec accès à sa boîte mail ; compte admin de test avec accès à sa boîte mail (base de test uniquement, jamais le vrai compte admin).
 - **Étapes** :
   1. Sur /login, cliquer « Mot de passe oublié ? », saisir l'e-mail du compte de test utilisateur.
@@ -356,11 +356,11 @@ Le protocole détaillé du cycle facturation → préavis → remboursement (Str
   - E-mail reçu en quelques minutes, pour les deux comptes (vérifier aussi les spams).
   - Le lien ouvre https://www.nestock.pro/reset-password (pas une erreur, pas l'ancien domaine nestock.tsukee.fr, pas localhost).
   - Connexion réussie avec le nouveau mot de passe.
-- **Statut courant** : Échec
+- **Statut courant** : À faire
 
 | Date | Agent | Statut | Observations |
 |---|---|---|---|
-| 2026-10-10 | Utilisateur (manuel) + Claude Code | Échec | Sur https://www.nestock.pro/forgot-password, deux demandes pour le compte admin : page « Email envoyé ! » mais aucun e-mail reçu (spams compris). Cause à chercher dans la configuration d'envoi des e-mails de Supabase (Authentication → Emails → SMTP Settings). Contournement : lien de réinitialisation généré avec la clé service_role. Ajout du même jour : /reset-password accepte aussi les liens `?token_hash=` (format recommandé par Supabase). |
+| 2026-10-10 | Utilisateur (manuel) + Claude Code | Bloqué | Non concluant : sur https://www.nestock.pro/forgot-password, demande pour contact@nestock.pro, page « Email envoyé ! » mais aucun e-mail. Cause : cette adresse n'a pas de compte sur le site en ligne (elle n'est que dans la table waitlist) ; Supabase affiche la même confirmation sans rien envoyer, ce qui est le comportement attendu (étape 2 de T-AUTH-06). L'envoi des e-mails n'est pas en cause à ce stade. Ajout du même jour : /reset-password accepte aussi les liens `?token_hash=` (format recommandé par Supabase). |
 
 ### T-AUTH-04 — Modification du profil et déconnexion
 
