@@ -812,15 +812,20 @@ Le protocole détaillé du cycle facturation → préavis → remboursement (Str
 
 ### T-SEC-02 — Panels d'administration protégés
 
-- **Objectif** : les panels admin exigent le mot de passe administrateur.
+- **Objectif** : l'espace d'administration (/admin) n'est accessible qu'à un compte connecté ayant le rôle admin.
 - **Source** : 02-Nestock-Fonctionnalites.md §2.12
-- **Prérequis** : aucun (ne pas utiliser le vrai mot de passe admin).
+- **Prérequis** : aucun pour les étapes 1 à 3 ; un compte de test **non admin** (ex. Locataire) pour l'étape 4. Ne jamais utiliser le compte admin.
 - **Étapes** :
-  1. Ouvrir /admin-waitlist et /admin-calendar en navigation privée.
-  2. Saisir un mauvais mot de passe.
+  1. En navigation privée (non connecté), ouvrir /admin, /admin/inscrits, /admin/calendrier et /admin/tests.
+  2. Ouvrir les anciennes adresses /admin-waitlist, /admin-inscrits, /admin-calendar et /admin-tests.
+  3. Sans être connecté, appeler `GET /api/admin-tests` et `POST /api/admin-calendar` avec `{"action":"get"}`.
+  4. Se connecter avec le compte non admin, puis ouvrir /admin/calendrier et refaire les appels de l'étape 3.
 - **Résultat attendu** :
-  - Aucune donnée affichée avant authentification ; mauvais mot de passe refusé.
-- **Statut courant** : OK
+  - Étape 1 : redirection vers la page de connexion, aucune donnée affichée.
+  - Étape 2 : redirection vers /admin/..., puis même comportement qu'à l'étape 1.
+  - Étape 3 : `401 {"error":"Non autorise"}`, aucune donnée renvoyée.
+  - Étape 4 : redirection vers l'accueil (/) ; les API répondent `401`. Aucun lien « Administration » dans le menu.
+- **Statut courant** : À faire (test réécrit le 10/10/2026 : le mot de passe commun a été remplacé par le rôle admin ; les résultats ci-dessous portent sur l'ancienne version)
 
 | Date | Agent | Statut | Observations |
 |---|---|---|---|
