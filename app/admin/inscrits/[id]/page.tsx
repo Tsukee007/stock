@@ -70,13 +70,24 @@ export default async function FicheInscrit({ params }: { params: Promise<{ id: s
   for (const b of rentals ?? []) if (b.spaces?.owner_id) otherIds.add(b.spaces.owner_id)
   for (const b of received ?? []) if (b.renter_id) otherIds.add(b.renter_id)
   for (const r of reviews ?? []) for (const x of [r.author_id, r.target_id]) if (x && x !== id) otherIds.add(x)
-  const { data: others } = otherIds.size
-    ? await db.from('profiles').select('id, full_name').in('id', [...otherIds])
-    : { data: [] as { id: string; full_name: string | null }[] }
+  const [{ data: others }, otherUsers] = await Promise.all([
+    otherIds.size
+      ? db.from('profiles').select('id, full_name').in('id', [...otherIds])
+      : Promise.resolve({ data: [] as { id: string; full_name: string | null }[] }),
+    Promise.all([...otherIds].map(uid => db.auth.admin.getUserById(uid))),
+  ])
+  const emailOf = (uid: string | null | undefined) =>
+    otherUsers.find(r => r.data.user?.id === uid)?.data.user?.email ?? ''
   const nameOf = (uid: string | null | undefined) =>
-    others?.find(o => o.id === uid)?.full_name || 'non renseigne'
+    others?.find(o => o.id === uid)?.full_name || emailOf(uid) || 'non renseigne'
+  // Nom (ou e-mail si pas de nom) cliquable vers sa fiche, e-mail en dessous
   const PersonLink = ({ uid }: { uid: string | null | undefined }) =>
-    uid ? <a href={`/admin/inscrits/${uid}`} className="text-blue-600 hover:underline">{nameOf(uid)}</a> : <span>?</span>
+    uid ? (
+      <>
+        <a href={`/admin/inscrits/${uid}`} className="text-blue-600 hover:underline">{nameOf(uid)}</a>
+        {emailOf(uid) && nameOf(uid) !== emailOf(uid) && <div className="text-xs text-gray-400">{emailOf(uid)}</div>}
+      </>
+    ) : <span>?</span>
 
   // Historique : tout ce que la personne a fait sur le site, du plus recent au plus ancien
   const events: Event[] = [{ date: user.created_at, label: 'Inscription' }]
@@ -174,7 +185,7 @@ export default async function FicheInscrit({ params }: { params: Promise<{ id: s
       <Section title="Demandes de reservation faites (locataire)" count={rentals?.length ?? 0}>
         {!rentals?.length ? <Empty text="Aucune demande." /> : (
           <table className="w-full text-sm">
-            <thead><tr className="text-xs text-gray-400 text-left"><th className="pb-2">Espace</th><th className="pb-2">Proprietaire</th><th className="pb-2">Debut</th><th className="pb-2">Loyer</th><th className="pb-2">Statut</th><th className="pb-2">Demande le</th></tr></thead>
+            <thead><tr className="text-xs text-gray-400 text-left"><th className="pb-2">Espace</th><th className="pb-2">Demande faite a</th><th className="pb-2">Debut</th><th className="pb-2">Loyer</th><th className="pb-2">Statut</th><th className="pb-2">Demande le</th></tr></thead>
             <tbody className="divide-y divide-gray-100">
               {rentals.map(b => (
                 <tr key={b.id}>
@@ -194,7 +205,7 @@ export default async function FicheInscrit({ params }: { params: Promise<{ id: s
       <Section title="Demandes recues sur ses annonces (proprietaire)" count={received?.length ?? 0}>
         {!received?.length ? <Empty text="Aucune demande recue." /> : (
           <table className="w-full text-sm">
-            <thead><tr className="text-xs text-gray-400 text-left"><th className="pb-2">Espace</th><th className="pb-2">Locataire</th><th className="pb-2">Debut</th><th className="pb-2">Loyer</th><th className="pb-2">Statut</th><th className="pb-2">Recue le</th></tr></thead>
+            <thead><tr className="text-xs text-gray-400 text-left"><th className="pb-2">Espace</th><th className="pb-2">Demande faite par</th><th className="pb-2">Debut</th><th className="pb-2">Loyer</th><th className="pb-2">Statut</th><th className="pb-2">Recue le</th></tr></thead>
             <tbody className="divide-y divide-gray-100">
               {received.map((b: any) => (
                 <tr key={b.id}>
