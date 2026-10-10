@@ -40,6 +40,7 @@ export default function RegisterPage() {
     const { data, error: signUpError } = await supabase.auth.signUp({
       email: form.email,
       password: form.password,
+      options: { data: { full_name: form.full_name } },
     })
 
     if (signUpError) {
@@ -48,15 +49,20 @@ export default function RegisterPage() {
       return
     }
 
+    // Profil et e-mail a l'administrateur : cote serveur (pas de session avant confirmation de l'e-mail)
     if (data.user) {
-      await supabase.from('profiles').upsert({
-        id: data.user.id,
-        full_name: form.full_name,
-        phone: form.phone,
-        address: form.address,
-        postal_code: form.postal_code,
-        city: form.city,
-      })
+      await fetch('/api/inscription', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: data.user.id,
+          full_name: form.full_name,
+          phone: form.phone,
+          address: form.address,
+          postal_code: form.postal_code,
+          city: form.city,
+        }),
+      }).catch(() => {})
     }
 
     router.push('/')

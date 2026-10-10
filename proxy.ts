@@ -3,11 +3,11 @@ import type { NextRequest } from 'next/server'
 
 const PUBLIC_PATHS = [
   '/waitlist',
-  '/admin-waitlist',
+  '/admin-inscrits',
   '/admin-calendar',
   '/admin-tests',
   '/api/waitlist',
-  '/api/admin-waitlist',
+  '/api/admin-inscrits',
   '/api/admin-calendar',
   '/api/admin-tests',
   '/api/stripe/webhook',
