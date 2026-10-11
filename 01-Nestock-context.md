@@ -176,6 +176,7 @@ TESTS_SYNC_SECRET (06/10/2026, meme valeur que TEST_SYNC_SECRET_NESTOCK dans le 
 - Description d'activite principale declaree : edition et exploitation d'une plateforme web de mise en relation entre particuliers pour la location d'espaces de stockage, remuneree par une commission sur les transactions
 - Documents fournis lors de la demande : attestation sur l'honneur de non-condamnation et de filiation (modele standard base sur l'article A.123-51 du Code de commerce), justificatif de jouissance des locaux (selon situation de logement), declaration d'option du conjoint (obligatoire des lors qu'on est marie, meme sans salarie et meme si le conjoint n'exerce aucune activite dans l'entreprise — case "absence d'activite professionnelle du conjoint dans l'entreprise" cochee)
 - Demande de creation deposee aupres de l'INPI (formalites.entreprises.gouv.fr) le 10/08/2026, en attente d'attribution du numero SIRET
+- **SIRET obtenu** (noté le 11/10/2026 ; numéro volontairement hors du dépôt, qui est public). Reste à le saisir dans Stripe avec le RIB (KYC)
 - Prochaine action des reception du SIRET : le renseigner avec le RIB dans le Dashboard Stripe pour completer le KYC, puis reprendre les etapes 2 a 6 ci-dessous
 
 Étapes identifiées le 10/08/2026 (discussion, pas encore toutes réalisées) :
@@ -239,7 +240,7 @@ TESTS_SYNC_SECRET (06/10/2026, meme valeur que TEST_SYNC_SECRET_NESTOCK dans le 
    - [ ] D2. Prod : vider la base du site, seulement après vérification qu'aucun vrai utilisateur n'y est inscrit et après sauvegarde (irréversible ; waitlist et calendrier éditorial y vivent aussi)
    - Fait le 11/10 : /forgot-password envoie le lien vers l'adresse du site ouvert (`window.location.origin`), il pointait toujours vers nestock.pro
 1. **Bascule sur le marketing/acquisition** (priorité actuelle a partir du 10/08/2026 soir) — le site est considere pret cote produit
-2. Stripe en production (clés live) — étape 1 (SIRET/KYC) en cours, dossier micro-entreprise déposé le 10/08, en attente de validation INPI. Voir les 6 étapes détaillées dans la section Stripe ci-dessus. Prévu juste avant le lancement public, pas avant
+2. Stripe en production (clés live) — SIRET obtenu ; reste à le saisir dans Stripe avec le RIB (KYC) si ce n'est pas fait, puis étapes 2 à 6. Voir les 6 étapes détaillées dans la section Stripe ci-dessus. Prévu juste avant le lancement public, pas avant
 3. Adapter les posts du calendrier éditorial existant (CTA waitlist obsolètes) avant publication
 4. PWA manifest — idée abordée et mise de côté le 10/08/2026, à reconsidérer une fois le site en phase de croissance
 5. Documents de reference disponibles a la racine du repo :
