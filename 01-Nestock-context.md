@@ -240,7 +240,7 @@ TESTS_SYNC_SECRET (06/10/2026, meme valeur que TEST_SYNC_SECRET_NESTOCK dans le 
    - [ ] D2. Prod : vider la base du site, seulement après vérification qu'aucun vrai utilisateur n'y est inscrit et après sauvegarde (irréversible ; waitlist et calendrier éditorial y vivent aussi)
    - Fait le 11/10 : /forgot-password envoie le lien vers l'adresse du site ouvert (`window.location.origin`), il pointait toujours vers nestock.pro
 1. **Bascule sur le marketing/acquisition** (priorité actuelle a partir du 10/08/2026 soir) — le site est considere pret cote produit
-2. Stripe en production (clés live) — SIRET obtenu ; reste à le saisir dans Stripe avec le RIB (KYC) si ce n'est pas fait, puis étapes 2 à 6. Voir les 6 étapes détaillées dans la section Stripe ci-dessus. Prévu juste avant le lancement public, pas avant
+2. Stripe en production (clés live) — SIRET obtenu. **Prévu le 12/10/2026** : (1) activer le compte dans le Dashboard Stripe (entrepreneur individuel, SIRET, adresse INPI, site https://www.nestock.pro, activité de plateforme rémunérée à la commission, identité, libellé `NESTOCK`, support contact@nestock.pro, RIB) ; (2) remplir le profil de plateforme Connect ; (3) attendre la validation. Clés live, webhook live, Vercel et vrai paiement (T-PROD-01) : seulement après les tests en mode test, juste avant l'ouverture au public. Voir les 6 étapes détaillées dans la section Stripe ci-dessus. Prévu juste avant le lancement public, pas avant
 3. Adapter les posts du calendrier éditorial existant (CTA waitlist obsolètes) avant publication
 4. PWA manifest — idée abordée et mise de côté le 10/08/2026, à reconsidérer une fois le site en phase de croissance
 5. Documents de reference disponibles a la racine du repo :
