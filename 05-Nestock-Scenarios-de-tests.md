@@ -50,6 +50,8 @@ Le protocole détaillé du cycle facturation → préavis → remboursement (Str
 | T-AUTH-04 | Modification du profil et déconnexion | À faire |
 | T-AUTH-05 | Connexion réussie : utilisateur et admin | À faire |
 | T-AUTH-06 | Réinitialisation du mot de passe : cas d'erreur | À faire |
+| T-AUTH-07 | E-mail de confirmation d'inscription aux couleurs de Nestock | À faire |
+| T-AUTH-08 | E-mail de réinitialisation du mot de passe aux couleurs de Nestock | À faire |
 | T-ANN-01 | Création d'une annonce avec photos | À faire |
 | T-ANN-02 | Limites des photos | À faire |
 | T-ANN-03 | Modification d'une annonce | À faire |
@@ -392,9 +394,13 @@ Le protocole détaillé du cycle facturation → préavis → remboursement (Str
   3. Vérifier le menu du haut, puis ouvrir /admin.
   4. Se déconnecter, puis ouvrir /admin/tests (non connecté) et se connecter avec le compte admin de test.
   5. Vérifier le menu du haut, puis ouvrir /admin/inscrits, /admin/calendrier et /admin/tests.
+  6. Se déconnecter, ouvrir https://www.nestock.pro, cliquer sur « Connexion » dans le menu du haut et se connecter avec le compte admin de test.
+  7. Se déconnecter et refaire l'étape 6 avec le compte utilisateur.
 - **Résultat attendu** :
   - Compte utilisateur : connexion réussie, le menu affiche le compte connecté, sans lien « Administration » ; /admin renvoie vers l'accueil.
   - Compte admin : connexion réussie, retour dans l'espace d'administration ; le menu du haut affiche « Administration » ; les trois pages s'affichent avec leurs données.
+  - Étape 6 : le compte admin arrive directement dans l'espace d'administration (/admin/inscrits), sans passer par l'accueil.
+  - Étape 7 : le compte utilisateur arrive sur l'accueil, comme avant.
   - Signaler en observation si la touche Entrée ne valide pas le formulaire (connu le 10/10/2026 : il faut cliquer sur le bouton).
 - **Statut courant** : À faire
 
@@ -424,6 +430,49 @@ Le protocole détaillé du cycle facturation → préavis → remboursement (Str
   - Étape 6 : le premier lien est refusé (page « Lien invalide ») ou accepté, noter lequel en observation.
   - Étapes 7 et 8 : page « Lien invalide » ou message clair en français ; jamais de formulaire qui échoue avec un message technique en anglais (ex. « Auth session missing! »).
   - Signaler en observation tout message en anglais.
+- **Statut courant** : À faire
+
+| Date | Agent | Statut | Observations |
+|---|---|---|---|
+
+### T-AUTH-07 — E-mail de confirmation d'inscription aux couleurs de Nestock
+
+- **Objectif** : l'e-mail de confirmation d'inscription vient clairement de Nestock (expéditeur, sujet, contenu) et son lien active le compte.
+- **Source** : 01-Nestock-context.md (11/10/2026, e-mails d'authentification envoyés par le SMTP Hostinger avec un modèle Nestock)
+- **Prérequis** : SMTP personnalisé et modèle « Confirm signup » configurés dans Supabase ; une adresse e-mail de test jamais utilisée, avec accès à sa boîte mail ; être déconnecté.
+- **Étapes** :
+  1. Ouvrir https://www.nestock.pro/register, remplir tous les champs avec l'adresse de test et valider.
+  2. Ouvrir la boîte mail (vérifier aussi les spams) et relever : expéditeur, sujet, contenu, délai de réception.
+  3. Cliquer sur « Confirmer mon adresse e-mail ».
+  4. Se connecter avec l'adresse et le mot de passe choisis.
+- **Résultat attendu** :
+  - E-mail reçu en quelques minutes, pas dans les spams.
+  - Expéditeur : « Nestock » <contact@nestock.pro> ; aucune mention de Supabase (ni dans l'expéditeur, ni dans le texte).
+  - Sujet : « Confirmez votre inscription sur Nestock ».
+  - Contenu en français, vouvoiement, couleurs de Nestock (bouton bleu), signature « L'équipe Nestock ».
+  - Le lien ouvre https://www.nestock.pro (pas l'ancien domaine nestock.tsukee.fr, pas localhost) et le compte est confirmé : la connexion fonctionne.
+- **Statut courant** : À faire
+
+| Date | Agent | Statut | Observations |
+|---|---|---|---|
+
+### T-AUTH-08 — E-mail de réinitialisation du mot de passe aux couleurs de Nestock
+
+- **Objectif** : l'e-mail de réinitialisation du mot de passe vient clairement de Nestock (expéditeur, sujet, contenu) et son lien permet de changer le mot de passe.
+- **Source** : 01-Nestock-context.md (11/10/2026, e-mails d'authentification envoyés par le SMTP Hostinger avec un modèle Nestock)
+- **Prérequis** : SMTP personnalisé et modèle « Reset password » configurés dans Supabase ; compte de test utilisateur avec accès à sa boîte mail ; être déconnecté.
+- **Étapes** :
+  1. Sur /login, cliquer « Mot de passe oublié ? », saisir l'e-mail du compte de test et valider.
+  2. Ouvrir la boîte mail (vérifier aussi les spams) et relever : expéditeur, sujet, contenu, délai de réception.
+  3. Cliquer sur « Choisir un nouveau mot de passe ».
+  4. Saisir un nouveau mot de passe, le confirmer, valider.
+  5. Se connecter avec le nouveau mot de passe.
+- **Résultat attendu** :
+  - E-mail reçu en quelques minutes, pas dans les spams.
+  - Expéditeur : « Nestock » <contact@nestock.pro> ; aucune mention de Supabase (ni dans l'expéditeur, ni dans le texte).
+  - Sujet : « Réinitialisation de votre mot de passe Nestock ».
+  - Contenu en français, vouvoiement, couleurs de Nestock (bouton bleu), phrase indiquant quoi faire si on n'a rien demandé, signature « L'équipe Nestock ».
+  - Le lien ouvre https://www.nestock.pro/reset-password ; mot de passe changé puis connexion réussie.
 - **Statut courant** : À faire
 
 | Date | Agent | Statut | Observations |

@@ -23,12 +23,15 @@ export default function LoginPage() {
 
   const handleLogin = async () => {
     setLoading(true)
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) {
       setError(authErrorMessage(error))
     } else {
+      // Compte admin sans page de retour demandee : direction l'espace d'administration
+      // (meme regle que isAdmin de lib/admin.ts, non importable ici car reserve au serveur)
+      const admin = data.user?.app_metadata?.role === 'admin'
       // Rechargement complet : le menu du haut (rendu cote serveur) affiche alors le compte connecte
-      window.location.assign(next)
+      window.location.assign(admin && next === '/' ? '/admin' : next)
     }
     setLoading(false)
   }
