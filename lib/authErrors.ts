@@ -19,6 +19,8 @@ export function authErrorMessage(error: { code?: string; message: string }): str
   if (message.includes('invalid login credentials')) return MESSAGES.invalid_credentials
   if (message.includes('email not confirmed')) return MESSAGES.email_not_confirmed
   if (message.includes('already registered')) return MESSAGES.user_already_exists
+  // Echec d'envoi par le SMTP (ex. 11/10/2026 : mot de passe SMTP mal saisi dans Supabase)
+  if (message.includes('error sending')) return 'L’e-mail n’a pas pu être envoyé. Réessayez dans quelques minutes, ou contactez-nous à contact@nestock.pro.'
   if (message.includes('missing email or phone') || message.includes('missing password')) return 'Veuillez saisir votre e-mail et votre mot de passe.'
   return 'Une erreur est survenue. Réessayez, ou contactez-nous à contact@nestock.pro.'
 }

@@ -51,7 +51,7 @@ Le protocole détaillé du cycle facturation → préavis → remboursement (Str
 | T-AUTH-05 | Connexion réussie : utilisateur et admin | À faire |
 | T-AUTH-06 | Réinitialisation du mot de passe : cas d'erreur | À faire |
 | T-AUTH-07 | E-mail de confirmation d'inscription aux couleurs de Nestock | À faire |
-| T-AUTH-08 | E-mail de réinitialisation du mot de passe aux couleurs de Nestock | À faire |
+| T-AUTH-08 | E-mail de réinitialisation du mot de passe aux couleurs de Nestock | Partiel |
 | T-ANN-01 | Création d'une annonce avec photos | À faire |
 | T-ANN-02 | Limites des photos | À faire |
 | T-ANN-03 | Modification d'une annonce | À faire |
@@ -474,10 +474,11 @@ Le protocole détaillé du cycle facturation → préavis → remboursement (Str
   - Sujet : « Réinitialisation de votre mot de passe Nestock ».
   - Contenu en français, vouvoiement, couleurs de Nestock (bouton bleu), phrase indiquant quoi faire si on n'a rien demandé, signature « L'équipe Nestock ».
   - Le lien ouvre https://www.nestock.pro/reset-password ; mot de passe changé puis connexion réussie.
-- **Statut courant** : À faire
+- **Statut courant** : Partiel
 
 | Date | Agent | Statut | Observations |
 |---|---|---|---|
+| 2026-10-11 | Utilisateur (manuel) + Claude Code | Partiel | Premier essai après configuration du SMTP Hostinger dans Supabase prod : pas d'e-mail, rien de visible dans Logs → Auth. Appel direct de `POST /auth/v1/recover` sur la prod → `500 {"error_code":"unexpected_failure","msg":"Error sending recovery email"}`. Identifiants Hostinger du site vérifiés valides (ports 465 et 587) ; mot de passe SMTP recollé dans Supabase → même appel `200 {}`. E-mail reçu sur contact@nestock.pro, signé Nestock (étapes 1 et 2 OK). Étapes 3 à 5 (lien, nouveau mot de passe, connexion) non encore rapportées. Hypothèse : mot de passe SMTP mal saisi lors de la première configuration. |
 
 ---
 
