@@ -20,7 +20,8 @@ export default function ForgotPasswordPage() {
       return
     }
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `https://nestock.pro/reset-password`
+      // Adresse du site ouvert (nestock.pro en ligne, localhost:3000 pour la base de test)
+      redirectTo: `${window.location.origin}/reset-password`
     })
     if (error) {
       setError(authErrorMessage(error))
