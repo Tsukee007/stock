@@ -76,6 +76,7 @@ Le protocole détaillé du cycle facturation → préavis → remboursement (Str
 | T-AVIS-01 | Avis en fin de location | À faire |
 | T-SEC-01 | Données d'autrui inaccessibles | À faire |
 | T-SEC-02 | Panels d'administration protégés | À faire |
+| T-SEC-03 | Comptes non admin : aucun accès à l'administration | À faire |
 | T-LEGAL-01 | Pages légales et RGPD | OK |
 | T-UI-01 | Orthographe, ton et marque | À faire |
 
@@ -932,6 +933,28 @@ Le protocole détaillé du cycle facturation → préavis → remboursement (Str
 |---|---|---|---|
 | 2026-10-06 | Claude Code | OK | Vérifié par `curl` (étapes équivalentes à la navigation privée) : `/admin-waitlist` et `/admin-calendar` → 200 avec formulaire de mot de passe seul, aucune donnée dans le HTML. Les données passent par les API : `POST /api/admin-waitlist` avec mauvais mot de passe → `401 {"error":"Mot de passe incorrect"}` ; `POST /api/admin-calendar` avec mauvais mot de passe → `401 {"error":"Non autorise"}`, sans mot de passe (`{"action":"get"}`) → `401`. Hypothèse : `/api/admin-calendar` ne vérifie pas que `ADMIN_PASSWORD` est défini (`password !== process.env.ADMIN_PASSWORD`) ; si la variable disparaissait de Vercel, une requête sans mot de passe passerait. `/api/admin-waitlist` fait bien ce contrôle. |
 | 2026-10-06 | Testeur (AI Framework) | OK | Re-test : `GET /admin-waitlist` et `GET /admin-calendar` → `200`, uniquement un formulaire de mot de passe (aucune donnée de waitlist ni de calendrier dans le HTML). `POST /api/admin-waitlist` avec mauvais mot de passe → `401 {"error":"Mot de passe incorrect"}` ; `POST /api/admin-calendar` avec mauvais mot de passe → `401 {"error":"Non autorise"}`. Conforme au résultat attendu. |
+
+### T-SEC-03 — Comptes non admin : aucun accès à l'administration
+
+- **Objectif** : seul le compte ayant le rôle admin voit et ouvre l'espace d'administration ; tous les autres comptes connectés n'en voient ni le lien, ni les pages, ni les données.
+- **Source** : 02-Nestock-Fonctionnalites.md §2.12, 01-Nestock-context.md (11/10/2026, accès admin par le rôle sur contact@nestock.pro)
+- **Prérequis** : les trois comptes de test non admin (Propriétaire, Locataire, 3e compte) ; un compte de test tout juste inscrit (voir T-AUTH-01) ; l'identifiant d'un inscrit (relevé par l'administrateur dans l'adresse d'une fiche /admin/inscrits/…). Ne jamais utiliser le compte admin.
+- **Étapes** (à refaire avec chacun des quatre comptes) :
+  1. Se déconnecter, ouvrir https://www.nestock.pro, cliquer sur « Connexion » et se connecter.
+  2. Regarder le menu du haut sur ordinateur, puis en largeur mobile (menu déroulant).
+  3. Ouvrir une à une /admin, /admin/inscrits, /admin/inscrits/<identifiant d'un inscrit>, /admin/calendrier et /admin/tests.
+  4. Se déconnecter, ouvrir /login?next=/admin/tests et se connecter.
+  5. Connecté, appeler `GET /api/admin-tests` et `POST /api/admin-calendar` avec `{"action":"get"}`.
+- **Résultat attendu** :
+  - Étape 1 : arrivée sur l'accueil (/), jamais dans l'administration.
+  - Étape 2 : aucun lien « Administration », ni sur ordinateur ni sur mobile.
+  - Étape 3 : chaque adresse renvoie vers l'accueil (/) ; aucune donnée d'administration visible, même brièvement (liste ou fiche d'inscrit, calendrier, tests).
+  - Étape 4 : connexion réussie puis renvoi vers l'accueil, pas de page d'administration.
+  - Étape 5 : `401 {"error":"Non autorise"}`, aucune donnée renvoyée.
+- **Statut courant** : À faire
+
+| Date | Agent | Statut | Observations |
+|---|---|---|---|
 
 ### T-LEGAL-01 — Pages légales et RGPD
 
