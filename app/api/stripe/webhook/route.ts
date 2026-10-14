@@ -1,6 +1,7 @@
 import Stripe from 'stripe'
 import { createClient } from '@supabase/supabase-js'
 import { sendEmail } from '@/lib/mailer'
+import { transferOwnerShare, reverseOwnerShare } from '@/lib/ownerPayouts'
 import { NextResponse } from 'next/server'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-02-25.clover' })
@@ -187,6 +188,8 @@ export async function POST(req: Request) {
       status: 'paid'
     }).select().single()
 
+    await transferOwnerShare({ bookingId, paymentIntentId })
+
     await supabase.from('messages').insert({
       booking_id: bookingId,
       sender_id: spaceData.owner_id,
@@ -300,6 +303,8 @@ export async function POST(req: Request) {
       stripe_payment_id: paymentIntentId,
       status: 'paid'
     }).select().single()
+
+    await transferOwnerShare({ bookingId: booking.id, paymentIntentId })
 
     await supabase.from('notifications').insert([
       {
@@ -415,6 +420,8 @@ export async function POST(req: Request) {
                   payment_intent: paymentIntentId,
                   amount: refundAmount,
                 })
+
+                await reverseOwnerShare({ bookingId: booking.id, paymentIntentId, ratio: refundRatio })
 
                 const refundAmountEur = (refundAmount / 100).toFixed(2)
 
