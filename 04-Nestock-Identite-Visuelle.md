@@ -50,7 +50,7 @@ Proximité · Confiance · Accessibilité · Impact local
 
 ## À faire pour appliquer l'identité
 
-- [ ] Décliner le logo en SVG (favicon + header)
+- [ ] Décliner le logo en SVG (favicon + header) — SVG et PNG 512 créés le 14/10/2026 dans `public/brand/` (`nestock-logo.svg`, `nestock-logo-512.png`, utilisés pour Stripe), reste à les brancher sur le favicon et le header
 - [ ] Mettre à jour `tailwind.config` avec les couleurs ci-dessus
 - [ ] Vérifier le contraste AA sur boutons et badges
 - [ ] Uniformiser landing page + dashboard + emails transactionnels

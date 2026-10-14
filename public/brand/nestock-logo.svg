@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 192 192">
+  <title>Nestock</title>
+  <rect width="192" height="192" rx="42" fill="#1D4ED8"/>
+  <path d="M51 90 L96 51 L141 90" fill="none" stroke="#E86A33" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="65.5" y="89.5" width="61" height="51" rx="7" fill="none" stroke="#FFFFFF" stroke-width="11"/>
+  <line x1="96" y1="89.5" x2="96" y2="140.5" stroke="#FFFFFF" stroke-width="9"/>
+</svg>
