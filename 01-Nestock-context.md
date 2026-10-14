@@ -240,7 +240,16 @@ TESTS_SYNC_SECRET (06/10/2026, meme valeur que TEST_SYNC_SECRET_NESTOCK dans le 
    - [ ] D2. Prod : vider la base du site, seulement après vérification qu'aucun vrai utilisateur n'y est inscrit et après sauvegarde (irréversible ; waitlist et calendrier éditorial y vivent aussi)
    - Fait le 11/10 : /forgot-password envoie le lien vers l'adresse du site ouvert (`window.location.origin`), il pointait toujours vers nestock.pro
 1. **Bascule sur le marketing/acquisition** (priorité actuelle a partir du 10/08/2026 soir) — le site est considere pret cote produit
-2. Stripe en production (clés live) — SIRET obtenu. **Prévu le 12/10/2026** : (1) activer le compte dans le Dashboard Stripe (entrepreneur individuel, SIRET, adresse INPI, site https://www.nestock.pro, activité de plateforme rémunérée à la commission, identité, libellé `NESTOCK`, support contact@nestock.pro, RIB) ; (2) remplir le profil de plateforme Connect ; (3) attendre la validation. Clés live, webhook live, Vercel et vrai paiement (T-PROD-01) : seulement après les tests en mode test, juste avant l'ouverture au public. Voir les 6 étapes détaillées dans la section Stripe ci-dessus. Prévu juste avant le lancement public, pas avant
+2. Stripe en production (clés live) — **compte activé le 14/10/2026** : modèle **Marketplace** (le locataire paie Nestock, chaque propriétaire reçoit son propre virement), inscription hébergée par Stripe, Dashboard Express pour les propriétaires, Nestock responsable des remboursements, contestations de paiement et soldes négatifs des comptes connectés ; Radar Standard (0,05 € par paiement analysé, 1 € par compte connecté). Clés live obtenues, gardées hors du dépôt et **pas encore mises sur Vercel** : clés live, webhook live, Vercel et vrai paiement (T-PROD-01) seulement après les tests en mode test, juste avant l'ouverture au public. Voir les 6 étapes détaillées dans la section Stripe ci-dessus
+   - **À faire avant les vrais paiements** (relevé le 14/10/2026) :
+     - [ ] Reverser leur part aux propriétaires : aucune instruction de reversement dans le code (pas de `transfer_data` dans `app/api/contracts/sign/route.ts`, aucun virement), tout l'argent reste sur le compte Nestock
+     - [ ] Attendre quelques jours après chaque paiement avant de reverser au propriétaire (laisser le temps de repérer une fraude)
+     - [ ] Conditions propriétaires : Nestock peut reprendre la part du propriétaire si une contestation est perdue (reprise d'un virement déjà fait)
+     - [ ] CGU : écrire noir sur blanc préavis, remboursement au prorata et résiliation (l'interdiction des biens illicites ou dangereux y est déjà)
+     - [ ] Enregistrer l'acceptation des CGU (date + version)
+     - [ ] Enregistrer l'adresse IP et le navigateur à la signature du contrat
+     - [ ] Enregistrer la date de la demande de résiliation (seuls `notice_initiated_by` et `notice_acknowledged_at` existent)
+     - [ ] Administration : page « dossier de preuves » par location (contrat, paiements, messages, résiliation) pour répondre vite à une contestation
 3. Adapter les posts du calendrier éditorial existant (CTA waitlist obsolètes) avant publication
 4. PWA manifest — idée abordée et mise de côté le 10/08/2026, à reconsidérer une fois le site en phase de croissance
 5. Documents de reference disponibles a la racine du repo :
