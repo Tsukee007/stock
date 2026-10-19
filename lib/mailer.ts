@@ -10,6 +10,9 @@ const transporter = nodemailer.createTransport({
   },
 })
 
+// Un e-mail qui ne part pas (limite d'envoi Hostinger, panne SMTP) ne doit pas faire échouer l'action
+// qui l'envoie : réservation, signature, webhook Stripe (sinon Stripe renvoie l'événement et tout est refait).
+// L'échec est journalisé ; renvoie false pour les appelants qui doivent le signaler (formulaire de contact).
 export async function sendEmail({
   to,
   subject,
@@ -18,13 +21,19 @@ export async function sendEmail({
   to: string
   subject: string
   html: string
-}) {
-  await transporter.sendMail({
-    from: process.env.SMTP_FROM,
-    to,
-    subject,
-    html,
-  })
+}): Promise<boolean> {
+  try {
+    await transporter.sendMail({
+      from: process.env.SMTP_FROM,
+      to,
+      subject,
+      html,
+    })
+    return true
+  } catch (err) {
+    console.error('E-mail non envoyé à ' + to + ' (' + subject + ') :', err)
+    return false
+  }
 }
 export async function sendWaitlistConfirmationEmail(to: string, prenom: string) {
   const html = `

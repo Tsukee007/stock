@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server'
 export async function POST(req: Request) {
   const { name, email, subject, message } = await req.json()
 
-  await sendEmail({
+  const sent = await sendEmail({
     to: process.env.SMTP_USER!,
     subject: `[Nestock] Contact - ${subject}`,
     html: `
@@ -21,5 +21,8 @@ export async function POST(req: Request) {
     `
   })
 
+  if (!sent) {
+    return NextResponse.json({ error: 'Votre message n\'a pas pu être envoyé. Réessayez dans quelques minutes ou écrivez à contact@nestock.pro.' }, { status: 502 })
+  }
   return NextResponse.json({ success: true })
 }

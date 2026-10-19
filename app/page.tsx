@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import SearchFilters from '@/components/map/SearchFilters'
 import MapWithList from '@/components/map/MapWithList'
 import { getRentalStatus } from '@/lib/utils'
+import { occupancyBySpace } from '@/lib/availability'
 import FAQSection from '@/components/FAQSection'
 import FeatureShowcase from '@/components/FeatureShowcase'
 
@@ -37,7 +38,7 @@ export default async function Home({
 
   let query = supabase
     .from('spaces')
-    .select('id, title, city, lat, lng, price_month, type, surface_m2, address, price_ttc, bookings(status), profiles(full_name)')
+    .select('id, title, city, lat, lng, price_month, type, surface_m2, address, price_ttc, profiles(full_name)')
     .eq('is_active', true)
 
   if (filters.city && !filters.lat) query = query.ilike('city', `%${filters.city}%`)
@@ -47,9 +48,10 @@ export default async function Home({
   if (filters.minSurface) query = query.gte('surface_m2', parseFloat(filters.minSurface))
 
   let { data: rawSpaces } = await query
+  const occupancy = await occupancyBySpace((rawSpaces ?? []).map(s => s.id))
   let spaces = rawSpaces?.map(s => ({
     ...s,
-    rental_status: getRentalStatus(s.bookings as any[]),
+    rental_status: getRentalStatus(occupancy.get(s.id)),
     profiles: Array.isArray(s.profiles) ? s.profiles[0] : s.profiles
   }))
 

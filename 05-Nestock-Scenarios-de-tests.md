@@ -99,6 +99,7 @@ Le protocole détaillé du cycle prélèvement → préavis → fin de location 
 | T-LEGAL-02 | CGU obligatoires à l'inscription et enregistrées | À faire |
 | T-LEGAL-03 | CGU et contrat à jour (version du 19/10/2026) | À faire |
 | T-UI-01 | Orthographe, ton et marque | À faire |
+| T-MAIL-01 | Un e-mail qui ne part pas ne bloque pas l'action | À faire |
 | T-CONF-01 | Paramétrage de la production (Vercel, Stripe) | À faire |
 
 ---
@@ -1270,13 +1271,13 @@ Le protocole détaillé du cycle prélèvement → préavis → fin de location 
 
 - **Objectif** : personne ne peut lire la liste des réservations avec la clé publique du site.
 - **Source** : faille relevée le 19/10/2026 : règle « API peut lire les réservations » (`bookings`, SELECT, `true`) — 13 lignes lisibles en prod
-- **Prérequis** : la clé publique (anon) et l'URL Supabase de la prod, visibles dans le code du site (`NEXT_PUBLIC_SUPABASE_ANON_KEY`).
+- **Prérequis** : code du 19/10/2026 en ligne (`lib/availability.ts`) **et** `supabase/bookings-lecture.sql` lancé sur la prod (sinon le test est en `Échec` attendu). La clé publique (anon) et l'URL Supabase de la prod, visibles dans le code du site (`NEXT_PUBLIC_SUPABASE_ANON_KEY`).
 - **Étapes** :
   1. `curl -s -D - -o /dev/null 'https://rkcewsargthrbiokhend.supabase.co/rest/v1/bookings?select=id&limit=0' -H 'apikey: CLE_ANON' -H 'Prefer: count=exact'` (ne lit aucune donnée, seulement le nombre).
   2. Ouvrir une annonce louée sans être connecté, et une annonce libre.
 - **Résultat attendu** :
   - Étape 1 : `content-range: */0` (aucune réservation visible) ou une erreur d'accès.
-  - Étape 2 : l'annonce louée affiche toujours « 🔒 Espace actuellement loué » et l'annonce libre le bouton de demande (les disponibilités restent justes).
+  - Étape 2 : l'annonce louée affiche toujours « 🔒 Espace actuellement loué » et l'annonce libre le bouton de demande ; sur la carte de l'accueil, badges « Loué » / « Préavis en cours » / « À louer » justes (les disponibilités sont lues côté serveur).
 - **Statut courant** : À faire
 
 | Date | Agent | Statut | Observations |
@@ -1333,6 +1334,26 @@ Le protocole détaillé du cycle prélèvement → préavis → fin de location 
   - Étape 1 : « Version du 19 octobre 2026 (réf. 2026-10-19) » ; articles : non-responsabilité de Nestock sur les litiges entre propriétaire et locataire (état de l'espace, biens stockés…) ; compte de paiement du propriétaire ; préavis de 15 jours minimum, fin en fin de mois (règle du 15) ; « Mois entamé » (aucun remboursement) ; contestation de paiement.
   - Étape 2 : article 2 avec la règle de fin de mois (plus de « 30 jours ») ; article 3 « le 1er de chaque mois », 1er paiement au prorata.
   - Étape 3 : la case mentionne les conditions générales d'utilisation, avec un lien.
+- **Statut courant** : À faire
+
+| Date | Agent | Statut | Observations |
+|---|---|---|---|
+
+### T-MAIL-01 — Un e-mail qui ne part pas ne bloque pas l'action
+
+- **Objectif** : si l'envoi d'e-mail échoue (limite d'envoi Hostinger, panne SMTP), la réservation, la signature ou le paiement aboutit quand même ; le formulaire de contact, lui, affiche l'échec.
+- **Source** : bug trouvé le 19/10/2026 (limite d'envoi Hostinger atteinte pendant les tests : la demande de réservation était créée mais le site répondait « erreur 500 » ; le webhook Stripe aurait pu être rejoué et créer des factures en double) ; corrigé dans `lib/mailer.ts`
+- **Prérequis** : environnement **local** (`http://localhost:3000`), avec un mauvais `SMTP_PASS` dans `.env.local` le temps du test (le remettre ensuite). Ne pas faire ce test en production.
+- **Étapes** :
+  1. En Locataire, faire une demande de réservation (T-RESA-01).
+  2. Envoyer le formulaire /contact.
+  3. Lire le terminal de `npm run dev`.
+  4. Remettre le bon `SMTP_PASS`, relancer `npm run dev`, renvoyer le formulaire /contact.
+- **Résultat attendu** :
+  - Étape 1 : la demande est créée et la page passe à la messagerie (pas d'erreur), les notifications du site sont là.
+  - Étape 2 : message rouge « Votre message n'a pas pu être envoyé… », pas de « ✅ ».
+  - Étape 3 : lignes « E-mail non envoyé à … ».
+  - Étape 4 : « ✅ » et e-mail reçu sur contact@nestock.pro.
 - **Statut courant** : À faire
 
 | Date | Agent | Statut | Observations |

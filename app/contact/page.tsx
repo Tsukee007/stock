@@ -6,6 +6,7 @@ export default function ContactPage() {
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' })
   const [loading, setLoading] = useState(false)
   const [sent, setSent] = useState(false)
+  const [error, setError] = useState('')
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))
@@ -13,12 +14,18 @@ export default function ContactPage() {
 
   const handleSubmit = async () => {
     setLoading(true)
-    await fetch('/api/contact-form', {
+    setError('')
+    const res = await fetch('/api/contact-form', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(form)
     })
-    setSent(true)
+    if (res.ok) {
+      setSent(true)
+    } else {
+      const data = await res.json().catch(() => ({}))
+      setError(data.error || 'Votre message n\'a pas pu être envoyé. Réessayez dans quelques minutes.')
+    }
     setLoading(false)
   }
 
@@ -74,6 +81,7 @@ export default function ContactPage() {
               placeholder="Décrivez votre demande..."
               rows={5} className="w-full border rounded-lg p-3" />
           </div>
+          {error && <p className="text-red-600 text-sm bg-red-50 p-3 rounded-lg">{error}</p>}
           <button onClick={handleSubmit} disabled={loading || !form.message || !form.email}
             className="w-full bg-blue-600 text-white rounded-lg p-3 font-semibold hover:bg-blue-700 disabled:opacity-50"
             style={{ color: '#ffffff' }}>

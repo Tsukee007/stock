@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import ReviewCard from '@/components/ui/ReviewCard'
 import PhotoLightbox from '@/components/ui/PhotoLightbox'
+import { occupancyBySpace } from '@/lib/availability'
 
 export default async function SpacePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -19,11 +20,7 @@ export default async function SpacePage({ params }: { params: Promise<{ id: stri
   const isOwner = user?.id === space.owner_id
   const ownerStripeReady = !!(space.profiles as any)?.stripe_onboarding_complete
 
-  const { data: activeBookingsData } = await supabase
-    .from('bookings')
-    .select('id, status, ending_date')
-    .eq('space_id', id)
-    .in('status', ['active', 'confirmed', 'awaiting_signature', 'pending', 'ending'])
+  const activeBookingsData = (await occupancyBySpace([id])).get(id) ?? []
 
   const isFullyBooked = activeBookingsData?.some(b => ['active', 'confirmed'].includes(b.status)) ?? false
   const isEnding = activeBookingsData?.some(b => b.status === 'ending') ?? false
