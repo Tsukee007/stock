@@ -3,6 +3,7 @@ import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { sendEmail } from '@/lib/mailer'
 import Stripe from 'stripe'
 import { NextResponse } from 'next/server'
+import { isOwnerStripeReady } from '@/lib/ownerStripe'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-02-25.clover' })
 
@@ -24,6 +25,21 @@ export async function POST(req: Request) {
   if (!contract) return NextResponse.json({ error: 'Contrat introuvable' }, { status: 404 })
 
   const spaceData = contract.spaces as any
+
+  // Le rôle vient de la base, pas de ce qu'envoie le navigateur
+  const userIsOwner = user.id === spaceData.owner_id
+  if (isOwner !== userIsOwner || (!userIsOwner && user.id !== contract.renter_id)) {
+    return NextResponse.json({ error: 'Non autorise' }, { status: 403 })
+  }
+
+  // Pas de location tant que le propriétaire ne peut pas recevoir ses loyers
+  if (!(await isOwnerStripeReady(spaceData.owner_id))) {
+    return NextResponse.json({
+      error: userIsOwner
+        ? 'Finalisez votre inscription Stripe avant de signer : sans elle, nous ne pouvons pas vous verser vos loyers.'
+        : 'Le propriétaire doit encore finaliser son compte de paiement. Nous l\'avons prévenu ; vous pourrez signer dès que ce sera fait.'
+    }, { status: 409 })
+  }
   const { data: ownerProfile } = await supabase
     .from('profiles')
     .select('stripe_account_id, stripe_onboarding_complete')

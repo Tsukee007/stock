@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { sendEmail } from '@/lib/mailer'
 import { NextResponse } from 'next/server'
+import { isOwnerStripeReady } from '@/lib/ownerStripe'
 
 export async function POST(req: Request) {
   const { space_id, start_date, message } = await req.json()
@@ -88,11 +89,40 @@ export async function POST(req: Request) {
   const { data: ownerAuth } = await adminClient.auth.admin.getUserById(space.owner_id)
   const ownerEmail = ownerAuth?.user?.email
 
+  // Sans compte Stripe actif, le propriétaire ne pourra pas accepter : on le relance et on prévient le locataire
+  const ownerStripeReady = await isOwnerStripeReady(space.owner_id)
+
   if (ownerEmail) {
     await sendEmail({
       to: ownerEmail,
       subject: 'Nouvelle demande de reservation - ' + space.title,
       html: '<div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto;"><h2 style="color: #2563eb;">Nestock</h2><p>Vous avez recu une nouvelle demande de reservation pour <strong>' + space.title + '</strong>.</p><p><strong>Date de debut souhaitee :</strong> ' + new Date(start_date).toLocaleDateString('fr-FR') + '</p><a href="' + process.env.NEXT_PUBLIC_SITE_URL + '/dashboard" style="background: #2563eb; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block; margin-top: 16px;">Voir la demande</a></div>'
+    })
+  }
+
+  if (!ownerStripeReady) {
+    await supabase.from('notifications').insert({
+      user_id: space.owner_id,
+      type: 'booking',
+      title: 'Finalisez votre compte Stripe',
+      message: 'Une demande vous attend pour ' + space.title + '. Pour pouvoir l\'accepter et recevoir vos loyers, terminez votre inscription Stripe.',
+      link: '/stripe/connect'
+    })
+
+    if (ownerEmail) {
+      await sendEmail({
+        to: ownerEmail,
+        subject: 'Action requise : finalisez votre compte Stripe pour accepter la demande',
+        html: '<div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto;"><h2 style="color: #2563eb;">Nestock</h2><p>Un locataire souhaite louer <strong>' + space.title + '</strong>.</p><p>Votre compte Stripe n\'est pas encore finalisé : sans lui, nous ne pouvons pas vous verser vos loyers, et vous ne pourrez pas accepter cette demande.</p><p>Cela prend environ 5 minutes (pièce d\'identité et IBAN). Pensez à valider le récapitulatif avec « Accepter et envoyer ».</p><a href="' + process.env.NEXT_PUBLIC_SITE_URL + '/stripe/connect" style="background: #2563eb; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block; margin-top: 16px;">Finaliser mon compte Stripe</a></div>'
+      })
+    }
+
+    await supabase.from('notifications').insert({
+      user_id: user.id,
+      type: 'booking',
+      title: 'Demande envoyée',
+      message: 'Le propriétaire de ' + space.title + ' doit finaliser son compte de paiement avant de pouvoir accepter votre demande. Nous l\'avons relancé, vous serez prévenu dès qu\'il aura répondu.',
+      link: '/messages?booking_id=' + booking.id
     })
   }
 

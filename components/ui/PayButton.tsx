@@ -16,8 +16,9 @@ export default function PayButton({ bookingId }: Props) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ bookingId })
     })
-    const { url } = await res.json()
+    const { url, error } = await res.json()
     if (url) window.location.href = url
+    else if (error) alert(error)
     setLoading(false)
   }
 

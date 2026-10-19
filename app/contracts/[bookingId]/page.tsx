@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound, redirect } from 'next/navigation'
 import ContractSign from '@/components/ui/ContractSign'
+import { isOwnerStripeReady } from '@/lib/ownerStripe'
 
 export default async function ContractPage({
   params
@@ -68,6 +69,7 @@ export default async function ContractPage({
   // Verifier si le profil de l'utilisateur connecte est complet
   const currentProfile = isOwner ? ownerProfile : renter
   const profileIncomplete = !currentProfile?.full_name || !currentProfile?.address || !currentProfile?.phone
+  const ownerStripeReady = contract?.status === 'fully_signed' || await isOwnerStripeReady(space.owner_id)
 
   const formatDate = (date: string) => {
     if (!date) return '__ / __ / ____'
@@ -91,6 +93,26 @@ export default async function ContractPage({
             <a href="/profile" className="inline-block bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-red-700">
               Compléter mon profil →
             </a>
+          </div>
+        )}
+
+        {/* Compte Stripe du propriétaire pas encore actif : signature bloquée */}
+        {!ownerStripeReady && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 space-y-3">
+            {isOwner ? (
+              <>
+                <p className="font-semibold text-yellow-800">⚠️ Finalisez votre compte Stripe</p>
+                <p className="text-sm text-yellow-700">Vous pourrez signer ce contrat dès que votre inscription Stripe sera terminée : c'est elle qui permet de vous verser vos loyers.</p>
+                <a href="/stripe/connect" className="inline-block bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-yellow-700">
+                  Finaliser mon compte Stripe →
+                </a>
+              </>
+            ) : (
+              <>
+                <p className="font-semibold text-yellow-800">⏳ Le propriétaire finalise son compte de paiement</p>
+                <p className="text-sm text-yellow-700">Nous l'avons prévenu. Vous pourrez signer et payer dès que ce sera fait.</p>
+              </>
+            )}
           </div>
         )}
 

@@ -10,13 +10,14 @@ export default async function SpacePage({ params }: { params: Promise<{ id: stri
 
   const { data: space } = await supabase
     .from('spaces')
-    .select('*, profiles(full_name, avatar_url, rating_avg), space_photos(url, position), price_ttc')
+    .select('*, profiles(full_name, avatar_url, rating_avg, stripe_onboarding_complete), space_photos(url, position), price_ttc')
     .eq('id', id)
     .single()
 
   if (!space) notFound()
 
-  const isOwner = user?.id === space.user_id
+  const isOwner = user?.id === space.owner_id
+  const ownerStripeReady = !!(space.profiles as any)?.stripe_onboarding_complete
 
   const { data: activeBookingsData } = await supabase
     .from('bookings')
@@ -138,6 +139,17 @@ export default async function SpacePage({ params }: { params: Promise<{ id: stri
           </div>
         )}
 
+        {/* Propriétaire sans compte Stripe actif : demandes possibles, acceptation bloquée */}
+        {isOwner && !ownerStripeReady && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 space-y-3">
+            <p className="font-semibold text-yellow-800">⚠️ Finalisez votre compte Stripe</p>
+            <p className="text-sm text-yellow-700">Votre annonce peut recevoir des demandes, mais vous ne pourrez les accepter qu'une fois votre inscription Stripe terminée : c'est elle qui permet de vous verser vos loyers.</p>
+            <a href="/stripe/connect" className="inline-block bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-yellow-700">
+              Finaliser mon compte Stripe →
+            </a>
+          </div>
+        )}
+
         {/* Boutons */}
         {!isOwner && (
           <div className="bg-white rounded-xl shadow-sm p-6 space-y-3">
@@ -166,6 +178,11 @@ export default async function SpacePage({ params }: { params: Promise<{ id: stri
                 className="block w-full bg-blue-600 text-white rounded-xl p-4 font-bold text-lg hover:bg-blue-700 text-center">
                 Faire une demande de réservation
               </a>
+            )}
+            {!ownerStripeReady && !isFullyBooked && (
+              <p className="text-xs text-yellow-700 bg-yellow-50 rounded-lg p-3">
+                Le propriétaire finalise son compte de paiement. Vous pouvez déjà envoyer votre demande : la location pourra démarrer dès qu'il aura terminé.
+              </p>
             )}
             <p className="text-center text-xs text-gray-400">Gratuit et sans engagement</p>
           </div>

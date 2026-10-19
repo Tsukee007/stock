@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import Stripe from 'stripe'
 import { NextResponse } from 'next/server'
+import { isOwnerStripeReady } from '@/lib/ownerStripe'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-02-25.clover' })
 
@@ -62,16 +63,9 @@ export async function GET(req: Request) {
     return NextResponse.json({ connected: false })
   }
 
-  const account = await stripe.accounts.retrieve(profile.stripe_account_id)
-  const isComplete = account.details_submitted && account.charges_enabled
+  const isComplete = await isOwnerStripeReady(user.id)
 
-  if (isComplete && !profile.stripe_onboarding_complete) {
-    await supabase.from('profiles').update({
-      stripe_onboarding_complete: true
-    }).eq('id', user.id)
-  }
-
-  return NextResponse.json({ 
+  return NextResponse.json({
     connected: isComplete,
     accountId: profile.stripe_account_id
   })

@@ -5,6 +5,7 @@ import ReviewForm from '@/components/ui/ReviewForm'
 import PayButton from '@/components/ui/PayButton'
 import { statusLabels, statusColors, getDaysLeft } from '@/lib/utils'
 import DeleteSpaceButton from '@/components/ui/DeleteSpaceButton'
+import { isOwnerStripeReady } from '@/lib/ownerStripe'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -41,6 +42,9 @@ export default async function DashboardPage() {
       .filter(b => b.status === 'pending')
       .map(b => ({ ...b, spaceTitle: space.title, spaceId: space.id }))
   ) ?? []
+
+  // Vérifié chez Stripe seulement quand une demande attend une réponse
+  const ownerStripeReady = pendingBookings.length === 0 || await isOwnerStripeReady(user.id)
 
   const awaitingSignatureBookings = spaces?.flatMap(space =>
     ((space.bookings as any[]) ?? [])
@@ -117,6 +121,15 @@ export default async function DashboardPage() {
               📩 Demandes de reservation
               <span className="bg-yellow-400 text-white text-xs px-2 py-0.5 rounded-full">{pendingBookings.length}</span>
             </h2>
+            {!ownerStripeReady && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-3 space-y-2">
+                <p className="font-semibold text-yellow-800">⚠️ Finalisez votre compte Stripe pour accepter ces demandes</p>
+                <p className="text-sm text-yellow-700">Sans compte Stripe actif, nous ne pouvons pas vous verser vos loyers. Pensez à valider le récapitulatif avec « Accepter et envoyer ».</p>
+                <a href="/stripe/connect" className="inline-block bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-yellow-700">
+                  Finaliser mon compte Stripe →
+                </a>
+              </div>
+            )}
             <div className="space-y-3">
               {pendingBookings.map(booking => (
                 <div key={booking.id} className="bg-white rounded-xl shadow-sm p-4 border-l-4 border-yellow-400">

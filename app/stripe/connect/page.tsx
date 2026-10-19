@@ -47,7 +47,7 @@ export default function StripeConnectPage() {
     </div>
   )
 
-  if (status === 'connected' || success) return (
+  if (status === 'connected') return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <div className="bg-white rounded-xl shadow-sm p-8 max-w-md w-full text-center space-y-4">
         <p className="text-5xl">🎉</p>
@@ -78,6 +78,12 @@ export default function StripeConnectPage() {
           <a href="/dashboard" className="text-gray-500 hover:text-blue-600">← Dashboard</a>
           <h1 className="text-xl font-bold">💳 Connexion Stripe</h1>
         </div>
+
+        {success && (
+          <div className="bg-yellow-50 rounded-xl p-4 text-yellow-700 text-sm">
+            ⚠️ Votre inscription Stripe n'est pas terminée. Reprenez-la et validez le récapitulatif avec « Accepter et envoyer » pour pouvoir accepter des locations.
+          </div>
+        )}
 
         {refresh && (
           <div className="bg-yellow-50 rounded-xl p-4 text-yellow-700 text-sm">

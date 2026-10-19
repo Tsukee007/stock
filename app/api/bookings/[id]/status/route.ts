@@ -3,6 +3,7 @@ import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { sendEmail } from '@/lib/mailer'
 import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
+import { isOwnerStripeReady } from '@/lib/ownerStripe'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-02-25.clover' })
 
@@ -147,6 +148,17 @@ export async function POST(
     })
 
     return NextResponse.json({ success: true })
+  }
+
+  // Seuls le refus (les deux parties) et l'acceptation (propriétaire au compte Stripe actif) passent par ici :
+  // la signature et le paiement font avancer les autres statuts
+  if (status === 'confirmed') {
+    if (!isOwner) return NextResponse.json({ error: 'Non autorise' }, { status: 403 })
+    if (!(await isOwnerStripeReady(spaceData.owner_id))) {
+      return NextResponse.json({ error: 'Finalisez votre inscription Stripe avant d\'accepter une location.' }, { status: 409 })
+    }
+  } else if (status !== 'cancelled') {
+    return NextResponse.json({ error: 'Statut non autorise' }, { status: 400 })
   }
 
   await supabase.from('bookings').update({ status }).eq('id', id)
