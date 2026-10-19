@@ -28,7 +28,7 @@ export default async function DashboardPage() {
 
   const { data: bookings } = await supabase
     .from('bookings')
-    .select('*, spaces(id, title, city, price_month, owner_id), reviews(id, author_id), ending_date, start_date, notice_initiated_by, notice_acknowledged_at')
+    .select('*, spaces(id, title, city, price_month, owner_id), reviews(id, author_id), contracts(status), ending_date, start_date, notice_initiated_by, notice_acknowledged_at')
     .eq('renter_id', user.id)
     .order('created_at', { ascending: false })
 
@@ -421,7 +421,8 @@ export default async function DashboardPage() {
                       }`}>
                         {statusLabels[booking.status] ?? booking.status}
                       </span>
-                      {booking.status === 'confirmed' && (
+                      {booking.status === 'awaiting_signature' &&
+                        [(booking as any).contracts].flat().some((c: any) => c?.status === 'fully_signed') && (
                         <PayButton bookingId={booking.id} />
                       )}
                       {booking.status === 'active' && (

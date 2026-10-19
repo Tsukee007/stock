@@ -1,11 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { sendEmail } from '@/lib/mailer'
-import Stripe from 'stripe'
 import { NextResponse } from 'next/server'
 import { isOwnerStripeReady } from '@/lib/ownerStripe'
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-02-25.clover' })
+import { createRentCheckout } from '@/lib/rentCheckout'
 
 export async function POST(req: Request) {
   const { contractId, bookingId, signatureName, birthDate, phone, email, isOwner } = await req.json()
@@ -122,28 +120,14 @@ export async function POST(req: Request) {
       })
     }
 
-    const priceInCents = Math.round((spaceData.price_ttc ?? spaceData.price_month * 1.10) * 100)
-
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      mode: 'subscription',
-      line_items: [{
-        price_data: {
-          currency: 'eur',
-          product_data: {
-            name: 'Location - ' + spaceData.title,
-            description: 'Abonnement mensuel Nestock'
-          },
-          unit_amount: priceInCents,
-          recurring: { interval: 'month' }
-        },
-        quantity: 1
-      }],
-      success_url: process.env.NEXT_PUBLIC_SITE_URL + '/dashboard?payment=success',
-      cancel_url: process.env.NEXT_PUBLIC_SITE_URL + '/contracts/' + bookingId + '?payment=cancelled',
-      metadata: { bookingId, contractId }
+    const checkoutUrl = await createRentCheckout({
+      bookingId,
+      contractId,
+      title: spaceData.title,
+      priceTtc: spaceData.price_ttc,
+      priceMonth: spaceData.price_month
     })
 
-    return NextResponse.json({ success: true, checkoutUrl: session.url })
+    return NextResponse.json({ success: true, checkoutUrl })
   }
 }

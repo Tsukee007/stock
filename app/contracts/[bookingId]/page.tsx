@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound, redirect } from 'next/navigation'
 import ContractSign from '@/components/ui/ContractSign'
 import { isOwnerStripeReady } from '@/lib/ownerStripe'
+import PayButton from '@/components/ui/PayButton'
 
 export default async function ContractPage({
   params
@@ -265,6 +266,15 @@ export default async function ContractPage({
             bookingStatus={booking.status}
             profileIncomplete={profileIncomplete}
           />
+        )}
+
+        {/* Contrat signé mais paiement pas terminé (page Stripe quittée) */}
+        {isRenter && contract?.status === 'fully_signed' && booking.status === 'awaiting_signature' && (
+          <div className="bg-white rounded-xl shadow-sm p-6 space-y-3 text-center">
+            <p className="font-semibold">💳 Il ne reste plus que le paiement</p>
+            <p className="text-sm text-gray-600">La location démarrera dès que le premier mois sera payé.</p>
+            <PayButton bookingId={bookingId} />
+          </div>
         )}
 
       </div>

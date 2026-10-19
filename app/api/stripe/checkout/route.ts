@@ -1,10 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
-import Stripe from 'stripe'
 import { NextResponse } from 'next/server'
 import { isOwnerStripeReady } from '@/lib/ownerStripe'
+import { createRentCheckout } from '@/lib/rentCheckout'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
-
+// Bouton « Payer » : le locataire a signé mais n'a pas terminé le paiement (page Stripe quittée).
+// On recrée la même page de paiement qu'à la signature.
 export async function POST(req: Request) {
   const { bookingId } = await req.json()
   const supabase = await createClient()
@@ -14,43 +14,35 @@ export async function POST(req: Request) {
 
   const { data: booking } = await supabase
     .from('bookings')
-    .select('*, spaces(title, price_month, owner_id)')
+    .select('id, status, renter_id, spaces(title, price_month, price_ttc, owner_id)')
     .eq('id', bookingId)
     .single()
 
   if (!booking) return NextResponse.json({ error: 'Réservation introuvable' }, { status: 404 })
+  if (booking.renter_id !== user.id) return NextResponse.json({ error: 'Non autorisé' }, { status: 403 })
+
+  const { data: contract } = await supabase
+    .from('contracts')
+    .select('id, status')
+    .eq('booking_id', bookingId)
+    .single()
+
+  if (booking.status !== 'awaiting_signature' || contract?.status !== 'fully_signed') {
+    return NextResponse.json({ error: 'Cette location n\'est pas en attente de paiement.' }, { status: 400 })
+  }
 
   const space = booking.spaces as any
-  if (booking.renter_id !== user.id) return NextResponse.json({ error: 'Non autorisé' }, { status: 403 })
   if (!(await isOwnerStripeReady(space.owner_id))) {
     return NextResponse.json({ error: 'Le propriétaire doit encore finaliser son compte de paiement. Nous l\'avons prévenu.' }, { status: 409 })
   }
-  const commission = Math.round(space.price_month * 0.10 * 100) // 10% en centimes
-  const total = Math.round(space.price_month * 1.10 * 100) // total en centimes
 
-  const session = await stripe.checkout.sessions.create({
-    payment_method_types: ['card'],
-    mode: 'payment',
-    line_items: [
-      {
-        price_data: {
-          currency: 'eur',
-          product_data: {
-            name: space.title,
-            description: `Location d'espace de stockage - 1 mois`,
-          },
-          unit_amount: total,
-        },
-        quantity: 1,
-      }
-    ],
-    metadata: {
-      bookingId,
-      userId: user.id,
-    },
-    success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard?payment=success`,
-    cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard?payment=cancelled`,
+  const url = await createRentCheckout({
+    bookingId,
+    contractId: contract.id,
+    title: space.title,
+    priceTtc: space.price_ttc,
+    priceMonth: space.price_month
   })
 
-  return NextResponse.json({ url: session.url })
+  return NextResponse.json({ url })
 }
