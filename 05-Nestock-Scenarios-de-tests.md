@@ -100,6 +100,7 @@ Le protocole détaillé du cycle prélèvement → préavis → fin de location 
 | T-LEGAL-03 | CGU et contrat à jour (version du 19/10/2026) | À faire |
 | T-UI-01 | Orthographe, ton et marque | À faire |
 | T-MAIL-01 | Un e-mail qui ne part pas ne bloque pas l'action | À faire |
+| T-MAIL-02 | Formulaire de contact : texte saisi affiché tel quel | À faire |
 | T-CONF-01 | Paramétrage de la production (Vercel, Stripe) | À faire |
 
 ---
@@ -1354,6 +1355,22 @@ Le protocole détaillé du cycle prélèvement → préavis → fin de location 
   - Étape 2 : message rouge « Votre message n'a pas pu être envoyé… », pas de « ✅ ».
   - Étape 3 : lignes « E-mail non envoyé à … ».
   - Étape 4 : « ✅ » et e-mail reçu sur contact@nestock.pro.
+- **Statut courant** : À faire
+
+| Date | Agent | Statut | Observations |
+|---|---|---|---|
+
+### T-MAIL-02 — Formulaire de contact : texte saisi affiché tel quel
+
+- **Objectif** : le texte tapé dans le formulaire de contact ne peut pas modifier la mise en page de l'e-mail reçu par Nestock (pas de HTML interprété).
+- **Source** : correction du 19/10/2026 (`app/api/contact-form/route.ts` : saisie échappée)
+- **Prérequis** : accès à la boîte contact@nestock.pro. Un seul envoi (limite d'envoi Hostinger).
+- **Étapes** :
+  1. Sur /contact, envoyer : nom `Test <b>gras</b>`, sujet `Essai <i>HTML</i>`, message sur deux lignes contenant `<a href="https://exemple.com">lien</a>`.
+  2. Ouvrir l'e-mail « [Nestock] Contact - … » reçu sur contact@nestock.pro.
+- **Résultat attendu** :
+  - Les balises apparaissent en texte brut (`<b>gras</b>`, `<a href=…>`), rien n'est en gras ni cliquable ; le retour à la ligne du message est conservé.
+  - Le sujet de l'e-mail est sur une seule ligne.
 - **Statut courant** : À faire
 
 | Date | Agent | Statut | Observations |
