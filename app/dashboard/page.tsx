@@ -229,7 +229,7 @@ export default async function DashboardPage() {
                       <p className="text-gray-600 text-sm">{booking.spaceCity} · {booking.spacePrice}€/mois</p>
                       <p className="text-gray-500 text-xs mt-0.5">Depuis le {new Date(booking.start_date).toLocaleDateString('fr-FR')}</p>
                     </div>
-                    <BookingAction bookingId={booking.id} status="ending" label="Résilier (15j)" color="gray" />
+                    <BookingAction bookingId={booking.id} status="ending" label="Résilier" color="gray" />
                   </div>
                   <div className="flex gap-3 mt-2">
                     <a href={'/messages?booking_id=' + booking['id']} className="text-xs text-blue-600 hover:underline">Messages</a>
@@ -426,7 +426,7 @@ export default async function DashboardPage() {
                         <PayButton bookingId={booking.id} />
                       )}
                       {booking.status === 'active' && (
-                        <BookingAction bookingId={booking.id} status="ending" label="Résilier (préavis 15j)" color="gray" />
+                        <BookingAction bookingId={booking.id} status="ending" label="Résilier" color="gray" />
                       )}
                       {booking.status === 'ending' && booking.ending_date && (
                         <div className="text-center">

@@ -4,6 +4,7 @@ import { sendEmail } from '@/lib/mailer'
 import { NextResponse } from 'next/server'
 import { isOwnerStripeReady } from '@/lib/ownerStripe'
 import { createRentCheckout } from '@/lib/rentCheckout'
+import { CGU_VERSION, clientInfo } from '@/lib/preuves'
 
 export async function POST(req: Request) {
   const { contractId, bookingId, signatureName, birthDate, phone, email, isOwner } = await req.json()
@@ -13,6 +14,7 @@ export async function POST(req: Request) {
   if (!user) return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
 
   const now = new Date().toISOString()
+  const { ip, userAgent } = clientInfo(req)
 
   const { data: contract } = await supabase
     .from('contracts')
@@ -49,15 +51,22 @@ export async function POST(req: Request) {
   )
 
   if (isOwner) {
-    await supabase.from('contracts').update({
+    const { error: signError } = await supabase.from('contracts').update({
       owner_signed: true,
       owner_signed_at: now,
       owner_signature_name: signatureName,
       owner_birth_date: birthDate,
       owner_phone: phone,
       owner_email: email,
+      owner_ip: ip,
+      owner_user_agent: userAgent,
+      owner_cgu_version: CGU_VERSION,
       status: 'owner_signed'
     }).eq('id', contractId)
+    if (signError) {
+      console.error('Signature non enregistree', contractId, signError)
+      return NextResponse.json({ error: 'La signature n\'a pas pu être enregistrée. Réessayez dans un instant.' }, { status: 500 })
+    }
 
     await supabase.from('bookings').update({ status: 'awaiting_signature' }).eq('id', bookingId)
 
@@ -83,15 +92,22 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: true })
 
   } else {
-    await supabase.from('contracts').update({
+    const { error: signError } = await supabase.from('contracts').update({
       renter_signed: true,
       renter_signed_at: now,
       renter_signature_name: signatureName,
       renter_birth_date: birthDate,
       renter_phone: phone,
       renter_email: email,
+      renter_ip: ip,
+      renter_user_agent: userAgent,
+      renter_cgu_version: CGU_VERSION,
       status: 'fully_signed'
     }).eq('id', contractId)
+    if (signError) {
+      console.error('Signature non enregistree', contractId, signError)
+      return NextResponse.json({ error: 'La signature n\'a pas pu être enregistrée. Réessayez dans un instant.' }, { status: 500 })
+    }
 
     await supabase.from('bookings').update({ status: 'awaiting_signature' }).eq('id', bookingId)
 
@@ -124,7 +140,8 @@ export async function POST(req: Request) {
       bookingId,
       contractId,
       title: spaceData.title,
-      priceTtc: spaceData.price_ttc,
+      // Prix figé dans le contrat : c'est aussi la base du reversement au propriétaire
+      priceTtc: contract.loyer_ttc ?? spaceData.price_ttc,
       priceMonth: spaceData.price_month
     })
 

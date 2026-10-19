@@ -4,6 +4,7 @@ import { sendEmail } from '@/lib/mailer'
 import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { isOwnerStripeReady } from '@/lib/ownerStripe'
+import { noticeEnd } from '@/lib/billing'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-02-25.clover' })
 
@@ -34,31 +35,48 @@ export async function POST(
     return NextResponse.json({ error: 'Non autorise' }, { status: 403 })
   }
 
+  // Écritures sur bookings avec la clé serveur : la règle d'accès ne laisse modifier que le propriétaire,
+  // ce qui faisait échouer en silence la résiliation demandée par le locataire. Les droits sont vérifiés ci-dessus.
   const adminClient = createAdminClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
 
-  if (status === 'ending') {
-    const endingDate = new Date()
-    endingDate.setDate(endingDate.getDate() + 15)
+  // Chaque action n'est possible qu'à la bonne étape de la location
+  const allowedFrom: Record<string, string[]> = {
+    ending: ['active'],
+    acknowledge_notice: ['ending'],
+    confirmed: ['pending'],
+    cancelled: ['pending', 'awaiting_signature'],
+  }
+  if (!allowedFrom[status]) {
+    // « ended » est posé par le cron de fin de location, pas par les utilisateurs
+    return NextResponse.json({ error: 'Statut non autorise' }, { status: 400 })
+  }
+  if (!allowedFrom[status].includes(booking.status)) {
+    return NextResponse.json({ error: 'Action impossible à cette étape de la location' }, { status: 409 })
+  }
+  if (status === 'acknowledge_notice' && booking.notice_initiated_by === (isOwner ? 'owner' : 'renter')) {
+    return NextResponse.json({ error: 'Le préavis doit être confirmé par l\'autre partie' }, { status: 403 })
+  }
 
-    await supabase.from('bookings').update({
+  if (status === 'ending') {
+    // Fin toujours en fin de mois : préavis jusqu'au 15 inclus → fin du mois en cours, sinon fin du mois suivant
+    const { endingDate, cancelAt } = noticeEnd()
+
+    await adminClient.from('bookings').update({
       status: 'ending',
       ending_date: endingDate.toISOString(),
-      notice_initiated_by: isRenter ? 'renter' : 'owner'
+      notice_initiated_by: isRenter ? 'renter' : 'owner',
+      notice_initiated_at: new Date().toISOString()
     }).eq('id', id)
 
-    // Programme l'annulation de la subscription Stripe exactement a la date de fin du preavis.
-    // Ainsi aucun nouveau prelevement mensuel ne peut se declencher apres cette date,
-    // meme si la date anniversaire de facturation tombe pendant le preavis.
-    // Le webhook customer.subscription.deleted se chargera du remboursement au prorata
-    // le jour ou cette annulation programmee s'execute reellement.
+    // L'abonnement (prélevé le 1er) s'arrête le 1er du mois qui suit la fin, à minuit :
+    // pile à la fin d'une période payée, donc ni prélèvement en trop ni remboursement.
     if (booking.stripe_subscription_id) {
       try {
         await stripe.subscriptions.update(booking.stripe_subscription_id, {
-          cancel_at: Math.floor(endingDate.getTime() / 1000),
-          // Pas d'avoir Stripe automatique : le webhook rembourse deja les jours non utilises
+          cancel_at: Math.floor(cancelAt.getTime() / 1000),
           proration_behavior: 'none',
         })
       } catch (stripeErr) {
@@ -73,14 +91,14 @@ export async function POST(
       user_id: otherUserId,
       type: 'booking',
       title: 'Préavis de résiliation',
-      message: otherRole + ' a initié la résiliation de la location pour ' + spaceData.title + '. Fin le ' + endingDate.toLocaleDateString('fr-FR'),
+      message: otherRole + ' a initié la résiliation de la location pour ' + spaceData.title + '. Fin le ' + endingDate.toLocaleDateString('fr-FR', { timeZone: 'Europe/Paris' }),
       link: '/dashboard/bookings/' + id
     })
 
     await supabase.from('messages').insert({
       booking_id: id,
       sender_id: user.id,
-      content: 'Un préavis de 15 jours a été initié. La location prendra fin le ' + endingDate.toLocaleDateString('fr-FR') + '.'
+      content: 'Un préavis a été donné. La location prendra fin le ' + endingDate.toLocaleDateString('fr-FR', { timeZone: 'Europe/Paris' }) + ' au soir ; le dernier mois prélevé est dû en entier.'
     })
 
     const { data: otherUser } = await adminClient.auth.admin.getUserById(otherUserId)
@@ -88,7 +106,7 @@ export async function POST(
       await sendEmail({
         to: otherUser.user.email,
         subject: 'Préavis de résiliation - ' + spaceData.title,
-        html: '<div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto;"><h2 style="color: #2563eb;">Nestock</h2><p>' + otherRole + ' a initié la résiliation de la location pour <strong>' + spaceData.title + '</strong>.</p><p>La location prendra fin le <strong>' + endingDate.toLocaleDateString('fr-FR') + '</strong>.</p><p>Veuillez accuser réception depuis votre dashboard.</p><a href="' + process.env.NEXT_PUBLIC_SITE_URL + '/dashboard" style="background: #2563eb; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block; margin-top: 16px;">Accuser réception</a></div>'
+        html: '<div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto;"><h2 style="color: #2563eb;">Nestock</h2><p>' + otherRole + ' a initié la résiliation de la location pour <strong>' + spaceData.title + '</strong>.</p><p>La location prendra fin le <strong>' + endingDate.toLocaleDateString('fr-FR', { timeZone: 'Europe/Paris' }) + '</strong>.</p><p>Veuillez accuser réception depuis votre dashboard.</p><a href="' + process.env.NEXT_PUBLIC_SITE_URL + '/dashboard" style="background: #2563eb; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block; margin-top: 16px;">Accuser réception</a></div>'
       })
     }
 
@@ -96,7 +114,7 @@ export async function POST(
   }
 
   if (status === 'acknowledge_notice') {
-    await supabase.from('bookings').update({
+    await adminClient.from('bookings').update({
       notice_acknowledged_at: new Date().toISOString()
     }).eq('id', id)
 
@@ -129,7 +147,7 @@ export async function POST(
   }
 
   if (status === 'ended') {
-    await supabase.from('bookings').update({ status: 'ended' }).eq('id', id)
+    await adminClient.from('bookings').update({ status: 'ended' }).eq('id', id)
 
     await supabase.from('messages').insert({
       booking_id: id,
@@ -161,7 +179,7 @@ export async function POST(
     return NextResponse.json({ error: 'Statut non autorise' }, { status: 400 })
   }
 
-  await supabase.from('bookings').update({ status }).eq('id', id)
+  await adminClient.from('bookings').update({ status }).eq('id', id)
 
   const autoMessages: Record<string, string> = {
     confirmed: 'Votre demande a ete acceptee !',

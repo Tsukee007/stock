@@ -1,8 +1,10 @@
 import Stripe from 'stripe'
+import { nextBillingDate } from '@/lib/billing'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-02-25.clover' })
 
 // Page de paiement Stripe de l'abonnement mensuel du locataire.
+// Prélèvement le 1er de chaque mois : le premier paiement couvre seulement les jours restants du mois en cours.
 // Le webhook (checkout.session.completed) active la réservation grâce aux métadonnées.
 export async function createRentCheckout({ bookingId, contractId, title, priceTtc, priceMonth }: {
   bookingId: string
@@ -30,7 +32,12 @@ export async function createRentCheckout({ bookingId, contractId, title, priceTt
     }],
     success_url: process.env.NEXT_PUBLIC_SITE_URL + '/dashboard?payment=success',
     cancel_url: process.env.NEXT_PUBLIC_SITE_URL + '/contracts/' + bookingId + '?payment=cancelled',
-    metadata: { bookingId, contractId }
+    metadata: { bookingId, contractId },
+    subscription_data: {
+      billing_cycle_anchor: Math.floor(nextBillingDate().getTime() / 1000),
+      proration_behavior: 'create_prorations',
+      metadata: { bookingId, contractId }
+    }
   })
 
   return session.url

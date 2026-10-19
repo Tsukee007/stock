@@ -1,7 +1,8 @@
 import Stripe from 'stripe'
 import { createClient } from '@supabase/supabase-js'
 import { sendEmail } from '@/lib/mailer'
-import { transferOwnerShare, reverseOwnerShare } from '@/lib/ownerPayouts'
+import { transferOwnerShare } from '@/lib/ownerPayouts'
+import { noticeEnd } from '@/lib/billing'
 import { NextResponse } from 'next/server'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-02-25.clover' })
@@ -386,67 +387,9 @@ export async function POST(req: Request) {
         .single()
 
       // Cas 1 : la reservation etait deja en preavis (status 'ending') et l'annulation
-      // programmee via cancel_at vient de se declencher a la date prevue.
-      // Il s'agit du deroulement normal du preavis Nestock, pas d'une annulation surprise.
-      // On calcule et rembourse le prorata des jours non utilises du dernier mois si besoin.
+      // programmee via cancel_at vient de se declencher, le 1er du mois qui suit la fin.
+      // Deroulement normal : le dernier mois preleve est du en entier, aucun remboursement.
       if (event.type === 'customer.subscription.deleted' && booking.status === 'ending') {
-        try {
-          const invoices = await stripe.invoices.list({
-            subscription: subscriptionId,
-            status: 'paid',
-            limit: 1,
-          })
-          const lastInvoice = invoices.data[0]
-          // invoice.period_start/period_end designent la periode PRECEDENTE sur une facture
-          // d'abonnement : le mois reellement paye d'avance est la periode de la ligne
-          const paidPeriod = lastInvoice?.lines.data[0]?.period
-
-          if (lastInvoice?.id && paidPeriod && booking.ending_date) {
-            const periodStart = paidPeriod.start
-            const periodEnd = paidPeriod.end
-            const endingDateUnix = Math.floor(new Date(booking.ending_date).getTime() / 1000)
-
-            const totalDays = (periodEnd - periodStart) / 86400
-            const usedDays = Math.max(0, Math.min(totalDays, (endingDateUnix - periodStart) / 86400))
-            const unusedDays = totalDays - usedDays
-
-            if (unusedDays > 0.5 && totalDays > 0) {
-              const refundRatio = unusedDays / totalDays
-              const refundAmount = Math.round(lastInvoice.amount_paid * refundRatio)
-              const paymentIntentId = await getInvoicePaymentIntentId(lastInvoice.id)
-
-              if (refundAmount > 0 && paymentIntentId) {
-                await stripe.refunds.create({
-                  payment_intent: paymentIntentId,
-                  amount: refundAmount,
-                })
-
-                await reverseOwnerShare({ bookingId: booking.id, paymentIntentId, ratio: refundRatio })
-
-                const refundAmountEur = (refundAmount / 100).toFixed(2)
-
-                await supabase.from('notifications').insert({
-                  user_id: booking.renter_id,
-                  type: 'refund',
-                  title: 'Remboursement au prorata',
-                  message: 'Vous avez ete rembourse de ' + refundAmountEur + ' EUR correspondant aux jours non utilises de votre dernier mois pour ' + (spaceData?.title || 'votre location') + '.',
-                  link: '/dashboard/bookings/' + booking.id
-                })
-
-                const { data: renterUser } = await supabase.auth.admin.getUserById(booking.renter_id)
-                if (renterUser?.user?.email) {
-                  await sendEmail({
-                    to: renterUser.user.email,
-                    subject: 'Remboursement au prorata — ' + (spaceData?.title || 'Nestock'),
-                    html: '<div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto;"><h2 style="color: #2563eb;">Nestock</h2><p>Votre location pour <strong>' + (spaceData?.title || '') + '</strong> etant terminee avant la fin de votre periode de facturation, vous avez ete rembourse au prorata des jours non utilises.</p><p style="font-size: 24px; font-weight: bold; color: #16a34a;">' + refundAmountEur + ' EUR</p><p>Ce montant sera credite sur votre moyen de paiement sous quelques jours ouvres.</p></div>'
-                  })
-                }
-              }
-            }
-          }
-        } catch (refundErr) {
-          console.error('Erreur calcul/remboursement prorata pour booking ' + booking.id + ':', refundErr)
-        }
         // Le cron end-bookings se charge de faire passer le statut a 'ended' une fois
         // ending_date atteinte — pas besoin de le faire ici.
         return NextResponse.json({ received: true })
@@ -454,21 +397,27 @@ export async function POST(req: Request) {
 
       // Cas 2 : annulation surprise, pas encore de preavis en cours (ex: le locataire
       // annule directement depuis son espace client Stripe plutot que via Nestock).
-      // Comportement existant : on convertit en preavis standard de 15 jours.
-      const endingDate = new Date()
-      endingDate.setDate(endingDate.getDate() + 15)
+      // On applique la regle Nestock : fin du mois en cours (preavis jusqu'au 15) ou du mois suivant.
+      // Si Stripe a deja arrete l'abonnement, le dernier mois n'est pas preleve : on previent l'admin.
+      const { endingDate } = noticeEnd()
+      await sendEmail({
+        to: 'contact@nestock.pro',
+        subject: 'Nestock — abonnement arrêté depuis Stripe (location ' + booking.id + ')',
+        html: '<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;"><h2 style="color: #1D4ED8;">Nestock — à traiter</h2><p>Le locataire de « ' + (spaceData?.title || '') + ' » a arrêté son abonnement directement chez Stripe (' + event.type + '), hors de Nestock. Fin de location appliquée : ' + endingDate.toLocaleDateString('fr-FR', { timeZone: 'Europe/Paris' }) + '.</p><p>Les mois jusqu\'à cette date risquent de ne plus être prélevés : vérifiez dans Stripe et voyez avec le locataire. Pour l\'éviter, désactivez l\'annulation dans Stripe → Paramètres → Billing → Portail client.</p></div>'
+      }).catch(err => console.error('Alerte annulation Stripe non envoyee', err))
 
       await supabase.from('bookings').update({
         status: 'ending',
         ending_date: endingDate.toISOString(),
-        notice_initiated_by: 'renter'
+        notice_initiated_by: 'renter',
+        notice_initiated_at: new Date().toISOString()
       }).eq('id', booking.id)
 
       await supabase.from('notifications').insert({
         user_id: booking.renter_id,
         type: 'subscription_cancelled',
         title: 'Abonnement annule',
-        message: 'Votre abonnement a ete annule via Stripe. Un preavis de 15 jours a ete initie, fin le ' + endingDate.toLocaleDateString('fr-FR') + '.',
+        message: 'Votre abonnement a ete annule via Stripe. Un preavis a ete initie, fin le ' + endingDate.toLocaleDateString('fr-FR', { timeZone: 'Europe/Paris' }) + '.',
         link: '/dashboard/bookings/' + booking.id
       })
 
@@ -477,7 +426,7 @@ export async function POST(req: Request) {
         await sendEmail({
           to: renterUser.user.email,
           subject: 'Annulation abonnement — ' + (spaceData?.title || 'Nestock'),
-          html: '<div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto;"><h2 style="color: #2563eb;">Nestock</h2><p>Votre abonnement Stripe pour <strong>' + (spaceData?.title || 'votre location') + '</strong> a ete annule.</p><p>Un preavis de 15 jours a ete automatiquement initie. La location se terminera le <strong>' + endingDate.toLocaleDateString('fr-FR') + '</strong>.</p><a href="' + process.env.NEXT_PUBLIC_SITE_URL + '/dashboard" style="background: #2563eb; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block; margin-top: 16px;">Voir ma location</a></div>'
+          html: '<div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto;"><h2 style="color: #2563eb;">Nestock</h2><p>Votre abonnement Stripe pour <strong>' + (spaceData?.title || 'votre location') + '</strong> a ete annule.</p><p>Un preavis a ete automatiquement initie. La location se terminera le <strong>' + endingDate.toLocaleDateString('fr-FR', { timeZone: 'Europe/Paris' }) + '</strong>.</p><a href="' + process.env.NEXT_PUBLIC_SITE_URL + '/dashboard" style="background: #2563eb; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block; margin-top: 16px;">Voir ma location</a></div>'
         })
       }
 

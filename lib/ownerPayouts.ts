@@ -46,7 +46,7 @@ export async function transferOwnerShare({ bookingId, paymentIntentId }: {
 
     const { data: booking } = await supabase
       .from('bookings')
-      .select('id, price_month, spaces(title, price_month, owner_id)')
+      .select('id, price_month, spaces(title, price_month, price_ttc, owner_id)')
       .eq('id', bookingId)
       .single()
     const space = booking?.spaces as any
@@ -72,9 +72,17 @@ export async function transferOwnerShare({ bookingId, paymentIntentId }: {
       return
     }
 
-    // Loyer figé à la réservation ; jamais plus que ce que le locataire a réellement payé
+    // Loyer figé à la réservation. Le premier paiement ne couvre que les jours restants du mois
+    // (prélèvement le 1er) : le propriétaire reçoit alors la même proportion de son loyer.
+    const { data: contract } = await supabase
+      .from('contracts')
+      .select('loyer_ttc')
+      .eq('booking_id', bookingId)
+      .maybeSingle()
+    const fullMonth = Math.round(Number(contract?.loyer_ttc ?? space.price_ttc) * 100)
+    const paidShare = fullMonth > 0 ? Math.min(1, paymentIntent.amount_received / fullMonth) : 1
     const ownerShare = Math.min(
-      Math.round(Number(booking.price_month ?? space.price_month) * 100),
+      Math.round(Number(booking.price_month ?? space.price_month) * 100 * paidShare),
       paymentIntent.amount_received
     )
     if (!(ownerShare > 0)) {

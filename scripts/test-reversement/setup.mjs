@@ -1,4 +1,4 @@
-import { db, stripe, state, save, userId } from "./common.mjs";
+import { parisMonthStart, db, stripe, state, save, userId } from "./common.mjs";
 const owner = await userId("proprietaire@nestock.pro");
 const renter = await userId("locataire@nestock.pro");
 state.owner = owner;
@@ -69,7 +69,7 @@ Object.assign(state, {
 
 const clock = await stripe.testHelpers.testClocks.create({
   frozen_time: Math.floor(Date.now() / 1000),
-  name: "Nestock reversement 14-10",
+  name: "Nestock reversement (prélèvement le 1er)",
 });
 const customer = await stripe.customers.create({
   email: "locataire@nestock.pro",
@@ -98,6 +98,9 @@ const sub = await stripe.subscriptions.create({
       },
     },
   ],
+  // Comme le site : prélèvement le 1er du mois, premier paiement au prorata des jours restants
+  billing_cycle_anchor: parisMonthStart(clock.frozen_time),
+  proration_behavior: "create_prorations",
   metadata: { bookingId: booking.id, contractId: contract.id },
 });
 Object.assign(state, {

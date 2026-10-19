@@ -10,6 +10,7 @@ export default function RegisterPage() {
   const supabase = createClient()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [cguAccepted, setCguAccepted] = useState(false)
   const [form, setForm] = useState({
     email: '',
     password: '',
@@ -27,6 +28,10 @@ export default function RegisterPage() {
   const handleSubmit = async () => {
     if (!form.email || !form.password || !form.full_name) {
       setError('Veuillez remplir tous les champs obligatoires')
+      return
+    }
+    if (!cguAccepted) {
+      setError('Veuillez accepter les conditions générales d\'utilisation')
       return
     }
     if (form.password.length < 6) {
@@ -56,6 +61,7 @@ export default function RegisterPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           user_id: data.user.id,
+          cgu_accepted: true,
           full_name: form.full_name,
           phone: form.phone,
           address: form.address,
@@ -121,6 +127,15 @@ export default function RegisterPage() {
             className="w-full border rounded-lg p-3" />
         </div>
 
+        <label className="flex items-start gap-2 text-sm text-gray-700 cursor-pointer">
+          <input type="checkbox" checked={cguAccepted} onChange={e => setCguAccepted(e.target.checked)}
+            className="w-4 h-4 mt-0.5 flex-shrink-0" />
+          <span>
+            J&apos;ai lu et j&apos;accepte les{' '}
+            <a href="/cgu" target="_blank" className="text-blue-600 hover:underline">conditions générales d&apos;utilisation</a> *
+          </span>
+        </label>
+
         <button onClick={handleSubmit} disabled={loading}
           className="w-full bg-blue-600 text-white rounded-lg p-3 font-semibold hover:bg-blue-700 disabled:opacity-50"
           style={{ color: '#ffffff' }}>
@@ -128,7 +143,6 @@ export default function RegisterPage() {
         </button>
 
         <p className="text-xs text-gray-500 leading-relaxed">
-          En créant votre compte, vous acceptez les <a href="/cgu" className="text-blue-600 hover:underline">conditions générales d&apos;utilisation</a>.
           Vos données sont traitées par Nestock pour gérer votre compte, vos annonces et vos locations, et conservées pendant la durée de votre compte.
           Conformément au RGPD, vous pouvez y accéder, les rectifier, les supprimer ou vous opposer à leur traitement en écrivant à{' '}
           <a href="mailto:contact@nestock.pro" className="text-blue-600 hover:underline">contact@nestock.pro</a>.{' '}

@@ -94,7 +94,7 @@ export async function GET(req: Request) {
           html: `
             <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; padding: 24px;">
               <h2 style="color: #111827;">Location terminee</h2>
-              <p style="color: #6b7280;">Le preavis de 15 jours pour "${spaceTitle}" est arrive a son terme. Votre location est desormais officiellement close et le prelevement automatique a ete annule.</p>
+              <p style="color: #6b7280;">Le preavis pour "${spaceTitle}" est arrive a son terme. Votre location est desormais officiellement close et le prelevement automatique a ete annule.</p>
               <p style="color: #9ca3af; font-size: 13px;">Nestock — contact@nestock.pro</p>
             </div>
           `,
@@ -107,7 +107,7 @@ export async function GET(req: Request) {
           html: `
             <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; padding: 24px;">
               <h2 style="color: #111827;">Location terminee</h2>
-              <p style="color: #6b7280;">Le preavis de 15 jours pour votre annonce "${spaceTitle}" est arrive a son terme. La location est desormais officiellement close et le prelevement automatique a ete annule. Votre annonce est de nouveau disponible.</p>
+              <p style="color: #6b7280;">Le preavis pour votre annonce "${spaceTitle}" est arrive a son terme. La location est desormais officiellement close et le prelevement automatique a ete annule. Votre annonce est de nouveau disponible.</p>
               <p style="color: #9ca3af; font-size: 13px;">Nestock — contact@nestock.pro</p>
             </div>
           `,

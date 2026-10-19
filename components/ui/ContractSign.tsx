@@ -152,7 +152,9 @@ export default function ContractSign({ contract, isOwner, isRenter, bookingId, s
           className="w-5 h-5 mt-0.5 flex-shrink-0" />
         <label htmlFor="accept" className="text-sm text-gray-700 cursor-pointer">
           Je soussigné(e) <strong>{form.name || '...'}</strong>, déclare avoir lu et accepté
-          les termes du présent contrat. Cette signature électronique a valeur juridique
+          les termes du présent contrat ainsi que les{' '}
+          <a href="/cgu" target="_blank" className="text-blue-600 hover:underline">conditions générales d&apos;utilisation</a>{' '}
+          de Nestock. Cette signature électronique a valeur juridique
           conformément à l'article 1366 du Code civil français.
         </label>
       </div>

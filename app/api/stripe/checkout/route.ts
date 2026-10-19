@@ -23,7 +23,7 @@ export async function POST(req: Request) {
 
   const { data: contract } = await supabase
     .from('contracts')
-    .select('id, status')
+    .select('id, status, loyer_ttc')
     .eq('booking_id', bookingId)
     .single()
 
@@ -40,7 +40,7 @@ export async function POST(req: Request) {
     bookingId,
     contractId: contract.id,
     title: space.title,
-    priceTtc: space.price_ttc,
+    priceTtc: contract.loyer_ttc ?? space.price_ttc,
     priceMonth: space.price_month
   })
 

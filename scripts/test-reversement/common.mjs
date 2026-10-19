@@ -49,3 +49,22 @@ export async function postSignedEvent(type, object) {
   return res.status + " " + (await res.text());
 }
 export const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// 1er du mois suivant (ou + n mois) à minuit, heure de Paris, en secondes : même règle que lib/billing.ts
+export function parisMonthStart(unix, monthsAhead = 1) {
+  const [y, m] = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris", year: "numeric", month: "2-digit" })
+    .format(new Date(unix * 1000)).split("-").map(Number);
+  const guess = Date.UTC(y, m - 1 + monthsAhead, 1);
+  const parts = new Intl.DateTimeFormat("en-US", { timeZone: "Europe/Paris", hourCycle: "h23", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit" })
+    .formatToParts(new Date(guess));
+  const hour = Number(parts.find((p) => p.type === "hour").value);
+  return Math.floor((guess - hour * 3600000) / 1000);
+}
+export async function advanceClock(to) {
+  await stripe.testHelpers.testClocks.advance(state.clock, { frozen_time: to });
+  for (let i = 0; i < 60; i++) {
+    await wait(3000);
+    if ((await stripe.testHelpers.testClocks.retrieve(state.clock)).status === "ready") break;
+  }
+  await wait(10000);
+}

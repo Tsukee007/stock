@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 import { sendEmail } from '@/lib/mailer'
+import { CGU_VERSION, clientInfo } from '@/lib/preuves'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -19,7 +20,7 @@ const escape = (s: unknown) =>
 
 export async function POST(req: Request) {
   try {
-    const { user_id, full_name, phone, address, postal_code, city } = await req.json()
+    const { user_id, full_name, phone, address, postal_code, city, cgu_accepted } = await req.json()
     if (typeof user_id !== 'string') {
       return NextResponse.json({ error: 'Requete invalide' }, { status: 400 })
     }
@@ -36,9 +37,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Inscription trop ancienne' }, { status: 400 })
     }
 
-    // Marque le compte d'abord : un second appel ne renverra ni profil ni e-mail
+    // Marque le compte d'abord : un second appel ne renverra ni profil ni e-mail.
+    // L'acceptation des CGU va dans app_metadata, que l'utilisateur ne peut pas modifier.
+    const { ip, userAgent } = clientInfo(req)
+    const cgu = cgu_accepted === true
+      ? { version: CGU_VERSION, accepted_at: new Date().toISOString(), ip, user_agent: userAgent }
+      : undefined
     await supabase.auth.admin.updateUserById(user.id, {
-      app_metadata: { ...user.app_metadata, admin_notified: true },
+      app_metadata: { ...user.app_metadata, admin_notified: true, ...(cgu && { cgu }) },
     })
 
     const profile = { full_name, phone, address, postal_code, city }

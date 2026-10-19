@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation'
 
 const menu = [
   { href: '/admin/inscrits', title: 'Inscrits' },
+  { href: '/admin/locations', title: 'Locations' },
   { href: '/admin/calendrier', title: 'Calendrier' },
   { href: '/admin/tests', title: 'Tests' },
 ]

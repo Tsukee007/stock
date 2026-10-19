@@ -2,13 +2,15 @@
 
 Cahier de tests destiné à des agents IA (et à un humain si besoin). Chaque test décrit **quoi faire** et **ce qu'on doit obtenir** ; l'agent qui l'exécute **ajoute son retour** dans l'historique du test.
 
-Le protocole détaillé du cycle facturation → préavis → remboursement (Stripe Test Clocks) est en [annexe](#annexe--protocole-stripe-test-clocks) ; il est exécuté par le test T-RESIL-02.
+Le protocole détaillé du cycle prélèvement → préavis → fin de location (Stripe Test Clocks) est en [annexe](#annexe--protocole-stripe-test-clocks) ; il est exécuté par le test T-RESIL-02.
+
+**Règle de mise à jour (19/10/2026)** : chaque bug corrigé, chaque évolution et chaque nouveau paramétrage reçoit un test dans ce cahier (ligne **Source** = date et origine). Un bug corrigé garde son test pour être re-testé.
 
 ---
 
 ## Consignes pour les agents
 
-1. **Environnement** : site de production https://www.nestock.pro, Stripe en **mode test uniquement**. Ne jamais saisir de vraie carte, de vrai IBAN ni de vraie pièce d'identité.
+1. **Environnement** : site de production https://www.nestock.pro, Stripe en **mode test uniquement**. Ne jamais saisir de vraie carte, de vrai IBAN ni de vraie pièce d'identité. Les tests qui passent par un paiement ont besoin du webhook Stripe en mode test vers www.nestock.pro (absent au 19/10/2026) : sans lui, la location ne s'active pas après paiement ; marquer alors `Bloqué` en citant ce prérequis.
 2. **Comptes** : utiliser uniquement des comptes de test (`…+test@…`). Ne jamais modifier ni supprimer les annonces/locations d'un autre utilisateur. Les tests désignent trois comptes de test distincts :
    - **Propriétaire** : publie les annonces (compte Stripe complet, voir T-STRIPE-01)
    - **Locataire** : réserve et paie
@@ -37,6 +39,9 @@ Le protocole détaillé du cycle facturation → préavis → remboursement (Str
 | T-STRIPE-04 | Inscription Stripe interrompue puis reprise (pas de doublon) | À faire |
 | T-STRIPE-05 | Compte Stripe complet → tableau de bord Stripe direct | À faire |
 | T-STRIPE-06 | Connexion normale non perturbée (retour après connexion sécurisé) | Bloqué |
+| T-STRIPE-07 | Propriétaire sans compte Stripe actif : demande possible, relances envoyées | À faire |
+| T-STRIPE-08 | Signature, acceptation et paiement bloqués tant que le compte Stripe n'est pas actif | À faire |
+| T-STRIPE-09 | Pas de faux « Compte Stripe connecté ! » si l'inscription est quittée | À faire |
 | T-NAV-01 | Menu visiteur non connecté | Partiel |
 | T-NAV-02 | Menu utilisateur connecté | Bloqué |
 | T-NAV-03 | Pages réservées : redirection vers la connexion | OK |
@@ -67,9 +72,17 @@ Le protocole détaillé du cycle facturation → préavis → remboursement (Str
 | T-PAY-01 | Premier paiement et quittance | À faire |
 | T-PAY-02 | Webhook Stripe accessible et protégé | Partiel |
 | T-PAY-03 | Gestion du paiement côté locataire | À faire |
-| T-RESIL-01 | Préavis de 15 jours | À faire |
-| T-RESIL-02 | Cycle complet facturation → préavis → remboursement | À faire |
+| T-PAY-04 | Prélèvement le 1er du mois, 1er paiement au prorata | À faire |
+| T-PAY-05 | Reversement au propriétaire : 1er mois partiel puis mois entiers | À faire |
+| T-PAY-06 | Reprendre un paiement abandonné (bouton « Payer ») | À faire |
+| T-RESIL-01 | Préavis : affichage des deux côtés et accusé de réception | À faire |
+| T-RESIL-02 | Cycle complet : prélèvement le 1er → préavis → fin sans remboursement | À faire |
 | T-RESIL-03 | Tâche de clôture protégée | OK |
+| T-RESIL-04 | Fin de location toujours en fin de mois (règle du 15) | À faire |
+| T-RESIL-05 | Le locataire peut résilier (re-test du bug du 19/10/2026) | À faire |
+| T-RESIL-06 | Aucun remboursement ni reprise à la fin de la location | À faire |
+| T-RESIL-07 | Actions impossibles à la mauvaise étape de la location | À faire |
+| T-RESIL-08 | Annulation de l'abonnement directement chez Stripe | À faire |
 | T-PROD-01 | Passage de Stripe en mode live | À faire |
 | T-MSG-01 | Messagerie en temps réel | À faire |
 | T-NOTIF-01 | Cloche de notifications | À faire |
@@ -77,8 +90,16 @@ Le protocole détaillé du cycle facturation → préavis → remboursement (Str
 | T-SEC-01 | Données d'autrui inaccessibles | À faire |
 | T-SEC-02 | Panels d'administration protégés | À faire |
 | T-SEC-03 | Comptes non admin : aucun accès à l'administration | À faire |
+| T-SEC-04 | Un locataire ne peut pas signer à la place du propriétaire | À faire |
+| T-SEC-05 | Statuts et paiement réservés aux bonnes personnes | À faire |
+| T-SEC-06 | Tâche de clôture : « Bearer undefined » refusé | À faire |
+| T-SEC-07 | Réservations non lisibles avec la clé publique | À faire |
+| T-ADMIN-01 | Dossier de preuves d'une location | À faire |
 | T-LEGAL-01 | Pages légales et RGPD | OK |
+| T-LEGAL-02 | CGU obligatoires à l'inscription et enregistrées | À faire |
+| T-LEGAL-03 | CGU et contrat à jour (version du 19/10/2026) | À faire |
 | T-UI-01 | Orthographe, ton et marque | À faire |
+| T-CONF-01 | Paramétrage de la production (Vercel, Stripe) | À faire |
 
 ---
 
@@ -181,6 +202,64 @@ Le protocole détaillé du cycle facturation → préavis → remboursement (Str
 | Date | Agent | Statut | Observations |
 |---|---|---|---|
 | 2026-10-08 | Testeur (AI Framework) | Bloqué | Étape 1 : connexion avec le compte Propriétaire sur /login échoue (Invalid login credentials). Même échec avec les comptes Locataire et 3e compte. Étapes 2 et 3 non réalisables faute de connexion réussie. |
+
+### T-STRIPE-07 — Propriétaire sans compte Stripe actif : demande possible, relances envoyées
+
+- **Objectif** : un locataire peut demander une annonce dont le propriétaire n'a pas fini son inscription Stripe ; le propriétaire est relancé, le locataire prévenu.
+- **Source** : 01-Nestock-context.md, « À faire avant les vrais paiements » (19/10/2026) ; évolution « location seulement si le compte Stripe du propriétaire est actif »
+- **Prérequis** : un 3e compte utilisé comme propriétaire **sans** compte Stripe terminé, avec une annonce visible ; compte Locataire. Lire les boîtes mail des deux comptes.
+- **Étapes** :
+  1. En Locataire, ouvrir l'annonce du 3e compte.
+  2. Cliquer « Faire une demande de réservation », choisir une date, envoyer.
+  3. Ouvrir la cloche de notifications du Locataire.
+  4. Lire la boîte mail du 3e compte et ses notifications.
+  5. En 3e compte, ouvrir sa propre annonce puis son Dashboard.
+- **Résultat attendu** :
+  - Étape 1 : sous le bouton, message jaune « Le propriétaire finalise son compte de paiement. Vous pouvez déjà envoyer votre demande… ».
+  - Étape 2 : la demande est créée (redirection vers la messagerie).
+  - Étape 3 : notification « Demande envoyée » : le propriétaire doit finaliser son compte de paiement.
+  - Étape 4 : deux e-mails au 3e compte, « Nouvelle demande de reservation » et « Action requise : finalisez votre compte Stripe pour accepter la demande » (bouton vers /stripe/connect) ; notification « Finalisez votre compte Stripe ».
+  - Étape 5 : bandeau jaune « Finalisez votre compte Stripe » sur l'annonce (sans bouton de demande) et « Finalisez votre compte Stripe pour accepter ces demandes » au-dessus des demandes du Dashboard.
+- **Statut courant** : À faire
+
+| Date | Agent | Statut | Observations |
+|---|---|---|---|
+
+### T-STRIPE-08 — Signature, acceptation et paiement bloqués tant que le compte Stripe n'est pas actif
+
+- **Objectif** : aucune location ne peut démarrer si le propriétaire ne peut pas recevoir ses loyers (évite les alertes « reversement en échec »).
+- **Source** : 01-Nestock-context.md, « À faire avant les vrais paiements » (19/10/2026)
+- **Prérequis** : T-STRIPE-07 fait (demande en attente chez le 3e compte, toujours sans Stripe).
+- **Étapes** :
+  1. En 3e compte, Dashboard → « Accepter et signer » sur la demande ; remplir et valider la signature.
+  2. En Locataire, ouvrir /contracts/[id de la réservation].
+  3. En 3e compte, refuser la demande.
+- **Résultat attendu** :
+  - Étape 1 : bandeau « Finalisez votre compte Stripe » sur la page du contrat ; la signature est refusée avec « Finalisez votre inscription Stripe avant de signer… » ; le contrat reste non signé.
+  - Étape 2 : bandeau « Le propriétaire finalise son compte de paiement » ; aucune signature ni paiement possible.
+  - Étape 3 : le refus fonctionne (statut « Refusée »).
+- **Statut courant** : À faire
+
+| Date | Agent | Statut | Observations |
+|---|---|---|---|
+
+### T-STRIPE-09 — Pas de faux « Compte Stripe connecté ! » si l'inscription est quittée
+
+- **Objectif** : la page de retour de Stripe n'annonce le succès que si le compte est vraiment prêt.
+- **Source** : bug relevé le 15/10/2026 (inscription quittée sans « Accepter et envoyer »), corrigé le 19/10/2026
+- **Prérequis** : un compte sans compte Stripe terminé.
+- **Étapes** :
+  1. Aller sur /stripe/connect, lancer l'inscription Stripe, puis la quitter sans valider le récapitulatif (bouton retour ou croix de Stripe).
+  2. Observer la page de retour sur nestock.pro.
+  3. Reprendre l'inscription jusqu'au bout avec « Accepter et envoyer » (données de test de la consigne 3).
+- **Résultat attendu** :
+  - Étape 2 : adresse `…/stripe/connect?success=true`, mais la page affiche « Votre inscription Stripe n'est pas terminée… » et le bouton pour la reprendre, **pas** « Compte Stripe connecté ! ».
+  - Étape 3 : retour sur « 🎉 Compte Stripe connecté ! » ; l'annonce de ce compte n'affiche plus de bandeau jaune.
+- **Statut courant** : À faire
+
+| Date | Agent | Statut | Observations |
+|---|---|---|---|
+
 
 ---
 
@@ -751,14 +830,70 @@ Le protocole détaillé du cycle facturation → préavis → remboursement (Str
 | Date | Agent | Statut | Observations |
 |---|---|---|---|
 
+### T-PAY-04 — Prélèvement le 1er du mois, 1er paiement au prorata
+
+- **Objectif** : le loyer est prélevé le 1er de chaque mois ; le premier paiement couvre seulement les jours restants du mois en cours.
+- **Source** : 01-Nestock-context.md, « À faire avant les vrais paiements » (19/10/2026) ; évolution « prélèvement le 1er du mois »
+- **Prérequis** : T-RESA-03 (contrat signé par les deux parties, compte Stripe du propriétaire actif). Webhook Stripe **mode test** déclaré vers `https://www.nestock.pro/api/stripe/webhook`, avec son `STRIPE_WEBHOOK_SECRET` sur Vercel (projet `stock-kb8s`). Il était absent au 19/10/2026 (voir 01-Nestock-context.md) : sans lui, exécuter le test en local (`http://localhost:3000` + `stripe listen`).
+- **Étapes** :
+  1. En Locataire, payer le 1er mois avec la carte de test.
+  2. Stripe (mode test) → Clients → client du locataire → abonnement : lire la prochaine date de facturation et le montant de la 1re facture.
+  3. Calculer le prorata attendu : prix mensuel TTC × jours restants dans le mois (jour du paiement compris) ÷ jours du mois.
+- **Résultat attendu** :
+  - Étape 1 : la page de paiement Stripe annonce un montant inférieur au prix mensuel (sauf paiement le 1er), puis le prix mensuel à partir du 1er du mois suivant.
+  - Étape 2 : prochaine facturation **le 1er du mois suivant** ; 1re facture égale au prorata de l'étape 3, à quelques centimes près.
+  - La location passe « En cours » ; quittance reçue.
+- **Statut courant** : À faire
+
+| Date | Agent | Statut | Observations |
+|---|---|---|---|
+
+### T-PAY-05 — Reversement au propriétaire : 1er mois partiel puis mois entiers
+
+- **Objectif** : le propriétaire reçoit exactement son loyer pour un mois entier, et la même proportion pour le 1er mois partiel ; Nestock garde sa commission.
+- **Source** : 01-Nestock-context.md, « À faire avant les vrais paiements » (19/10/2026) ; reversement codé le 14/10/2026, testé le 15/10/2026
+- **Prérequis** : T-PAY-04 fait. Accès au tableau de bord Stripe (mode test).
+- **Étapes** :
+  1. Stripe (mode test) → Connect → compte connecté du Propriétaire → Transferts (ou Paiements reçus).
+  2. Comparer le 1er transfert avec : loyer du propriétaire × montant de la 1re facture ÷ prix mensuel TTC.
+  3. Pour les mois suivants : Test Clock (annexe, étape 3) ou attendre le 1er du mois, puis relire les transferts.
+- **Résultat attendu** :
+  - Étape 2 : un transfert par paiement, égal au calcul (à 1 centime près), rattaché au paiement du locataire, avec l'identifiant de la réservation en métadonnée.
+  - Étape 3 : un transfert égal au loyer exact du propriétaire (ex. 50,00 € pour une annonce à 50 €) pour chaque mois entier.
+  - Aucun e-mail « Nestock — reversement en échec » sur contact@nestock.pro.
+- **Statut courant** : À faire
+
+| Date | Agent | Statut | Observations |
+|---|---|---|---|
+
+### T-PAY-06 — Reprendre un paiement abandonné (bouton « Payer »)
+
+- **Objectif** : un locataire qui a signé mais quitté la page de paiement Stripe peut payer plus tard.
+- **Source** : évolution du 19/10/2026 (l'ancien bouton « Payer » était inutilisable et au mauvais prix)
+- **Prérequis** : contrat signé par le Propriétaire. Webhook Stripe **mode test** déclaré vers `https://www.nestock.pro/api/stripe/webhook`, avec son `STRIPE_WEBHOOK_SECRET` sur Vercel (projet `stock-kb8s`). Il était absent au 19/10/2026 (voir 01-Nestock-context.md) : sans lui, exécuter le test en local (`http://localhost:3000` + `stripe listen`).
+- **Étapes** :
+  1. En Locataire, signer le contrat puis, sur la page Stripe, cliquer sur la flèche de retour sans payer.
+  2. Ouvrir le Dashboard du Locataire, puis la page du contrat.
+  3. Cliquer « 💳 Payer » et payer avec la carte de test.
+  4. En Propriétaire, ouvrir la page du contrat.
+- **Résultat attendu** :
+  - Étape 2 : bouton « 💳 Payer » sur la location (Dashboard) ; sur le contrat, bloc « Il ne reste plus que le paiement ».
+  - Étape 3 : page Stripe d'abonnement mensuel au prix du contrat (1er mois au prorata, cf. T-PAY-04) ; après paiement, location « En cours ».
+  - Étape 4 : pas de bloc de paiement côté propriétaire.
+- **Statut courant** : À faire
+
+| Date | Agent | Statut | Observations |
+|---|---|---|---|
+
+
 ---
 
 ## Résiliation
 
-### T-RESIL-01 — Préavis de 15 jours
+### T-RESIL-01 — Préavis : affichage des deux côtés et accusé de réception
 
-- **Objectif** : le préavis démarre, s'affiche des deux côtés et programme la fin du prélèvement Stripe.
-- **Source** : 02-Nestock-Fonctionnalites.md §2.8
+- **Objectif** : le préavis démarre, s'affiche des deux côtés et programme la fin du prélèvement Stripe. Depuis le 19/10/2026, la fin tombe toujours en fin de mois (détail de la règle : T-RESIL-04).
+- **Source** : 02-Nestock-Fonctionnalites.md §2.8 ; 01-Nestock-context.md (règle de fin de mois, 19/10/2026)
 - **Prérequis** : location active (T-PAY-01).
 - **Étapes** :
   1. En Locataire, cliquer « Résilier » depuis le Dashboard ou la page détail.
@@ -766,28 +901,28 @@ Le protocole détaillé du cycle facturation → préavis → remboursement (Str
   3. En Propriétaire, cliquer sur l'accusé de réception du préavis.
   4. Dans Stripe (mode test), ouvrir l'abonnement.
 - **Résultat attendu** :
-  - Statut « en préavis » avec compte à rebours de 15 jours des deux côtés ; notification + e-mail à l'autre partie.
+  - Statut « en préavis » avec le nombre de jours restants jusqu'à la fin (dernier jour du mois en cours ou du mois suivant) des deux côtés ; notification + e-mail à l'autre partie.
   - Accusé de réception enregistré et visible.
-  - Abonnement Stripe : « Cancels on [date de fin] ».
+  - Abonnement Stripe : « Cancels on [1er du mois qui suit la fin] ».
   - L'annonce affiche « ⏳ Disponible le [date de fin] ».
 - **Statut courant** : À faire
 
 | Date | Agent | Statut | Observations |
 |---|---|---|---|
 
-### T-RESIL-02 — Cycle complet facturation → préavis → remboursement
+### T-RESIL-02 — Cycle complet : prélèvement le 1er → préavis → fin sans remboursement
 
-- **Objectif** : valider annulation programmée, remboursement au prorata et clôture par le cron, sans attendre 15 jours.
-- **Source** : annexe « Protocole Stripe Test Clocks » (ci-dessous) ; correction du webhook pour l'API Stripe basil (commit e766249, 06/10/2026).
+- **Objectif** : valider le prélèvement le 1er du mois, l'annulation programmée en fin de mois, l'absence de remboursement et la clôture par le cron, sans attendre la fin du mois.
+- **Source** : annexe « Protocole Stripe Test Clocks » (ci-dessous) ; règles du 19/10/2026 (prélèvement le 1er, fin en fin de mois, plus de remboursement au prorata). Les scripts `scripts/test-reversement/` (setup, t1, t2, t3) font la même chose en local.
 - **Prérequis** : accès au tableau de bord Stripe (mode test) et à Supabase ; CRON_SECRET ; version du site déployée contenant le commit e766249.
 - **Étapes** :
   1. Dérouler intégralement le protocole de l'annexe (étapes 1 à 6, puis nettoyage).
   2. Reporter dans les observations le résultat de chaque bloc « ✅ Vérifications ».
 - **Résultat attendu** :
   - Toutes les vérifications de l'annexe sont validées, en particulier :
-  - **Facture du 2e mois** (`invoice.paid`, renouvellement) : webhook en 200, nouvelle ligne `invoices` avec `stripe_payment_id` renseigné, quittance reçue par e-mail par les deux parties, notifications « Loyer prélevé » / « Loyer reçu ».
-  - `cancel_at` programmé à la date de fin du préavis.
-  - **Fin du préavis** : remboursement partiel du dernier loyer payé, d'un montant égal à `montant payé × jours non utilisés ÷ jours de la période` (à 1 centime près), visible dans Stripe → Paiements ; e-mail et notification « Remboursement au prorata » avec ce même montant.
+  - **Prélèvement du 1er du mois** (`invoice.paid`, renouvellement) : webhook en 200, nouvelle ligne `invoices` avec `stripe_payment_id` renseigné, quittance reçue par e-mail par les deux parties, notifications « Loyer prélevé » / « Loyer reçu », reversement du loyer entier au propriétaire.
+  - `cancel_at` programmé au **1er du mois qui suit la fin** (règle du 15).
+  - **Fin de la location** : aucune facture après la fin, **aucun remboursement**, aucune reprise de transfert au propriétaire, aucun e-mail « Remboursement au prorata ».
   - **Aucun avoir** sur le compte du client dans Stripe : solde client à 0 €, aucune ligne de prorata (« Unused time… ») sur ses factures.
   - Cron : `processed` ≥ 1, statut `ended`, annonce de nouveau disponible.
 - **Statut courant** : À faire
@@ -812,6 +947,94 @@ Le protocole détaillé du cycle facturation → préavis → remboursement (Str
 | 2026-10-06 | Claude Code | OK | Sans secret → `401` ; avec `Authorization: Bearer faux` → `401`. |
 | 2026-10-06 | Testeur (AI Framework) | OK | Re-test : `GET /api/cron/end-bookings` sans en-tête → `401 {"error":"Non autorise"}` ; avec `Authorization: Bearer faux` → `401 {"error":"Non autorise"}`. Les deux tentatives sont refusées, conforme au résultat attendu. |
 
+### T-RESIL-04 — Fin de location toujours en fin de mois (règle du 15)
+
+- **Objectif** : préavis donné jusqu'au 15 inclus → fin le dernier jour du mois en cours ; après le 15 → fin le dernier jour du mois suivant ; l'abonnement s'arrête pile à cette date.
+- **Source** : 01-Nestock-context.md, « À faire avant les vrais paiements » (19/10/2026) ; règle demandée par l'utilisateur le 19/10/2026
+- **Prérequis** : location active (T-PAY-04). Noter la date du jour (heure de Paris).
+- **Étapes** :
+  1. En Locataire, cliquer « Résilier » sur la location.
+  2. Lire le message automatique de la conversation et la date de fin affichée sur le Dashboard des deux comptes.
+  3. Stripe (mode test) → abonnement du locataire : lire « Cancels on … ».
+- **Résultat attendu** :
+  - Étape 2 : si le jour est ≤ 15, fin le **dernier jour du mois en cours** ; sinon, fin le **dernier jour du mois suivant**. Message « Un préavis a été donné. La location prendra fin le … au soir ; le dernier mois prélevé est dû en entier. »
+  - Étape 3 : annulation programmée le **1er du mois qui suit la fin**, à minuit (heure de Paris) ; aucun avoir ni ligne de prorata sur le client.
+  - Le bouton s'appelle « Résilier » (plus « (15j) »).
+- **Statut courant** : À faire
+
+| Date | Agent | Statut | Observations |
+|---|---|---|---|
+
+### T-RESIL-05 — Le locataire peut résilier (re-test du bug du 19/10/2026)
+
+- **Objectif** : une résiliation demandée par le locataire est bien enregistrée.
+- **Source** : bug corrigé le 19/10/2026 : la règle d'accès de `bookings` ne laissait modifier que le propriétaire, la demande du locataire était ignorée alors que le site affichait un succès
+- **Prérequis** : location active (T-PAY-04).
+- **Étapes** :
+  1. En Locataire, cliquer « Résilier ».
+  2. Recharger le Dashboard du Locataire, puis celui du Propriétaire.
+  3. En Propriétaire, « ✅ Accuser réception ».
+  4. En admin, /admin/locations → la location → rubrique « Résiliation ».
+- **Résultat attendu** :
+  - Étape 2 : la location est « en préavis » des deux côtés, avec « Préavis initié par le locataire » et la date de fin.
+  - Étape 3 : accusé de réception enregistré et visible.
+  - Étape 4 : « Demandée par le locataire », « Demandée le » (date et heure), « Fin de la location », « Accusé de réception » renseignés.
+- **Statut courant** : À faire
+
+| Date | Agent | Statut | Observations |
+|---|---|---|---|
+
+### T-RESIL-06 — Aucun remboursement ni reprise à la fin de la location
+
+- **Objectif** : le dernier mois prélevé est dû en entier : Nestock ne rembourse rien et ne reprend rien au propriétaire.
+- **Source** : 01-Nestock-context.md, « À faire avant les vrais paiements » (19/10/2026)
+- **Prérequis** : T-RESIL-04 fait ; Test Clock (annexe, étapes 4 et 5) ou attendre la date de fin.
+- **Étapes** :
+  1. Avancer l'horloge de test au-delà du 1er du mois qui suit la fin (annexe, étape 5).
+  2. Stripe → Paiements, Connect → transferts du propriétaire, client du locataire.
+- **Résultat attendu** :
+  - Abonnement annulé, **aucune facture après la fin**, **aucun remboursement**, aucune reprise de transfert, solde client à 0 €.
+  - Aucun e-mail « Remboursement au prorata ».
+- **Statut courant** : À faire
+
+| Date | Agent | Statut | Observations |
+|---|---|---|---|
+
+### T-RESIL-07 — Actions impossibles à la mauvaise étape de la location
+
+- **Objectif** : on ne peut résilier qu'une location en cours, l'accusé de réception vient de l'autre partie, on ne peut plus refuser une location payée, « ended » est réservé au cron.
+- **Source** : durcissement du 19/10/2026 (`app/api/bookings/[id]/status`)
+- **Prérequis** : une demande en attente (T-RESA-01) et une location en préavis initiée par le locataire (T-RESIL-05). Exécuter les appels depuis la console du navigateur, connecté avec le compte indiqué : `await fetch('/api/bookings/ID/status', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({status:'…'})}).then(r => r.status)`.
+- **Étapes** :
+  1. En Locataire, sur la demande en attente : `ending`.
+  2. En Locataire, sur la location en préavis : `acknowledge_notice`.
+  3. En Locataire, sur la location en préavis : `cancelled`.
+  4. En Locataire ou Propriétaire : `ended`, puis `active`.
+- **Résultat attendu** :
+  - Étape 1 : **409**. Étape 2 : **403**. Étape 3 : **409**. Étape 4 : **400** pour les deux.
+  - Aucun statut modifié (vérifier les Dashboards).
+- **Statut courant** : À faire
+
+| Date | Agent | Statut | Observations |
+|---|---|---|---|
+
+### T-RESIL-08 — Annulation de l'abonnement directement chez Stripe
+
+- **Objectif** : le locataire ne peut pas arrêter son abonnement hors de Nestock ; si cela arrive quand même, l'administrateur est alerté.
+- **Source** : 01-Nestock-context.md, « À faire avant les vrais paiements » (19/10/2026) ; paramétrage Stripe à faire (portail client)
+- **Prérequis** : location active ; paramétrage « Stripe → Paramètres → Billing → Portail client : annulation désactivée » fait.
+- **Étapes** :
+  1. En Locataire, Dashboard → gestion du paiement (portail Stripe, T-PAY-03).
+  2. Chercher une option d'annulation de l'abonnement.
+- **Résultat attendu** :
+  - Aucune option « Annuler l'abonnement » dans le portail.
+  - Si l'annulation est encore possible : l'annuler, puis vérifier l'e-mail « Nestock — abonnement arrêté depuis Stripe » sur contact@nestock.pro et la date de fin appliquée (règle du 15) — et signaler le paramétrage manquant.
+- **Statut courant** : À faire
+
+| Date | Agent | Statut | Observations |
+|---|---|---|---|
+
+
 ---
 
 ## Mise en production
@@ -827,11 +1050,11 @@ Le protocole détaillé du cycle facturation → préavis → remboursement (Str
 - **Étapes** :
   1. Stripe (mode live) → Connect : compléter le profil de plateforme.
   2. Stripe (mode live) → Développeurs → Webhooks : créer un endpoint `https://www.nestock.pro/api/stripe/webhook` avec les 4 événements `checkout.session.completed`, `invoice.paid`, `customer.subscription.updated`, `customer.subscription.deleted`. Noter sa clé `whsec_…` (différente de celle du mode test).
-  3. Vercel, projet qui sert nestock.pro (`stock-kb8s`) : remplacer `STRIPE_SECRET_KEY` (`sk_live_…`) et `STRIPE_WEBHOOK_SECRET` (`whsec_…` live) pour l'environnement Production.
+  3. Vercel, projet qui sert nestock.pro (`stock-kb8s`) : remplacer `STRIPE_SECRET_KEY` (`sk_live_…`), `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` (`pk_live_…`) et `STRIPE_WEBHOOK_SECRET` (`whsec_…` live) pour l'environnement Production. Stripe live → Paramètres → Billing → Portail client : désactiver l'annulation d'abonnement.
   4. Redéployer la production (les variables ne sont prises en compte qu'au déploiement suivant).
   5. Vérifier que l'endpoint répond sans redirection : `curl -I https://www.nestock.pro/api/stripe/webhook`.
   6. Faire un vrai paiement de bout en bout (petit montant, annonce et comptes réels), puis consulter Stripe live → Webhooks → tentatives récentes, Supabase `bookings` / `invoices`, et les e-mails.
-  7. Résilier cette location de test et vérifier le remboursement (ou rembourser manuellement depuis Stripe).
+  7. Résilier cette location de test (fin en fin de mois, aucun remboursement automatique depuis le 19/10/2026), puis rembourser le paiement à la main depuis Stripe live et reprendre le transfert au propriétaire si besoin.
 - **Résultat attendu** :
   - Étape 5 : code **405** (méthode non autorisée : la route n'accepte que POST), jamais 307/308 ni 404.
   - Étape 6 : événement `checkout.session.completed` en **200** dans le webhook live ; location `active` ; ligne `invoices` avec `stripe_payment_id` renseigné ; quittance reçue par les deux parties ; commission de 10 % prélevée et le reste transféré au compte connecté du propriétaire.
@@ -994,12 +1217,154 @@ Le protocole détaillé du cycle facturation → préavis → remboursement (Str
 | Date | Agent | Statut | Observations |
 |---|---|---|---|
 
+### T-SEC-04 — Un locataire ne peut pas signer à la place du propriétaire
+
+- **Objectif** : le rôle du signataire est déterminé par le serveur, pas par le navigateur.
+- **Source** : faille corrigée le 19/10/2026 (`isOwner` envoyé par le navigateur à /api/contracts/sign)
+- **Prérequis** : contrat non signé (T-RESA-03 avant signature), compte Stripe du propriétaire actif. Console du navigateur connecté en Locataire.
+- **Étapes** :
+  1. Exécuter `await fetch('/api/contracts/sign', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({contractId:'ID_CONTRAT', bookingId:'ID_RESA', signatureName:'Test', birthDate:'1990-01-01', isOwner:true})}).then(r => r.status)`.
+  2. Ouvrir la page du contrat.
+- **Résultat attendu** :
+  - Étape 1 : **403**.
+  - Étape 2 : signature du propriétaire toujours vide.
+- **Statut courant** : À faire
+
+| Date | Agent | Statut | Observations |
+|---|---|---|---|
+
+### T-SEC-05 — Statuts et paiement réservés aux bonnes personnes
+
+- **Objectif** : un locataire ne peut ni accepter sa propre demande, ni passer sa location « active » sans payer, ni lancer le paiement d'un autre ; le propriétaire ne peut pas lancer le paiement.
+- **Source** : failles corrigées le 19/10/2026
+- **Prérequis** : une demande en attente (T-RESA-01) et un contrat signé non payé (T-PAY-06, étape 1). Console du navigateur.
+- **Étapes** :
+  1. En Locataire, demande en attente : `status: 'confirmed'` sur /api/bookings/ID/status.
+  2. En Locataire : `status: 'active'`.
+  3. En Propriétaire, contrat signé non payé : `await fetch('/api/stripe/checkout', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({bookingId:'ID_RESA'})}).then(r => r.status)`.
+  4. En 3e compte : même appel.
+- **Résultat attendu** :
+  - Étape 1 : **403**. Étape 2 : **400**. Étapes 3 et 4 : **403**.
+  - Aucun statut modifié.
+- **Statut courant** : À faire
+
+| Date | Agent | Statut | Observations |
+|---|---|---|---|
+
+### T-SEC-06 — Tâche de clôture : « Bearer undefined » refusé
+
+- **Objectif** : la tâche automatique ne s'ouvre jamais avec un secret absent ou « undefined ».
+- **Source** : faille corrigée le 19/10/2026 (commit 1f7d1f9) ; `CRON_SECRET` ajouté sur Vercel (`stock-kb8s`) le 19/10/2026
+- **Prérequis** : aucun.
+- **Étapes** :
+  1. `curl -s -o /dev/null -w '%{http_code}' -H 'Authorization: Bearer undefined' https://www.nestock.pro/api/cron/end-bookings`
+  2. `curl -s -o /dev/null -w '%{http_code}' -H 'Authorization: Bearer ' https://www.nestock.pro/api/cron/end-bookings`
+- **Résultat attendu** :
+  - Les deux appels renvoient **401**.
+- **Statut courant** : À faire
+
+| Date | Agent | Statut | Observations |
+|---|---|---|---|
+
+### T-SEC-07 — Réservations non lisibles avec la clé publique
+
+- **Objectif** : personne ne peut lire la liste des réservations avec la clé publique du site.
+- **Source** : faille relevée le 19/10/2026 : règle « API peut lire les réservations » (`bookings`, SELECT, `true`) — 13 lignes lisibles en prod
+- **Prérequis** : la clé publique (anon) et l'URL Supabase de la prod, visibles dans le code du site (`NEXT_PUBLIC_SUPABASE_ANON_KEY`).
+- **Étapes** :
+  1. `curl -s -D - -o /dev/null 'https://rkcewsargthrbiokhend.supabase.co/rest/v1/bookings?select=id&limit=0' -H 'apikey: CLE_ANON' -H 'Prefer: count=exact'` (ne lit aucune donnée, seulement le nombre).
+  2. Ouvrir une annonce louée sans être connecté, et une annonce libre.
+- **Résultat attendu** :
+  - Étape 1 : `content-range: */0` (aucune réservation visible) ou une erreur d'accès.
+  - Étape 2 : l'annonce louée affiche toujours « 🔒 Espace actuellement loué » et l'annonce libre le bouton de demande (les disponibilités restent justes).
+- **Statut courant** : À faire
+
+| Date | Agent | Statut | Observations |
+|---|---|---|---|
+
+### T-ADMIN-01 — Dossier de preuves d'une location
+
+- **Objectif** : l'administrateur retrouve en une page tout ce qu'il faut pour répondre à une contestation de paiement.
+- **Source** : 01-Nestock-context.md, « À faire avant les vrais paiements » (19/10/2026) ; page /admin/locations
+- **Prérequis** : compte admin ; une location payée puis résiliée (T-RESIL-05).
+- **Étapes** :
+  1. En admin, menu Administration → « Locations ».
+  2. Ouvrir la location.
+  3. Cmd+P → Enregistrer en PDF.
+  4. En Locataire, ouvrir la même adresse /admin/locations/ID.
+- **Résultat attendu** :
+  - Étape 1 : tableau des locations (espace, propriétaire, locataire, statut, début, loyer).
+  - Étape 2 : rubriques Location, Propriétaire, Locataire (avec « CGU acceptées à l'inscription » pour les comptes créés depuis le 19/10/2026), Contrat (signatures : date, nom, IP, navigateur, version des CGU), Paiements (factures Stripe), Reversements/remboursements/contestations, Résiliation, Messages ; pas de « Stripe illisible ».
+  - Étape 3 : le PDF est lisible.
+  - Étape 4 : redirection hors de l'administration.
+- **Statut courant** : À faire
+
+| Date | Agent | Statut | Observations |
+|---|---|---|---|
+
+### T-LEGAL-02 — CGU obligatoires à l'inscription et enregistrées
+
+- **Objectif** : on ne peut pas créer de compte sans accepter les CGU ; l'acceptation (version, date, IP, navigateur) est enregistrée et non modifiable.
+- **Source** : 01-Nestock-context.md, « À faire avant les vrais paiements » (19/10/2026)
+- **Prérequis** : une adresse e-mail de test neuve.
+- **Étapes** :
+  1. Ouvrir /register, remplir le formulaire **sans** cocher « J'ai lu et j'accepte les conditions générales d'utilisation », valider.
+  2. Cocher la case (le lien ouvre /cgu dans un nouvel onglet), valider.
+  3. En admin, /admin/inscrits → fiche du compte ; ou, une fois ce compte locataire d'une location, /admin/locations → dossier.
+- **Résultat attendu** :
+  - Étape 1 : message « Veuillez accepter les conditions générales d'utilisation », aucun compte créé.
+  - Étape 2 : compte créé.
+  - Étape 3 : dans le dossier, « CGU acceptées à l'inscription : version 2026-10-19, le …, IP … ».
+- **Statut courant** : À faire
+
+| Date | Agent | Statut | Observations |
+|---|---|---|---|
+
+### T-LEGAL-03 — CGU et contrat à jour (version du 19/10/2026)
+
+- **Objectif** : les CGU et le contrat décrivent les règles réellement appliquées par le site.
+- **Source** : 01-Nestock-context.md, « À faire avant les vrais paiements » (19/10/2026)
+- **Prérequis** : un contrat existant (T-RESA-03).
+- **Étapes** :
+  1. Ouvrir /cgu.
+  2. Ouvrir la page d'un contrat, articles 2 et 3.
+  3. Signer un contrat (T-RESA-03) et lire la case à cocher.
+- **Résultat attendu** :
+  - Étape 1 : « Version du 19 octobre 2026 (réf. 2026-10-19) » ; articles : non-responsabilité de Nestock sur les litiges entre propriétaire et locataire (état de l'espace, biens stockés…) ; compte de paiement du propriétaire ; préavis de 15 jours minimum, fin en fin de mois (règle du 15) ; « Mois entamé » (aucun remboursement) ; contestation de paiement.
+  - Étape 2 : article 2 avec la règle de fin de mois (plus de « 30 jours ») ; article 3 « le 1er de chaque mois », 1er paiement au prorata.
+  - Étape 3 : la case mentionne les conditions générales d'utilisation, avec un lien.
+- **Statut courant** : À faire
+
+| Date | Agent | Statut | Observations |
+|---|---|---|---|
+
+### T-CONF-01 — Paramétrage de la production (Vercel, Stripe)
+
+- **Objectif** : vérifier les réglages de production faits ou à faire, pour qu'ils ne se perdent pas.
+- **Source** : 01-Nestock-context.md, point Vercel (19/10/2026)
+- **Prérequis** : accès aux tableaux de bord Vercel et Stripe (lecture seule).
+- **Étapes** :
+  1. Vercel → projets : lister les projets.
+  2. Vercel → `stock-kb8s` → Settings → Domains, puis Environment Variables (noms seulement).
+  3. Vercel → `stock-kb8s` → Cron Jobs → View Logs, le lendemain d'une nuit.
+  4. Stripe (mode test, puis live) → Développeurs → Webhooks ; Paramètres → Billing → Portail client.
+- **Résultat attendu** :
+  - Étape 1 : un seul projet Nestock, `stock-kb8s` (le doublon `stock` est supprimé).
+  - Étape 2 : domaines nestock.pro, www.nestock.pro, nestock.tsukee.fr ; variables `CRON_SECRET` et `STRIPE_WEBHOOK_SECRET` présentes, `ADMIN_PASSWORD` absente.
+  - Étape 3 : appel de 2 h (UTC) en **200**.
+  - Étape 4 : un webhook vers `https://www.nestock.pro/api/stripe/webhook` avec les 4 événements ; annulation d'abonnement désactivée dans le portail client.
+- **Statut courant** : À faire
+
+| Date | Agent | Statut | Observations |
+|---|---|---|---|
+
+
 ---
 
 ## Annexe — Protocole Stripe Test Clocks
 
 Protocole exécuté par **T-RESIL-02**. Il valide en quelques minutes tout le cycle :
-facturation mensuelle → déclenchement du préavis → annulation Stripe programmée (`cancel_at`) → remboursement automatique au prorata → clôture par le cron.
+1er paiement au prorata → prélèvement le 1er du mois → déclenchement du préavis → annulation Stripe programmée (`cancel_at`) au 1er du mois qui suit la fin → aucun remboursement → clôture par le cron. (Règles du 19/10/2026.)
 
 Il utilise les **Stripe Test Clocks**, qui simulent l'écoulement du temps sans attendre de vrais cycles de facturation. Fonctionne uniquement en mode test.
 
@@ -1015,7 +1380,7 @@ Il utilise les **Stripe Test Clocks**, qui simulent l'écoulement du temps sans 
 
 1. Dans l'interface du test clock, cliquer **« Create customer »** : le client Stripe est rattaché à l'horloge.
 2. Attacher une carte de test au client (`4242 4242 4242 4242`, date future, CVC quelconque).
-3. Créer un abonnement pour ce client, avec un prix mensuel équivalent à celui d'une annonce de test sur Nestock.
+3. Créer un abonnement pour ce client, avec un prix mensuel équivalent à celui d'une annonce de test sur Nestock, **ancré au 1er du mois suivant** (« Billing cycle anchor » = 1er du mois suivant à 00:00 heure de Paris, prorata activé), comme le fait le site. Par l'API : `billing_cycle_anchor` + `proration_behavior: create_prorations`.
 
 **Alternative plus réaliste :** faire une vraie réservation de test sur `nestock.pro` (mode test) avec un compte locataire de test, et rattacher après coup le client Stripe généré à un test clock via l'API. Plus fidèle au parcours utilisateur, mais plus long à mettre en place ; la méthode manuelle suffit à valider la logique serveur.
 
@@ -1029,16 +1394,18 @@ Il utilise les **Stripe Test Clocks**, qui simulent l'écoulement du temps sans 
 **✅ Vérifications :**
 - Stripe → Webhooks → endpoint de test → tentatives récentes : `invoice.paid` en **200**.
 - **Aucune** nouvelle ligne dans `invoices` : c'est normal. Le webhook ignore la 1re facture d'un abonnement (`billing_reason = subscription_create`), car dans le vrai parcours elle est traitée par `checkout.session.completed` (testé par T-PAY-01).
+- Montant de la 1re facture = prix mensuel × jours restants du mois ÷ jours du mois (prorata).
 
-### Étape 3 — Facture du 2e mois
+### Étape 3 — Prélèvement du 1er du mois
 
-1. Avancer le test clock d'**un mois** (juste après la date anniversaire de l'abonnement).
+1. Avancer le test clock au **1er du mois suivant**, quelques heures après minuit (heure de Paris).
 
 **✅ Vérifications :**
 - `invoice.paid` (renouvellement) en **200** dans les tentatives récentes du webhook.
 - Supabase, table `invoices` : nouvelle ligne `status = 'paid'`, `stripe_payment_id` renseigné (`pi_…`).
 - E-mail « Quittance de loyer mensuelle » reçu par le locataire, « Paiement mensuel reçu » par le propriétaire.
 - Notifications « Loyer prélevé » (locataire) et « Loyer reçu » (propriétaire).
+- Stripe → Connect → compte du propriétaire : transfert égal à son loyer exact (mois entier).
 
 ### Étape 4 — Déclencher le préavis
 
@@ -1053,24 +1420,22 @@ Il utilise les **Stripe Test Clocks**, qui simulent l'écoulement du temps sans 
 2. Ouvrir immédiatement l'abonnement dans Stripe.
 
 **✅ Vérifications :**
-- Supabase : `bookings.status = 'ending'`, `ending_date` renseignée (15 jours après le déclenchement).
-- Stripe : l'abonnement affiche **« Cancels on [date] »** (le `cancel_at` programmé).
+- Supabase : `bookings.status = 'ending'`, `notice_initiated_at` renseigné, `ending_date` = dernier jour du mois en cours (préavis jusqu'au 15 inclus) ou du mois suivant (après le 15), à 23:59:59 heure de Paris. Attention : la règle utilise la date **réelle** du serveur, pas celle du test clock.
+- Stripe : l'abonnement affiche **« Cancels on [1er du mois qui suit la fin] »**.
 - Stripe : **aucune** ligne de prorata ni avoir créé sur le client à ce moment-là.
 - Notification + e-mail de préavis reçus par l'autre partie.
 
-### Étape 5 — Fin du préavis et remboursement au prorata
+### Étape 5 — Fin de la location, sans remboursement
 
-**C'est le cœur du test** : `cancel_at` déclenche-t-il l'annulation à la bonne date, et le remboursement est-il juste ?
+**C'est le cœur du test** : `cancel_at` arrête-t-il l'abonnement pile à la fin d'une période payée, sans facture ni remboursement ?
 
-1. Noter, sur la **dernière facture payée** de l'abonnement, le montant payé et la période de la ligne d'abonnement (ex. « 6 nov. – 6 déc. »). Attention : c'est la période de la **ligne**, pas les dates « Period » de l'en-tête de facture, qui désignent le mois précédent.
-2. Calculer le remboursement attendu : `montant payé × (fin de période − ending_date) ÷ (fin de période − début de période)`, en jours.
-3. Avancer le test clock **au-delà de `ending_date`**. Si une date anniversaire tombe pendant le préavis, Stripe émet d'abord un nouveau `invoice.paid` : c'est voulu (le locataire paie un mois complet mais ne reste que quelques jours), refaire alors les points 1 et 2 avec cette nouvelle facture.
+1. Avancer le test clock **au-delà du 1er du mois qui suit la fin** (date du `cancel_at`). Si un autre 1er du mois tombe avant (préavis donné après le 15), Stripe prélève d'abord ce mois entier : c'est voulu, il est dû.
 
-**✅ Vérifications, dans l'ordre où elles doivent apparaître :**
+**✅ Vérifications :**
 - `customer.subscription.deleted` en **200** dans les tentatives récentes du webhook.
-- Stripe → Paiements → le dernier paiement : **remboursement partiel** du montant calculé au point 2 (à 1 centime près).
-- E-mail « Remboursement au prorata » reçu par le locataire, avec le même montant ; notification in-app correspondante.
-- Stripe → client : **solde à 0 €**, aucun avoir, aucune ligne « Unused time… » sur ses factures (sinon le locataire serait crédité deux fois).
+- **Aucune** facture datée du 1er du mois qui suit la fin ; abonnement « Canceled ».
+- **Aucun remboursement** dans Stripe → Paiements ; aucune reprise sur les transferts du propriétaire ; aucun e-mail « Remboursement au prorata ».
+- Stripe → client : **solde à 0 €**, aucun avoir, aucune ligne « Unused time… ».
 
 ### Étape 6 — Clôture par le cron
 
@@ -1099,7 +1464,8 @@ Si `ending_date` est encore dans le futur réel, modifier temporairement `ending
 - **Aucun événement n'arrive au webhook** : vérifier que le test clock est en mode test et que l'endpoint est configuré côté test dans Stripe. Si les événements arrivent en **400** : `STRIPE_WEBHOOK_SECRET` sur Vercel ne correspond pas à la clé `whsec_` de l'endpoint de test.
 - **Pas de quittance au 2e mois** : vérifier dans les logs Vercel que la réservation est trouvée (`bookings.stripe_subscription_id` doit être exactement l'ID de l'abonnement, `sub_…`).
 - **`stripe_payment_id` vide** : chercher « paiement introuvable pour la facture » dans les logs Vercel.
-- **Pas de remboursement** : chercher « Erreur calcul/remboursement prorata » dans les logs Vercel ; vérifier que `ending_date` est bien dans la période de la dernière facture payée.
+- **Une facture le 1er du mois qui suit la fin** : `cancel_at` ne tombe pas pile sur la fin de période ; vérifier que l'abonnement est bien ancré au 1er (`billing_cycle_anchor`) et que `cancel_at` = 1er du mois à 00:00 heure de Paris.
+- **Un remboursement apparaît** : version du site antérieure au 19/10/2026 (le remboursement au prorata a été supprimé).
 - **Avoir présent sur le client** : l'annulation a été programmée sans `proration_behavior: 'none'` (version du site antérieure au commit e766249).
 
 ---

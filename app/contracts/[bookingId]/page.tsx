@@ -190,7 +190,8 @@ export default async function ContractPage({
               <p className="font-bold">ARTICLE 2 — DURÉE DE LA LOCATION</p>
               <div className="bg-gray-50 rounded-lg p-3 mt-2 space-y-1">
                 <p>☑ Indéterminée à compter du <strong>{formatDate(booking.start_date)}</strong></p>
-                <p>Préavis de résiliation : <strong>30 jours</strong>, transmis par écrit via la messagerie Nestock.</p>
+                <p>Résiliation possible à tout moment par l'une ou l'autre partie depuis son tableau de bord Nestock, avec un préavis de <strong>15 jours minimum</strong>. La location se termine toujours le <strong>dernier jour d'un mois</strong> : préavis donné jusqu'au 15 inclus, fin du mois en cours ; après le 15, fin du mois suivant.</p>
+                <p>Le dernier mois prélevé est dû en entier : aucun remboursement au prorata.</p>
               </div>
             </div>
 
@@ -202,7 +203,7 @@ export default async function ContractPage({
                     <p>Frais Stripe (~1.5% + 0.25€) : <strong>{(space.price_ttc - space.price_month - space.price_month * 0.10).toFixed(2)}€/mois</strong></p>
                     <p>Montant total TTC : <strong>{Number(space.price_ttc).toFixed(2)}€ par mois</strong></p>
                 <p>Paiement : <strong>par prélèvement automatique via Stripe</strong></p>
-                <p>Date de prélèvement : <strong>le {new Date(booking.start_date).getDate()} de chaque mois</strong></p>
+                <p>Date de prélèvement : <strong>le 1er de chaque mois</strong> ; le premier paiement, fait à la signature, couvre les jours restants du mois en cours, au prorata</p>
               </div>
             </div>
 

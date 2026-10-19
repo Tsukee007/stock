@@ -211,7 +211,7 @@ export default async function Home({
               <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-sm mx-auto">4</div>
               <div className="text-4xl">🔑</div>
               <h3 className="font-bold text-gray-800">Stockez</h3>
-              <p className="text-gray-500 text-sm">Paiement automatique chaque mois. Résiliez avec 15j de préavis.</p>
+              <p className="text-gray-500 text-sm">Prélèvement automatique le 1er de chaque mois. Résiliez quand vous voulez, avec 15 jours de préavis minimum, en fin de mois.</p>
             </div>
           </div>
         </div>

@@ -17,7 +17,7 @@ const faqs = [
   },
   {
     q: 'Puis-je résilier à tout moment ?',
-    a: "Oui. Propriétaire et locataire peuvent résilier avec un préavis de 15 jours via la messagerie Nestock."
+    a: "Oui. Propriétaire et locataire peuvent résilier depuis leur tableau de bord. La location se termine toujours en fin de mois : préavis donné jusqu'au 15, fin du mois en cours ; après le 15, fin du mois suivant."
   },
   {
     q: 'Mes données bancaires sont-elles sécurisées ?',
