@@ -1,8 +1,9 @@
 'use client'
 
-import Map, { Marker, Popup, NavigationControl } from 'react-map-gl'
+import Map, { Marker, Popup, NavigationControl, Source, Layer, type MapRef, type MapLayerMouseEvent } from 'react-map-gl'
+import type { GeoJSONSource } from 'mapbox-gl'
 import { type RentalStatus, rentalStatusBadge, rentalStatusLabels, rentalStatusMarker } from '@/lib/utils'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import 'mapbox-gl/dist/mapbox-gl.css'
 
 type Space = {
@@ -35,12 +36,49 @@ const mapLocale = {
   'NavigationControl.ResetBearing': 'Réorienter vers le nord',
 }
 
+// Au-delà de ce zoom, chaque annonce est affichée seule (le zoom 13 de la sélection les montre donc toutes)
+const CLUSTER_MAX_ZOOM = 12
+
 export default function SpacesMap({ spaces, selectedId, onSelect, cooperativeGestures = false }: Props) {
   const [viewport, setViewport] = useState({
     longitude: 2.3522,
     latitude: 46.8566,
     zoom: 5
   })
+
+  const mapRef = useRef<MapRef>(null)
+  // Annonces affichées seules (hors bulle) ; null tant que la carte n'a pas calculé les bulles
+  const [unclusteredIds, setUnclusteredIds] = useState<Set<string> | null>(null)
+  const [cursor, setCursor] = useState('')
+
+  const geojson = useMemo(() => ({
+    type: 'FeatureCollection' as const,
+    features: spaces.map(space => ({
+      type: 'Feature' as const,
+      properties: { id: space.id },
+      geometry: { type: 'Point' as const, coordinates: [space.lng, space.lat] }
+    }))
+  }), [spaces])
+
+  // Les bulles sont dessinées par Mapbox ; les annonces seules gardent leur étiquette de prix
+  const refreshUnclustered = useCallback(() => {
+    const map = mapRef.current
+    if (!map || !map.getSource('spaces')) return
+    const features = map.querySourceFeatures('spaces', { filter: ['!', ['has', 'point_count']] })
+    setUnclusteredIds(new Set(features.map(f => String(f.properties?.id))))
+  }, [])
+
+  const handleClick = (e: MapLayerMouseEvent) => {
+    const cluster = e.features?.[0]
+    const map = mapRef.current
+    if (!cluster || !map || cluster.geometry.type !== 'Point') return
+    const [longitude, latitude] = cluster.geometry.coordinates
+    const source = map.getSource('spaces') as GeoJSONSource
+    source.getClusterExpansionZoom(cluster.properties?.cluster_id, (err, zoom) => {
+      if (err || zoom == null) return
+      setViewport(prev => ({ ...prev, longitude, latitude, zoom }))
+    })
+  }
 
   // Centrer sur l'espace sélectionné
   useEffect(() => {
@@ -59,19 +97,54 @@ export default function SpacesMap({ spaces, selectedId, onSelect, cooperativeGes
 
   return (
     <Map
+      ref={mapRef}
       mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
       longitude={viewport.longitude}
       latitude={viewport.latitude}
       zoom={viewport.zoom}
       onMove={e => setViewport(e.viewState)}
+      onMoveEnd={refreshUnclustered}
+      onSourceData={e => { if (e.sourceId === 'spaces' && e.isSourceLoaded) refreshUnclustered() }}
+      interactiveLayerIds={['clusters']}
+      onClick={handleClick}
+      onMouseEnter={() => setCursor('pointer')}
+      onMouseLeave={() => setCursor('')}
+      cursor={cursor}
       style={{ width: '100%', height: '100%' }}
       mapStyle="mapbox://styles/mapbox/streets-v12"
       cooperativeGestures={cooperativeGestures}
       locale={mapLocale}
     >
       {cooperativeGestures && <NavigationControl position="top-right" showCompass={false} />}
+      <Source id="spaces" type="geojson" data={geojson} cluster clusterMaxZoom={CLUSTER_MAX_ZOOM} clusterRadius={50}>
+        <Layer
+          id="clusters"
+          type="circle"
+          filter={['has', 'point_count']}
+          paint={{
+            'circle-color': '#374151',
+            'circle-opacity': 0.85,
+            'circle-stroke-width': 2,
+            'circle-stroke-color': '#ffffff',
+            'circle-radius': ['step', ['get', 'point_count'], 16, 10, 20, 50, 26, 200, 32]
+          }}
+        />
+        <Layer
+          id="cluster-count"
+          type="symbol"
+          filter={['has', 'point_count']}
+          layout={{
+            'text-field': ['get', 'point_count_abbreviated'],
+            'text-size': 12,
+            'text-font': ['DIN Pro Bold', 'Arial Unicode MS Bold']
+          }}
+          paint={{ 'text-color': '#ffffff' }}
+        />
+      </Source>
+
       {spaces.map(space => {
         const isSelected = selectedId === space.id
+        if (!isSelected && !unclusteredIds?.has(space.id)) return null
         return (
           <Marker
             key={space.id}

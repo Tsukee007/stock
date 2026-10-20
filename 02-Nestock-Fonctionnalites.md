@@ -27,9 +27,9 @@ Création d'annonce avec photos (jusqu'à 3), simulateur de prix transparent aff
 *Technique : `app/spaces/new`, `app/spaces/[id]/edit`, composant `PhotoUpload` (max 3, 2Mo), `DeleteSpaceButton` avec vérification `hasActiveBooking`.*
 
 ### 2.3 Recherche & Carte interactive
-Carte Mapbox avec marqueurs de prix, recherche par ville, filtres par rayon de distance, type d'espace et fourchette de prix. Bascule liste/carte sur mobile.
+Carte Mapbox avec marqueurs de prix, regroupés en bulles numérotées quand on dézoome (un clic sur une bulle zoome dessus). Recherche par ville, filtres par rayon de distance, type d'espace, fourchette de prix, surface et disponibilité (« Seulement les espaces à louer »). Sur grand écran, les filtres restent ouverts dans un panneau à gauche. Bascule liste/carte sur mobile.
 
-*Technique : Mapbox GL, `SearchFilters` + `MapWithList`, calcul de distance haversine côté serveur (`getDistanceKm`).*
+*Technique : Mapbox GL (source GeoJSON avec `cluster`), `FiltersContext` + `SearchFilters` + `FilterSidebar` + `MapWithList`, calcul de distance haversine côté serveur (`getDistanceKm`).*
 
 ### 2.4 Messagerie
 Messagerie intégrée en temps réel entre propriétaire et locataire, liée à chaque réservation. Notifications automatiques à chaque nouveau message.

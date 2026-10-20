@@ -1,5 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import SearchFilters from '@/components/map/SearchFilters'
+import FilterSidebar from '@/components/map/FilterSidebar'
+import { FiltersProvider } from '@/components/map/FiltersContext'
 import MapWithList from '@/components/map/MapWithList'
 import { getRentalStatus } from '@/lib/utils'
 import { occupancyBySpace } from '@/lib/availability'
@@ -15,6 +17,7 @@ type SearchParams = {
   radius?: string
   lat?: string
   lng?: string
+  available?: string
 }
 
 function getDistanceKm(lat1: number, lng1: number, lat2: number, lng2: number) {
@@ -64,14 +67,23 @@ export default async function Home({
     )
   }
 
+  if (spaces && filters.available === '1') {
+    spaces = spaces.filter(s => s.rental_status === 'available')
+  }
+
   if (user) {
     return (
-      <main className="relative flex flex-col" style={{ height: 'calc(100vh - 64px)' }}>
-        <SearchFilters initialFilters={filters} />
-        <div className="flex-1 pt-16 md:pt-16">
-          <MapWithList spaces={spaces ?? []} />
-        </div>
-      </main>
+      <FiltersProvider initialFilters={filters}>
+        <main className="relative flex flex-col" style={{ height: 'calc(100vh - 64px)' }}>
+          <SearchFilters />
+          <div className="flex-1 min-h-0 pt-16 md:pt-16 flex">
+            <FilterSidebar />
+            <div className="flex-1 min-w-0">
+              <MapWithList spaces={spaces ?? []} />
+            </div>
+          </div>
+        </main>
+      </FiltersProvider>
     )
   }
 
@@ -128,10 +140,15 @@ export default async function Home({
           <p className="text-gray-500 text-sm mt-1">Inscrivez-vous gratuitement pour contacter les propriétaires et réserver.</p>
         </div>
         <div className="relative rounded-2xl overflow-hidden border border-gray-200" style={{ height: '500px' }}>
-          <SearchFilters initialFilters={filters} />
-          <div className="h-full pt-14">
-            <MapWithList spaces={spaces ?? []} cooperativeGestures />
-          </div>
+          <FiltersProvider initialFilters={filters}>
+            <SearchFilters />
+            <div className="h-full pt-14 flex">
+              <FilterSidebar />
+              <div className="flex-1 min-w-0">
+                <MapWithList spaces={spaces ?? []} cooperativeGestures />
+              </div>
+            </div>
+          </FiltersProvider>
           <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-gray-50 to-transparent pointer-events-none" />
           <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10">
             <a href="/register" className="bg-blue-600 text-white font-bold px-8 py-3 rounded-xl shadow-md hover:bg-blue-700 transition whitespace-nowrap text-lg" style={{ color: '#ffffff' }}>

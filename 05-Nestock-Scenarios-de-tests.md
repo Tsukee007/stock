@@ -64,6 +64,8 @@ Le protocole détaillé du cycle prélèvement → préavis → fin de location 
 | T-ANN-05 | Le propriétaire ne peut pas réserver sa propre annonce | À faire |
 | T-RECH-01 | Recherche par ville et filtres | À faire |
 | T-RECH-02 | Liste et carte sur mobile | À faire |
+| T-RECH-03 | Carte : annonces regroupées en bulles quand on dézoome | À faire |
+| T-RECH-04 | Panneau de filtres à gauche et filtre « à louer » | À faire |
 | T-RESA-01 | Demande de réservation | À faire |
 | T-RESA-02 | Refus d'une demande | À faire |
 | T-RESA-03 | Acceptation, contrat et signatures | À faire |
@@ -659,7 +661,7 @@ Le protocole détaillé du cycle prélèvement → préavis → fin de location 
 - **Prérequis** : au moins 2 annonces de types et prix différents.
 - **Étapes** :
   1. Sur la carte (connecté), rechercher une ville où existe une annonce.
-  2. Ouvrir « Filtres » : filtrer par type, puis par fourchette de prix, puis par surface minimale.
+  2. Dans les filtres (panneau de gauche sur grand écran, bouton « ⚙️ Filtres » sinon) : filtrer par type, puis par fourchette de prix, puis par surface minimale.
   3. Utiliser le filtre de rayon de distance.
   4. Rechercher une ville sans annonce.
 - **Résultat attendu** :
@@ -682,6 +684,50 @@ Le protocole détaillé du cycle prélèvement → préavis → fin de location 
 - **Résultat attendu** :
   - Chaque onglet affiche son contenu sans débordement horizontal.
   - Le marqueur ouvre une bulle (titre, statut, ville, surface, prix) et le lien mène à l'annonce.
+- **Statut courant** : À faire
+
+| Date | Agent | Statut | Observations |
+|---|---|---|---|
+
+### T-RECH-03 — Carte : annonces regroupées en bulles quand on dézoome
+
+- **Objectif** : quand on dézoome, les annonces proches se regroupent en une bulle qui indique leur nombre ; on les retrouve en zoomant.
+- **Source** : demande du 06/10/2026 (note Google Keep « Nestock », carte avec points regroupés) ; réalisée le 20/10/2026
+- **Prérequis** : au moins 3 annonces dans la même ville (ex. les annonces fictives de Toulouse de la base de test).
+- **Étapes** :
+  1. Ouvrir la page d'accueil (connecté : carte plein écran ; déconnecté : section « Espaces disponibles près de chez vous »). Vue de la France entière.
+  2. Cliquer sur la bulle de la ville.
+  3. Dézoomer avec le bouton **−** jusqu'à revoir la France.
+  4. Dans la liste, cliquer sur une annonce de la ville.
+  5. Filtrer de façon à ne garder qu'une annonce de la ville (ex. « Seulement les espaces à louer »).
+- **Résultat attendu** :
+  - Étape 1 : une bulle grise avec le nombre d'annonces (ex. « 3 ») à la place des étiquettes de prix ; pas d'étiquettes empilées.
+  - Étape 2 : la carte zoome sur la ville ; les étiquettes de prix séparées apparaissent, avec leurs couleurs (vert à louer, bleu loué, orange préavis) ; le curseur est une main au survol de la bulle.
+  - Étape 3 : les étiquettes se regroupent à nouveau en bulle.
+  - Étape 4 : la carte zoome sur l'annonce et ouvre sa fiche (titre, statut, prix, « Voir l'annonce »).
+  - Étape 5 : le nombre de la bulle (ou l'étiquette seule) correspond au compteur « N espaces trouvés ».
+- **Statut courant** : À faire
+
+| Date | Agent | Statut | Observations |
+|---|---|---|---|
+
+### T-RECH-04 — Panneau de filtres à gauche et filtre « à louer »
+
+- **Objectif** : sur grand écran, les filtres restent ouverts à gauche ; sur petit écran, ils restent derrière le bouton « ⚙️ Filtres » ; le filtre « Seulement les espaces à louer » ne garde que les annonces libres.
+- **Source** : demande du 06/10/2026 (note Google Keep « Nestock », filtres sur le côté) ; réalisée le 20/10/2026
+- **Prérequis** : des annonces aux statuts différents (À louer, Loué, Préavis en cours).
+- **Étapes** :
+  1. Fenêtre d'au moins 1024 px de large : ouvrir la page d'accueil (connecté, puis déconnecté).
+  2. Cocher « Seulement les espaces à louer », puis « Appliquer ».
+  3. Rechercher une ville dans la barre du haut (choisir une suggestion), puis choisir un rayon dans le panneau et « Appliquer ».
+  4. « Réinitialiser ».
+  5. Fenêtre de moins de 1024 px (et téléphone de 390 px) : recharger la page, ouvrir « ⚙️ Filtres », cocher « Seulement les espaces à louer », « Appliquer ».
+- **Résultat attendu** :
+  - Étape 1 : panneau « Filtres » à gauche de la liste, sans bouton « ⚙️ Filtres » dans la barre ; carte et liste toujours utilisables.
+  - Étape 2 : seules les annonces « À louer » restent (liste, carte, compteur) ; l'adresse contient `available=1` ; déconnecté, la page ne remonte pas tout en haut.
+  - Étape 3 : les choix « Rayon autour de [ville] » apparaissent dans le panneau ; seules les annonces dans le rayon restent.
+  - Étape 4 : toutes les annonces reviennent, champs vidés.
+  - Étape 5 : pas de panneau à gauche ; le bouton « ⚙️ Filtres » ouvre les mêmes champs sous la barre ; le filtre s'applique et le menu se ferme ; pas de débordement horizontal.
 - **Statut courant** : À faire
 
 | Date | Agent | Statut | Observations |

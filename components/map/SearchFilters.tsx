@@ -1,28 +1,12 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useRef } from 'react'
+import { useFilters } from './FiltersContext'
+import FilterFields from './FilterFields'
 
-type Props = {
-  initialFilters: {
-    city?: string
-    type?: string
-    minPrice?: string
-    maxPrice?: string
-    minSurface?: string
-    radius?: string
-    lat?: string
-    lng?: string
-  }
-}
-
-const RADIUS_OPTIONS = [2,5, 10, 20, 30, 50, 100]
-
-export default function SearchFilters({ initialFilters }: Props) {
-  const router = useRouter()
+export default function SearchFilters() {
+  const { filters, setFilters, cityQuery, setCityQuery, apply } = useFilters()
   const [open, setOpen] = useState(false)
-  const [filters, setFilters] = useState(initialFilters)
-  const [cityQuery, setCityQuery] = useState(initialFilters.city ?? '')
   const [citySuggestions, setCitySuggestions] = useState<Array<{name: string, lat: number, lng: number}>>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -65,23 +49,8 @@ export default function SearchFilters({ initialFilters }: Props) {
     setShowSuggestions(false)
   }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFilters(prev => ({ ...prev, [e.target.name]: e.target.value }))
-  }
-
   const handleSearch = () => {
-    const params = new URLSearchParams()
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value) params.set(key, value as string)
-    })
-    router.push(`/?${params.toString()}`)
-    setOpen(false)
-  }
-
-  const handleReset = () => {
-    setFilters({})
-    setCityQuery('')
-    router.push('/')
+    apply()
     setOpen(false)
   }
 
@@ -116,9 +85,10 @@ export default function SearchFilters({ initialFilters }: Props) {
           )}
         </div>
 
+        {/* Sur grand écran, les filtres sont dans le panneau de gauche */}
         <button
           onClick={() => setOpen(!open)}
-          className={`flex items-center gap-1 text-sm px-3 py-1.5 rounded-xl transition ${
+          className={`lg:hidden flex items-center gap-1 text-sm px-3 py-1.5 rounded-xl transition ${
             activeCount > 0
               ? 'bg-blue-600 text-white'
               : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -140,105 +110,10 @@ export default function SearchFilters({ initialFilters }: Props) {
         </button>
       </div>
 
-      {/* Panneau de filtres */}
+      {/* Panneau de filtres (mobile et petit écran) */}
       {open && (
-        <div className="bg-white rounded-2xl shadow-lg p-4 mt-2 space-y-4">
-
-          {/* Rayon de recherche */}
-          {filters.lat && (
-            <div>
-              <label className="block text-xs font-medium text-gray-500 mb-2">
-                📏 Rayon autour de {cityQuery}
-              </label>
-              <div className="flex gap-2 flex-wrap">
-                {RADIUS_OPTIONS.map(r => (
-                  <button
-                    key={r}
-                    onClick={() => setFilters(prev => ({ ...prev, radius: r.toString() }))}
-                    className={`text-xs px-3 py-1.5 rounded-full border transition ${
-                      filters.radius === r.toString()
-                        ? 'bg-blue-600 text-white border-blue-600'
-                        : 'text-gray-600 border-gray-200 hover:border-blue-400'
-                    }`}
-                  >
-                    {r} km
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Type */}
-          <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Type d'espace</label>
-            <select
-              name="type"
-              value={filters.type ?? ''}
-              onChange={handleChange}
-              className="w-full border rounded-lg p-2 text-sm"
-            >
-              <option value="">Tous les types</option>
-              <option value="garage">🚗 Garage</option>
-              <option value="cave">🍷 Cave</option>
-              <option value="grenier">🏠 Grenier</option>
-              <option value="box">📦 Box</option>
-              <option value="autre">📋 Autre</option>
-            </select>
-          </div>
-
-          {/* Prix */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">Prix min (€/mois)</label>
-              <input
-                name="minPrice"
-                type="number"
-                value={filters.minPrice ?? ''}
-                onChange={handleChange}
-                placeholder="0"
-                className="w-full border rounded-lg p-2 text-sm"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">Prix max (€/mois)</label>
-              <input
-                name="maxPrice"
-                type="number"
-                value={filters.maxPrice ?? ''}
-                onChange={handleChange}
-                placeholder="500"
-                className="w-full border rounded-lg p-2 text-sm"
-              />
-            </div>
-          </div>
-
-          {/* Surface */}
-          <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Surface minimum (m²)</label>
-            <input
-              name="minSurface"
-              type="number"
-              value={filters.minSurface ?? ''}
-              onChange={handleChange}
-              placeholder="0"
-              className="w-full border rounded-lg p-2 text-sm"
-            />
-          </div>
-
-          <div className="flex gap-2">
-            <button
-              onClick={handleReset}
-              className="flex-1 border text-gray-600 text-sm py-2 rounded-xl hover:bg-gray-50"
-            >
-              Réinitialiser
-            </button>
-            <button
-              onClick={handleSearch}
-              className="flex-1 bg-blue-600 text-white text-sm py-2 rounded-xl hover:bg-blue-700"
-            >
-              Appliquer
-            </button>
-          </div>
+        <div className="lg:hidden bg-white rounded-2xl shadow-lg p-4 mt-2">
+          <FilterFields onDone={() => setOpen(false)} />
         </div>
       )}
     </div>

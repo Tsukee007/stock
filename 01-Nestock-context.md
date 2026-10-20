@@ -206,8 +206,8 @@ TESTS_SYNC_SECRET (06/10/2026, meme valeur que TEST_SYNC_SECRET_NESTOCK dans le 
 
 ## Fonctionnalités terminées
 - Auth (login/register/reset password)
-- Carte interactive Mapbox avec marqueurs prix
-- Recherche par ville + rayon + filtres
+- Carte interactive Mapbox avec marqueurs prix, regroupés en bulles numérotées quand on dézoome (20/10/2026)
+- Recherche par ville + rayon + filtres ; filtres dans un panneau fixe à gauche sur grand écran (≥ 1024 px), filtre « Seulement les espaces à louer » (20/10/2026)
 - Création/modification annonce avec photos + simulateur prix
 - Page détail annonce avec lightbox photos
 - Messagerie temps réel Supabase Realtime
@@ -288,6 +288,13 @@ TESTS_SYNC_SECRET (06/10/2026, meme valeur que TEST_SYNC_SECRET_NESTOCK dans le 
    - 05-Nestock-Scenarios-de-tests.md : cahier de tests (agents IA ou humain) ; contient en annexe le protocole Stripe Test Clocks (cycle facturation/preavis/remboursement, test T-RESIL-02) et le test de passage en live (T-PROD-01). Fusion le 06/10/2026 de l'ancien 03-Nestock-test-stripe-clock-scenario.md et de 05-Nestock-Pas-de-test.md
 
 ## Journal des modifications
+
+### 20/10/2026 — Carte : bulles et panneau de filtres
+- Demande notée dans Google Keep (libellé Nestock, 06/10) : carte « comme l'exemple », points regroupés quand on dézoome, filtres sur le côté
+- `SpacesMap` : source GeoJSON Mapbox avec `cluster` (rayon 50 px, plus de bulle au-delà du zoom 12) ; bulles grises avec le nombre, clic = zoom jusqu'à leur séparation ; les annonces hors bulle gardent leur étiquette de prix (liste obtenue par `querySourceFeatures`)
+- Filtres partagés par `FiltersContext` entre la barre de recherche (`SearchFilters`) et le panneau `FilterSidebar` (grand écran) ; champs dans `FilterFields` ; sous 1024 px, bouton « ⚙️ Filtres » comme avant
+- Nouveau filtre `available=1` (statut « À louer » calculé côté serveur) ; appliquer un filtre ne remonte plus la page en haut (`scroll: false`)
+- Tests : T-RECH-03 et T-RECH-04
 
 ### 10/10/2026 — Espace d'administration /admin
 - Liste des inscrits et fiche de chaque inscrit (/admin/inscrits), e-mail à l'admin à chaque inscription
