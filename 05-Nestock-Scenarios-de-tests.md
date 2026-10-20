@@ -94,6 +94,7 @@ Le protocole détaillé du cycle prélèvement → préavis → fin de location 
 | T-SEC-05 | Statuts et paiement réservés aux bonnes personnes | À faire |
 | T-SEC-06 | Tâche de clôture : « Bearer undefined » refusé | À faire |
 | T-SEC-07 | Réservations non lisibles avec la clé publique | À faire |
+| T-SEC-08 | Anciennes adresses qui créaient une réservation : supprimées | À faire |
 | T-ADMIN-01 | Dossier de preuves d'une location | À faire |
 | T-LEGAL-01 | Pages légales et RGPD | OK |
 | T-LEGAL-02 | CGU obligatoires à l'inscription et enregistrées | À faire |
@@ -1279,6 +1280,24 @@ Le protocole détaillé du cycle prélèvement → préavis → fin de location 
 - **Résultat attendu** :
   - Étape 1 : `content-range: */0` (aucune réservation visible) ou une erreur d'accès.
   - Étape 2 : l'annonce louée affiche toujours « 🔒 Espace actuellement loué » et l'annonce libre le bouton de demande ; sur la carte de l'accueil, badges « Loué » / « Préavis en cours » / « À louer » justes (les disponibilités sont lues côté serveur).
+- **Statut courant** : À faire
+
+| Date | Agent | Statut | Observations |
+|---|---|---|---|
+
+### T-SEC-08 — Anciennes adresses qui créaient une réservation : supprimées
+
+- **Objectif** : ouvrir un lien ne suffit plus à créer une demande de réservation ou une conversation au nom de la personne connectée (lien piégé envoyé par un tiers).
+- **Source** : suppression le 20/10/2026 de `/api/contact/[spaceId]` et `/api/message/[spaceId]` (GET qui créaient une réservation `pending` / `message_only`, appelées par aucune page)
+- **Prérequis** : compte Locataire ; l'ID d'une annonce publiée (dans l'adresse de sa page /spaces/ID).
+- **Étapes** :
+  1. `curl -s -o /dev/null -w '%{http_code}' https://www.nestock.pro/api/contact/ID` puis la même chose avec `/api/message/ID`.
+  2. Connecté en Locataire, ouvrir https://www.nestock.pro/api/contact/ID puis https://www.nestock.pro/api/message/ID dans le navigateur, puis aller dans Messages.
+  3. Depuis la page de l'annonce, faire une demande de réservation et envoyer un message par le parcours normal.
+- **Résultat attendu** :
+  - Étape 1 : **404** pour les deux adresses.
+  - Étape 2 : page introuvable ; aucune nouvelle conversation ni demande dans Messages.
+  - Étape 3 : la demande et le message fonctionnent comme avant.
 - **Statut courant** : À faire
 
 | Date | Agent | Statut | Observations |
