@@ -344,6 +344,7 @@ Le protocole détaillé du cycle prélèvement → préavis → fin de location 
   4. Cliquer-glisser la carte de droite à gauche.
   5. Sur mobile : glisser un doigt sur la carte, puis deux doigts.
 - **Résultat attendu** :
+  0. À l'ouverture, la carte montre toute la France métropolitaine, Corse comprise, non cachée par le bouton « S'inscrire gratuitement pour réserver » (cadrage du 21/10/2026).
   1. La page défile, la carte ne zoome pas ; un message « Maintenez Ctrl + molette pour zoomer sur la carte » (ou ⌘) s'affiche.
   2. La carte zoome.
   3. La carte zoome / dézoome.

@@ -39,6 +39,9 @@ const mapLocale = {
 // Au-delà de ce zoom, chaque annonce est affichée seule (le zoom 13 de la sélection les montre donc toutes)
 const CLUSTER_MAX_ZOOM = 12
 
+// France métropolitaine (Corse comprise) : la carte s'ouvre cadrée dessus, quelle que soit sa taille
+const FRANCE_BOUNDS: [[number, number], [number, number]] = [[-5.2, 41.3], [9.6, 51.1]]
+
 export default function SpacesMap({ spaces, selectedId, onSelect, cooperativeGestures = false }: Props) {
   const [viewport, setViewport] = useState({
     longitude: 2.3522,
@@ -103,6 +106,8 @@ export default function SpacesMap({ spaces, selectedId, onSelect, cooperativeGes
       latitude={viewport.latitude}
       zoom={viewport.zoom}
       onMove={e => setViewport(e.viewState)}
+      // Page d'accueil déconnectée : marge en bas pour le bouton « S'inscrire » posé sur la carte
+      onLoad={e => e.target.fitBounds(FRANCE_BOUNDS, { padding: { top: 20, right: 20, left: 20, bottom: cooperativeGestures ? 90 : 20 }, duration: 0 })}
       onMoveEnd={refreshUnclustered}
       onSourceData={e => { if (e.sourceId === 'spaces' && e.isSourceLoaded) refreshUnclustered() }}
       interactiveLayerIds={['clusters']}

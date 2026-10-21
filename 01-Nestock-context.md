@@ -295,6 +295,7 @@ TESTS_SYNC_SECRET (06/10/2026, meme valeur que TEST_SYNC_SECRET_NESTOCK dans le 
 - Filtres partagés par `FiltersContext` entre la barre de recherche (`SearchFilters`) et le panneau `FilterSidebar` (grand écran) ; champs dans `FilterFields` ; sous 1024 px, bouton « ⚙️ Filtres » comme avant
 - Nouveau filtre `available=1` (statut « À louer » calculé côté serveur) ; appliquer un filtre ne remonte plus la page en haut (`scroll: false`)
 - Tests : T-RECH-03 et T-RECH-04
+- 21/10/2026 : la carte s'ouvre cadrée sur la France métropolitaine (Corse comprise) quelle que soit sa taille (`fitBounds`), avec une marge en bas sur la page d'accueil déconnectée pour le bouton « S'inscrire » (avant : centre fixe trop au nord, Toulouse hors cadre) ; T-MAP-01 complété
 
 ### 10/10/2026 — Espace d'administration /admin
 - Liste des inscrits et fiche de chaque inscrit (/admin/inscrits), e-mail à l'admin à chaque inscription
